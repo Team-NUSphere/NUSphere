@@ -1,6 +1,12 @@
+# To run:
+
+## Development:
+
+`docker compose up -d`
+
 # .env:
 
-- NODE_ENV=_development_/_production_
+- NODE*ENV=\_development*/_production_
 
 ## Postgres
 
@@ -11,10 +17,10 @@
 
 ## Backend
 
-- BACKEND_PORT=_3001_
-- BACKEND_HOST_PORT=_3001_
+- BACKEND*PORT=\_3001*
+- BACKEND*HOST_PORT=\_3001*
 
 ## Frontend
 
-- FRONEND_PORT=_5173_
-- FRONEND_HOST_PORT=_5173_
+- FRONEND*PORT=\_5173*
+- FRONEND*HOST_PORT=\_5173*
