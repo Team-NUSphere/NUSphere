@@ -1,0 +1,20 @@
+# .env:
+
+- NODE_ENV=_development_/_production_
+
+## Postgres
+
+- POSTGRES_USER
+- POSTGRES_PASSWORD
+- POSTGRES_DB
+- POSTGRES_PORT
+
+## Backend
+
+- BACKEND_PORT=_3001_
+- BACKEND_HOST_PORT=_3001_
+
+## Frontend
+
+- FRONEND_PORT=_5173_
+- FRONEND_HOST_PORT=_5173_
