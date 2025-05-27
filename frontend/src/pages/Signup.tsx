@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import {
-  User,
-  Unsubscribe,
+  type User,
+  type Unsubscribe,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
