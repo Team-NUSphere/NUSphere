@@ -11,19 +11,19 @@ import { auth } from "../firebase";
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
-  isAuthLoading: boolean;
+  isLoadingAuth: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>({
   currentUser: null,
   isAuthenticated: false,
-  isAuthLoading: true,
+  isLoadingAuth: true,
 });
 
-export function getAuth() {
+export function getAuth(): AuthContextType {
   const context = useContext(AuthContext);
-  if (!context) {
-    alert("Context error");
+  if (context === undefined) {
+    throw new Error("Must pass in context provider for authContext");
   }
   return context;
 }
@@ -34,16 +34,17 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
 
   useEffect(() => {
+    setIsLoadingAuth(true);
     const unsubscribe: Unsubscribe = onAuthStateChanged(
       auth,
       (user: User | null) => {
         if (user) {
           setCurrentUser(user);
-          setIsAuthLoading(false);
         }
+        setIsLoadingAuth(false);
       }
     );
     return unsubscribe;
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, isAuthenticated: !!currentUser, isAuthLoading }}
+      value={{ currentUser, isAuthenticated: !!currentUser, isLoadingAuth }}
     >
       {children}
     </AuthContext.Provider>
