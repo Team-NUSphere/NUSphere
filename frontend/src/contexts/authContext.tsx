@@ -8,6 +8,16 @@ import {
 import { onAuthStateChanged, type User, type Unsubscribe } from "firebase/auth";
 import { auth } from "../firebase";
 
+// Hook function
+export function getAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("Must pass in context provider for authContext");
+  }
+  return context;
+}
+
+// AuthContext definition
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
@@ -20,14 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>({
   isLoadingAuth: true,
 });
 
-export function getAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("Must pass in context provider for authContext");
-  }
-  return context;
-}
-
+// AuthProvider definition
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -52,7 +55,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, isAuthenticated: !!currentUser, isLoadingAuth }}
+      value={{
+        currentUser,
+        isAuthenticated: !!currentUser,
+        isLoadingAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>
