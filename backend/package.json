@@ -13,20 +13,27 @@
     "format:check": "prettier --check .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "imports": {
+    "#*": "./src/*"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "express": "^5.1.0",
     "pg": "^8.16.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
     "@tsconfig/node22": "^22.0.1",
+    "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.18",
     "@types/sequelize": "^4.28.20",
