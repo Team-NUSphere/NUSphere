@@ -65,3 +65,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     </AuthContext.Provider>
   );
 }
+
+export async function authenticateWithBackend(request: string) {
+  let idToken = null;
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.warn("No user logged in, cannot make authentication call");
+      return;
+    }
+    idToken = await currentUser.getIdToken();
+    console.log("Firebase auth successful");
+  } catch (firebaseAuthError) {
+    console.error("Firebase auth unsuccessful");
+  }
+  try {
+    const response = await fetch(`http://localhost:3001/${request}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    if (response.ok) {
+      console.log("Backend authenticated");
+    } else {
+      console.error("Backend authentication failed");
+    }
+  } catch (networkError) {
+    console.error("Network failure");
+  }
+}

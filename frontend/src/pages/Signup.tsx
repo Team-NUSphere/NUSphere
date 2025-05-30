@@ -6,7 +6,7 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
-import firebase from "firebase/compat/app";
+import { authenticateWithBackend } from "../contexts/authContext";
 
 export default function Signup() {
   const [email, setEmail] = useState<string>("");
@@ -16,42 +16,43 @@ export default function Signup() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
-  const authenticateWithBackend = async () => {
-    let idToken = null;
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.warn("No user logged in, cannot make authentication call");
-        return;
-      }
-      idToken = await user.getIdToken();
-      console.log("Firebase auth successful");
-    } catch (firebaseAuthError) {
-      console.error("Firebase auth unsuccessful");
-    }
-    try {
-      const response = await fetch("http://localhost:3001/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      if (response.ok) {
-        console.log("Backend authenticated");
-      } else {
-        console.error("Backend authentication failed");
-      }
-    } catch (networkError) {
-      console.error("Network failure");
-    }
-  };
+  // const authenticateWithBackend = async () => {
+  //   let idToken = null;
+  //   try {
+  //     const user = auth.currentUser;
+  //     if (!user) {
+  //       console.warn("No user logged in, cannot make authentication call");
+  //       return;
+  //     }
+  //     idToken = await user.getIdToken();
+  //     console.log("Firebase auth successful");
+  //   } catch (firebaseAuthError) {
+  //     console.error("Firebase auth unsuccessful");
+  //   }
+  //   try {
+  //     const response = await fetch("http://localhost:3001/register", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${idToken}`,
+  //       },
+  //     });
+  //     if (response.ok) {
+  //       console.log("Backend authenticated");
+  //     } else {
+  //       console.error("Backend authentication failed");
+  //     }
+  //   } catch (networkError) {
+  //     console.error("Network failure");
+  //   }
+  // };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      await authenticateWithBackend();
+      console.log("connecting with backend");
+      await authenticateWithBackend("register");
       navigate(from, { replace: true });
     } catch (err) {
       const errorMsg: string =
