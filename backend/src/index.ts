@@ -2,6 +2,7 @@ import { corsOptions } from "#configs/corsOptions.js";
 import firebaseApp from "#firebase-admin.js";
 import errorHandler from "#middlewares/errorHandler.js";
 import registerRouter from "#routes/register.js";
+import loginRouter from "#routes/login.js";
 import cors from "cors";
 import express from "express";
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded());
 //routes
 app.get("/", middleware);
 app.use("/register", registerRouter);
+app.use("/login", loginRouter);
 
 // 404 catch all
 app.all("*name", (req, res, next) => {
