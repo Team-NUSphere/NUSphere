@@ -1,8 +1,8 @@
 import { corsOptions } from "#configs/corsOptions.js";
 import firebaseApp from "#firebase-admin.js";
 import errorHandler from "#middlewares/errorHandler.js";
-import registerRouter from "#routes/register.js";
 import loginRouter from "#routes/login.js";
+import registerRouter from "#routes/register.js";
 import cors from "cors";
 import express from "express";
 

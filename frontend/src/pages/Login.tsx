@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { auth } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import { authenticateWithBackend } from "../contexts/authContext";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -15,6 +16,7 @@ export default function Login() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      await authenticateWithBackend("login");
       navigate(from, { replace: true });
     } catch (err) {
       const errorMsg: string =
