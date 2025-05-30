@@ -16,10 +16,12 @@ const handleSignUp = async (
   const token: string = authHeader.split(" ")[1];
   const user: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
   const uid: string = user.uid;
+  await User.sync({ force: true });
   const duplicate = await User.findOne({ where: { uid: uid } });
   if (duplicate) res.sendStatus(401);
   try {
     const result = await User.create({ uid: uid });
+    res.sendStatus(200);
     console.log(result.toJSON());
   } catch (err) {
     next(err);

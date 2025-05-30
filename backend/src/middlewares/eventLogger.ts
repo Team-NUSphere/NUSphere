@@ -5,6 +5,8 @@ import fsPromises from "fs/promises";
 import path from "path";
 import { v4 as uuid } from "uuid";
 
+const __dirname = import.meta.dirname;
+
 const logEvents = async (message: string, fileName: string): Promise<void> => {
   const dateTime: string = format(new Date(), "yyyyMMdd\tHH:mm:ss");
   const logId: string = uuid();

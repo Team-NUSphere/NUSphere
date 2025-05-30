@@ -8,6 +8,7 @@ export const corsOptions: CorsOptions = {
     origin: string | undefined,
     callback: (arg0: Error | null, arg1: boolean | undefined) => void,
   ) => {
+    console.log(origin);
     if (!origin || trustedOrigins.includes(origin)) {
       callback(null, true);
     } else {

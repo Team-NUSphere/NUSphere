@@ -1,1 +1,4 @@
-export const trustedOrigins: string[] = ["https://localhost:5173"];
+export const trustedOrigins: string[] = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];

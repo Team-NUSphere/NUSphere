@@ -33,7 +33,7 @@ services:
       - ./backend/src:/app/src
       - ./backend/package.json:/app/package.json
       - ./backend/package-lock.json:/app/package-lock.json
-      - /app/node_modules
+      - node_modules_volume:/app/node_modules
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACKEND_PORT}
@@ -43,6 +43,8 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
       DB_PORT: 5432
+
+      FIREBASE_SERVICE_ACCOUNT_KEY: ${FIREBASE_SERVICE_ACCOUNT_KEY}
     depends_on:
       db:
         condition: service_healthy
@@ -50,3 +52,4 @@ services:
 
 volumes:
   postgres_data:
+  node_modules_volume:
