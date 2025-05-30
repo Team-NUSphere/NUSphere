@@ -2,7 +2,8 @@ import { ErrorRequestHandler } from "express";
 
 import { logEvents } from "./eventLogger.js";
 
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof Error) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     logEvents(`${err.name}: ${err.message}`, "errLog.txt");
@@ -12,7 +13,6 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     logEvents("Error handling error", "ErrorHandlerError.txt");
   }
-  next();
 };
 
 export default errorHandler;
