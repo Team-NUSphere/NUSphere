@@ -23,9 +23,10 @@ const handleSignIn = async (
     if (!found) {
       await handleSignUp(req, res, next);
       found = await User.findOne({ where: { uid: uid } });
+      return;
     }
     res.sendStatus(200);
-    console.log(found?.toJSON());
+    console.log(found.toJSON());
   } catch (err) {
     next(err);
   }
