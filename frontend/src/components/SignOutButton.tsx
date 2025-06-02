@@ -8,7 +8,7 @@ const SignOutButton: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/login");
+      navigate("/auth");
     } catch (err) {
       const errorMsg: string =
         err instanceof Error ? err.message : "Signout failed";
