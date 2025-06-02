@@ -80,13 +80,16 @@ export async function authenticateWithBackend(request: string) {
     console.error("Firebase auth unsuccessful");
   }
   try {
-    const response = await fetch(`http://localhost:3001/${request}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
+    const response = await fetch(
+      `https://nusphere-2d33b7b9d756.herokuapp.com/${request}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
     if (response.ok) {
       console.log("Backend authenticated");
     } else {
