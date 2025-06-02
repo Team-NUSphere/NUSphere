@@ -1,6 +1,8 @@
-# NUSphere 🚀
+# [NUSphere 🚀](https://nusphere-navy.vercel.app/)
 
 ### Unified Collaborative Workspace for NUS Students
+
+[Check it out](https://nusphere-navy.vercel.app/)
 
 ### 🎯 The Problem
 
