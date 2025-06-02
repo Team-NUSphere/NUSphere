@@ -80,7 +80,8 @@ export async function authenticateWithBackend(request: string) {
     console.error("Firebase auth unsuccessful");
   }
   try {
-    const response = await fetch(`http://localhost:3001/${request}`, {
+    const backend = process.env.BACKENDURL ?? "http://localhost:3001";
+    const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

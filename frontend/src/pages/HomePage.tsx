@@ -1,4 +1,4 @@
-import SignOutButton from "../components/SignOutButton"
+import SignOutButton from "../components/SignOutButton";
 
 export default function HomePage() {
   const styles = {
@@ -162,7 +162,7 @@ export default function HomePage() {
       textDecoration: "none",
       transition: "color 0.2s ease",
     },
-  }
+  };
 
   return (
     <div style={styles.container}>
@@ -181,18 +181,19 @@ export default function HomePage() {
             Welcome to <span style={styles.heroGradientText}>NUSphere</span>
           </h1>
           <p style={styles.heroSubtitle}>
-            Your gateway to the NUS community. Connect, collaborate, and thrive in Singapore's premier university
-            ecosystem.
+            Your gateway to the NUS community. Connect, collaborate, and thrive
+            in Singapore's premier university ecosystem.
           </p>
           <button
             style={styles.ctaButton}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-              e.currentTarget.style.transform = "scale(1.05)"
+              e.currentTarget.style.boxShadow =
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.transform = "scale(1.05)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "none"
-              e.currentTarget.style.transform = "scale(1)"
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "scale(1)";
             }}
           >
             Get Started
@@ -204,12 +205,13 @@ export default function HomePage() {
           <div
             style={styles.card}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-              e.currentTarget.style.transform = "translateY(-4px)"
+              e.currentTarget.style.boxShadow =
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
+              e.currentTarget.style.transform = "translateY(-4px)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "none"
-              e.currentTarget.style.transform = "translateY(0)"
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             <div style={{ ...styles.iconContainer, background: "#dbeafe" }}>
@@ -229,19 +231,21 @@ export default function HomePage() {
             </div>
             <h3 style={styles.cardTitle}>Connect</h3>
             <p style={styles.cardText}>
-              Build meaningful relationships with fellow students, faculty, and alumni across all faculties.
+              Build meaningful relationships with fellow students, faculty, and
+              alumni across all faculties.
             </p>
           </div>
 
           <div
             style={styles.card}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-              e.currentTarget.style.transform = "translateY(-4px)"
+              e.currentTarget.style.boxShadow =
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
+              e.currentTarget.style.transform = "translateY(-4px)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "none"
-              e.currentTarget.style.transform = "translateY(0)"
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             <div style={{ ...styles.iconContainer, background: "#e0e7ff" }}>
@@ -261,19 +265,21 @@ export default function HomePage() {
             </div>
             <h3 style={styles.cardTitle}>Collaborate</h3>
             <p style={styles.cardText}>
-              Work together on projects, research, and initiatives that shape the future of education.
+              Work together on projects, research, and initiatives that shape
+              the future of education.
             </p>
           </div>
 
           <div
             style={styles.card}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-              e.currentTarget.style.transform = "translateY(-4px)"
+              e.currentTarget.style.boxShadow =
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
+              e.currentTarget.style.transform = "translateY(-4px)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "none"
-              e.currentTarget.style.transform = "translateY(0)"
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             <div style={{ ...styles.iconContainer, background: "#f3e8ff" }}>
@@ -283,12 +289,18 @@ export default function HomePage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
             </div>
             <h3 style={styles.cardTitle}>Thrive</h3>
             <p style={styles.cardText}>
-              Access resources, opportunities, and support to excel in your academic and personal journey.
+              Access resources, opportunities, and support to excel in your
+              academic and personal journey.
             </p>
           </div>
         </div>
@@ -297,20 +309,16 @@ export default function HomePage() {
         <div style={styles.statsSection}>
           <div style={styles.statsGrid}>
             <div>
-              <div style={styles.statNumber}>50,000+</div>
+              <div style={styles.statNumber}>0</div>
               <div style={styles.statLabel}>Active Students</div>
             </div>
             <div>
-              <div style={styles.statNumber}>17</div>
+              <div style={styles.statNumber}>0</div>
               <div style={styles.statLabel}>Faculties</div>
             </div>
             <div>
-              <div style={styles.statNumber}>1,000+</div>
+              <div style={styles.statNumber}>0</div>
               <div style={styles.statLabel}>Student Organizations</div>
-            </div>
-            <div>
-              <div style={styles.statNumber}>150+</div>
-              <div style={styles.statLabel}>Countries Represented</div>
             </div>
           </div>
         </div>
@@ -319,7 +327,6 @@ export default function HomePage() {
       {/* Footer */}
       <footer style={styles.footer}>
         <div style={styles.footerContent}>
-          <div style={{ color: "#4b5563" }}>© 2024 NUSphere. All rights reserved.</div>
           <div style={styles.footerLinks}>
             <a
               href="#"
@@ -351,4 +358,5 @@ export default function HomePage() {
     </div>
   )
   //test
+  );
 }

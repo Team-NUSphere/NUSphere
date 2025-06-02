@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import "../output.css"
+import "../output.css";
 
 const SignOutButton: React.FC = () => {
   const navigate = useNavigate();
@@ -18,8 +18,11 @@ const SignOutButton: React.FC = () => {
   };
 
   return (
-    <button onClick={handleSignOut} className="sign-out-button px-6 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all duration-200 font-medium">
-      Sign Out
+    <button
+      onClick={handleSignOut}
+      className="sign-out-button px-6 py-2 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all duration-200 font-medium"
+    >
+      Sign Out button broken, pls refresh page after clicking
     </button>
   );
 };
