@@ -1,0 +1,55 @@
+name: NUSphere
+
+services:
+  db:
+    image: postgres:17.5-alpine
+    container_name: nusphere_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test:
+        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: nusphere_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_HOST_PORT}"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+      - ./backend/package-lock.json:/app/package-lock.json
+      - node_modules_volume:/app/node_modules
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${BACKEND_PORT}
+
+      DB_HOST: db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      DB_PORT: 5432
+
+      FIREBASE_SERVICE_ACCOUNT_KEY: ${FIREBASE_SERVICE_ACCOUNT_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  node_modules_volume:

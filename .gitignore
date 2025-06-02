@@ -1,13 +1,13 @@
 #Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
+frontend/node_modules/
+backend/node_modules/
 
 #Build Artifacts
-client/build/
-server/build/
-client/dist/
-server/dist/
+frontend/build/
+backend/build/
+frontend/dist/
+backend/dist/
 
 #Logs
 logs/
@@ -19,18 +19,8 @@ yarn-error.log*
 
 #Environment Variables
 .env
-.env.*
-!.env.example
+backend/.env
+frontend/.env
 
 #IDE Specific
 .vscode/
-.idea/
-*.sublime-workspace
-*.sublime-project
-*.swp
-*.swo
-*.DS_Store
-*.sublime-settings
-*.sublime-project
-*.sublime-workspace
-*.sublime-settings
