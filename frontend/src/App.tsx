@@ -1,10 +1,14 @@
-import './App.css';
+import "./App.css";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { AuthProvider } from "./contexts/authContext";
+import "./output.css"
 
 function App() {
   return (
-    <div className="App">
-     
-    </div>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }
 
