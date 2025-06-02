@@ -57,7 +57,6 @@ export function AuthForm() {
 
     return (
             <div className="relative w-full max-w-md mx-auto">
-                <CatDecorations />
 
                 {/* Main Card */}
                 <div className="relative z-10 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">

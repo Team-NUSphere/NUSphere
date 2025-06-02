@@ -4,7 +4,7 @@ import "../output.css"
 export function SocialLoginButtons() {
   const handleSocialLogin = (provider: string) => {
     console.log(`Logging in with ${provider}`)
-    // Here you would integrate with Firebase social authentication
+
   }
 
   return (
