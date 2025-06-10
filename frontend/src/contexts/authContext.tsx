@@ -78,9 +78,9 @@ export async function authenticateWithBackend(request: string) {
     console.error("Firebase auth unsuccessful");
   }
   try {
-    const backend =
-      process.env.VITE_BACKENDURL ??
-      "https://nusphere-2d33b7b9d756.herokuapp.com";
+    console.log("authenticating with backend");
+    const backend = "http://127.0.0.1:3001";
+    console.log(backend);
     const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
@@ -94,6 +94,6 @@ export async function authenticateWithBackend(request: string) {
       console.error("Backend authentication failed");
     }
   } catch (networkError) {
-    console.error("Network failure");
+    console.error("Network failure: " + networkError);
   }
 }

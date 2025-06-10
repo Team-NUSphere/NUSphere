@@ -1,19 +1,29 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Sequelize } from "sequelize";
 
-import { sequelize } from "./database.js";
+import { DB, TimetableModelStatic } from "./types.js";
 
-class User extends Model {}
+export interface UserAttributes {
+  uid: string;
+}
 
-User.init(
-  {
+export interface UserInstance extends Model<UserAttributes>, UserAttributes {}
+
+export default (sequelize: Sequelize): TimetableModelStatic<UserInstance> => {
+  const User = sequelize.define("User", {
     uid: {
       allowNull: false,
+      primaryKey: true,
       type: DataTypes.STRING,
+      unique: true,
     },
-  },
-  {
-    sequelize,
-  },
-);
-await User.sync({ alter: true });
-export default User;
+  }) as TimetableModelStatic<UserInstance>;
+
+  User.associate = (db: DB) => {
+    User.hasOne(db.UserTimetable, { foreignKey: "uid" });
+    User.belongsToMany(db.Module, {
+      foreignKey: "uid",
+      through: "Enrollments",
+    });
+  };
+  return User;
+};
