@@ -29,8 +29,20 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "/test",
-        element: <div> Hello, world </div>,
+        path: "/timetable",
+        element: <div> Hello, timetable </div>,
+      },
+      {
+        path: "/mod",
+        element: <div> Hello, mod </div>,
+      },
+      {
+        path: "/forum",
+        element: <div> Hello, forum </div>,
+      },
+      {
+        path: "/settings",
+        element: <div> Hello, settings </div>,
       },
     ],
   },

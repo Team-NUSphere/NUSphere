@@ -23,7 +23,7 @@ const NavItem = ({ to, icon: Icon, label }: NavItemProps) => {
       }
     >
       <Icon className="w-auto text-3xl h-auto mb-1" />
-      <span className="text-sm text-center">{label}</span>
+      <span className="text-xs text-center">{label}</span>
     </NavLink>
   );
 };
