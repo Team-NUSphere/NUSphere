@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { SocialLoginButtons } from "./social-login-buttons";
-import "../output.css";
 import { auth } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";

@@ -2,7 +2,6 @@ import React from "react";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import "../output.css";
 
 const SignOutButton: React.FC = () => {
   const navigate = useNavigate();

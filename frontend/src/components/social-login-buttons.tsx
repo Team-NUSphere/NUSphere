@@ -1,11 +1,9 @@
-"use client"
-import "../output.css"
+"use client";
 
 export function SocialLoginButtons() {
   const handleSocialLogin = (provider: string) => {
-    console.log(`Logging in with ${provider}`)
-
-  }
+    console.log(`Logging in with ${provider}`);
+  };
 
   return (
     <div className="grid grid-cols-3 gap-3">
@@ -54,5 +52,5 @@ export function SocialLoginButtons() {
         </svg>
       </button>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import "../output.css"
+// import "../output.css"
 
 export function CatDecorations() {
   return (
@@ -101,7 +101,10 @@ export function CatDecorations() {
         </div>
       </div>
 
-      <div className="absolute bottom-8 right-8 opacity-20 animate-pulse" style={{ animationDelay: "1s" }}>
+      <div
+        className="absolute bottom-8 right-8 opacity-20 animate-pulse"
+        style={{ animationDelay: "1s" }}
+      >
         <div className="w-3 h-3 bg-gray-400 rounded-full relative">
           <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-400 rounded-full"></div>
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -109,7 +112,10 @@ export function CatDecorations() {
         </div>
       </div>
 
-      <div className="absolute top-1/3 left-4 opacity-15 animate-pulse" style={{ animationDelay: "2s" }}>
+      <div
+        className="absolute top-1/3 left-4 opacity-15 animate-pulse"
+        style={{ animationDelay: "2s" }}
+      >
         <div className="w-2 h-2 bg-gray-400 rounded-full relative">
           <div className="absolute -top-1 -left-1 w-1 h-1 bg-gray-400 rounded-full"></div>
           <div className="absolute -top-1 -right-1 w-1 h-1 bg-gray-400 rounded-full"></div>
@@ -117,7 +123,10 @@ export function CatDecorations() {
         </div>
       </div>
 
-      <div className="absolute bottom-1/3 right-4 opacity-15 animate-pulse" style={{ animationDelay: "0.5s" }}>
+      <div
+        className="absolute bottom-1/3 right-4 opacity-15 animate-pulse"
+        style={{ animationDelay: "0.5s" }}
+      >
         <div className="w-2 h-2 bg-gray-400 rounded-full relative">
           <div className="absolute -top-1 -left-1 w-1 h-1 bg-gray-400 rounded-full"></div>
           <div className="absolute -top-1 -right-1 w-1 h-1 bg-gray-400 rounded-full"></div>
@@ -125,5 +134,5 @@ export function CatDecorations() {
         </div>
       </div>
     </>
-  )
+  );
 }
