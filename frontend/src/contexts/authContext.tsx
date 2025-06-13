@@ -79,7 +79,7 @@ export async function authenticateWithBackend(request: string) {
   }
   try {
     console.log("authenticating with backend");
-    const backend = "http://127.0.0.1:3001";
+    const backend = "http://localhost:3001";
     console.log(backend);
     const response = await fetch(backend + `/${request}`, {
       method: "POST",

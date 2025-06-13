@@ -1,5 +1,5 @@
+import { UserModel } from "#db/models/index.js";
 import { firebaseAuth } from "#firebase-admin.js";
-import { UserModel } from "#models/database.js";
 import { NextFunction, Request, Response } from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 

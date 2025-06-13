@@ -1,6 +1,8 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
+// import { BelongsTo, BelongsToAssociation, Column, DataType, Table } from "sequelize-typescript";
 
 import { DB, TimetableModelStatic } from "./types.js";
+// import Module from "./Module.js";
 
 export interface ClassAttributes {
   classNo: string;
@@ -56,3 +58,53 @@ export default (sequelize: Sequelize): TimetableModelStatic<ClassInstance> => {
   };
   return Class;
 };
+
+// @Table({
+//   modelName: "Class",
+//   timestamps: false,
+// })
+// class Class extends Model {
+//   @Column({
+//     type: DataTypes.INTEGER
+//   })
+//   classNo!: number;
+
+//   @Column({
+//     type: DataType.STRING
+//   })
+//   day!: string;
+
+//   @Column({
+//     type: DataType.TIME
+//   })
+//   endTime!: string;
+
+//   @Column({
+//     defaultValue: DataType.UUIDV4,
+//     primaryKey: true,
+//     type: DataType.UUIDV4
+//   })
+//   id!: string;
+
+//   @Column({
+//     type: DataType.STRING
+//   })
+//   lessonType!: string;
+
+//   @Column({
+//     type: DataType.TIME
+//   })
+//   startTime!: string;
+
+//   @Column({
+//     type: DataType.STRING
+//   })
+//   venue!: string;
+
+//   @Column({
+//     type: DataType.ARRAY(DataType.INTEGER)
+//   })
+//   weeks!: number[];
+
+//   @BelongsTo(() => Module)
+// }

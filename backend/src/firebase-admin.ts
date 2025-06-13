@@ -6,6 +6,7 @@ import {
   ServiceAccount,
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import "dotenv/config.js";
 
 const firebaseApp = initializeFirebase();
 
