@@ -11,13 +11,13 @@ export default function Sidebar() {
 
       <ul>
         <ModItem
-          moduleCode="CS1101s"
+          moduleCode="CS1101S"
           moduleName="Programming Methodology I"
           homeOffice="Dean's Office (Computing)"
           courseUnits={4}
         />
         <ModItem
-          moduleCode="CS1101s"
+          moduleCode="CS1101S"
           moduleName="Programming Methodology I"
           homeOffice="Dean's Office (Computing)"
           courseUnits={4}

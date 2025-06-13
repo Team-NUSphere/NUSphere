@@ -15,15 +15,16 @@ const ModItem = ({
 }: ModItemProps) => {
   return (
     <li>
-      <div>
-        <div>
-          <Link to={`/mod/${moduleCode}`}>
-            <span>{moduleCode}</span>
+      <div className="my-3">
+        <div className="mb-1">
+          <Link to={`/mod/${moduleCode}`} className="text-blue-600">
+            <span className="mr-3">{moduleCode}</span>
             <span>{moduleName}</span>
           </Link>
         </div>
-        <div>
-          <span>{homeOffice}</span>•<span>{`${courseUnits} Units`}</span>
+        <div className="text-gray-500">
+          <span className="mr-2">{homeOffice}</span>•
+          <span className="ml-2">{`${courseUnits} Units`}</span>
         </div>
       </div>
     </li>
