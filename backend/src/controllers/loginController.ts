@@ -1,4 +1,4 @@
-import { UserModel } from "#db/models/index.js";
+import User from "#db/models/User.js";
 import { firebaseAuth } from "#firebase-admin.js";
 import { NextFunction, Request, Response } from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
@@ -19,10 +19,10 @@ const handleSignIn = async (
   const user: DecodedIdToken = await firebaseAuth.verifyIdToken(idToken);
   const uid: string = user.uid;
   try {
-    let found = await UserModel.findOne({ where: { uid: uid } });
+    let found = await User.findOne({ where: { uid: uid } });
     if (!found) {
       await handleSignUp(req, res, next);
-      found = await UserModel.findOne({ where: { uid: uid } });
+      found = await User.findOne({ where: { uid: uid } });
       return;
     }
     res.sendStatus(200);

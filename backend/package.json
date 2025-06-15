@@ -11,7 +11,8 @@
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "getMods": "tsx --watch src/db/scripts/populateModules.ts"
   },
   "imports": {
     "#*": "./src/*"
@@ -22,6 +23,7 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "axios": "^1.10.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",

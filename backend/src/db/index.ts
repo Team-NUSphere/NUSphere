@@ -1,20 +1,19 @@
 // import { databaseUrl } from "#configs/sequelizeOptions.js";
 import { Options, Sequelize } from "sequelize";
 
-import * as dbConfig from "../config/config.cjs";
-import initClassModel from "./Class.js";
-import initModuleModel from "./Module.js";
-import initModuleTimetableModel from "./ModuleTimetable.js";
-import { DB } from "./types.js";
-import initUserModel from "./User.js";
-import initUserEventModel from "./UserEvents.js";
-import initUserTimetableModel from "./UserTimetable.js";
+import * as dbConfig from "./config/config.cjs";
+import Class from "./models/Class.js";
+import Module from "./models/Module.js";
+import User from "./models/User.js";
+import UserEvent from "./models/UserEvents.js";
+import UserTimetable from "./models/UserTimetable.js";
+import { DB } from "./types/dbtypes.js";
 
 type NodeEnv = "development" | "production" | "test";
 const env: NodeEnv = (process.env.NODE_ENV ?? "development") as NodeEnv;
 type DbConfigs = Record<string, Options>;
 const config = (dbConfig.default as DbConfigs)[env];
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
   config.database ?? "default",
   config.username ?? "user",
   config.password ?? "password",
@@ -28,28 +27,28 @@ try {
   console.error("Unable to establish database connection", error);
 }
 
-export const UserModel = initUserModel(sequelize);
-export const UserEventModel = initUserEventModel(sequelize);
-export const UserTimetableModel = initUserTimetableModel(sequelize);
-export const ModuleModel = initModuleModel(sequelize);
-export const ModuleTimetableModel = initModuleTimetableModel(sequelize);
-export const ClassModel = initClassModel(sequelize);
+await sequelize.sync();
+
+Class.initModel(sequelize);
+Module.initModel(sequelize);
+User.initModel(sequelize);
+UserEvent.initModel(sequelize);
+UserTimetable.initModel(sequelize);
 
 const db: DB = {
-  Class: ClassModel,
-  Module: ModuleModel,
-  ModuleTimetable: ModuleTimetableModel,
-  User: UserModel,
-  UserEvent: UserEventModel,
-  UserTimetable: UserTimetableModel,
+  Class: Class,
+  Module: Module,
+  User: User,
+  UserEvent: UserEvent,
+  UserTimetable: UserTimetable,
 };
 
 Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    console.log("associating");
-    db[modelName].associate(db);
-  }
+  console.log("associating");
+  db[modelName].associate();
 });
+
+await sequelize.sync();
 
 export default db;
 

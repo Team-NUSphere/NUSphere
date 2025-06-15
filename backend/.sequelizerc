@@ -4,5 +4,5 @@ module.export = {
   config: path.resolve("dist/db/config", "config.js"),
   "models-path": path.resolve("dist/db", "models"),
   "seeders-path": path.resolve("dist/db", "seeders"),
-  "migrations-path": path.resolve("src/db", "migrations"),
+  "migrations-path": path.resolve("dist/db", "migrations"),
 };

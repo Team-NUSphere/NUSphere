@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 
-import { TimetableModelStatic } from "./types.js";
+import { DbModelStatic } from "../types/dbtypes.js";
 
 export interface ModuleTimetableAttributes {
   uid: string;
@@ -12,15 +12,16 @@ export interface ModuleTimetableInstance
 
 export default (
   sequelize: Sequelize,
-): TimetableModelStatic<ModuleTimetableInstance> => {
+): DbModelStatic<ModuleTimetableInstance> => {
   const ModuleTimetable = sequelize.define("ModuleTimetable", {
     uid: {
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      type: DataTypes.UUIDV4,
+      type: DataTypes.UUID,
       unique: true,
     },
-  }) as TimetableModelStatic<ModuleTimetableInstance>;
+  }) as DbModelStatic<ModuleTimetableInstance>;
 
   return ModuleTimetable;
 };

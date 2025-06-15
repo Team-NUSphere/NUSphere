@@ -1,5 +1,5 @@
+import User from "#db/models/User.js";
 import { firebaseAuth } from "#firebase-admin.js";
-import { UserModel } from "#db/models/index.js";
 import { NextFunction, Request, Response } from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 
@@ -16,10 +16,10 @@ const handleSignUp = async (
   const token: string = authHeader.split(" ")[1];
   const user: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
   const uid: string = user.uid;
-  const duplicate = await UserModel.findOne({ where: { uid: uid } });
+  const duplicate = await User.findOne({ where: { uid: uid } });
   if (duplicate) res.sendStatus(401);
   try {
-    const result = await UserModel.create({ uid: uid });
+    const result = await User.create({ uid: uid });
     res.sendStatus(200);
     console.log(result.toJSON());
   } catch (err) {
