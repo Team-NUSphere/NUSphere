@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import clsx from "clsx";
+import { NavLink } from "react-router-dom";
 
 type ModItemProps = {
   moduleCode: string;
@@ -15,18 +16,27 @@ const ModItem = ({
 }: ModItemProps) => {
   return (
     <li>
-      <div className="my-3">
+      <NavLink
+        to={`/modules/${moduleCode}`}
+        className={({ isActive }) => {
+          console.log(`NavLink for ${moduleCode}: isActive = ${isActive}`);
+          return clsx("my-1 p-1 rounded-md text-blue-600 block", {
+            "bg-blue-100": isActive,
+            "hover:bg-gray-100": !isActive,
+          });
+        }}
+      >
         <div className="mb-1">
-          <Link to={`/mod/${moduleCode}`} className="text-blue-600">
-            <span className="mr-3">{moduleCode}</span>
-            <span>{moduleName}</span>
-          </Link>
+          <span className="mr-2">
+            <b>{moduleCode}</b>
+          </span>
+          <span>{moduleName}</span>
         </div>
         <div className="text-gray-500">
-          <span className="mr-2">{homeOffice}</span>•
-          <span className="ml-2">{`${courseUnits} Units`}</span>
+          <span className="mr-1">{homeOffice}</span>•
+          <span className="ml-1">{`${courseUnits} Units`}</span>
         </div>
-      </div>
+      </NavLink>
     </li>
   );
 };

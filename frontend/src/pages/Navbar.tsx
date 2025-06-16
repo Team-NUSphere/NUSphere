@@ -7,7 +7,7 @@ import { FiBookOpen } from "react-icons/fi";
 import { FiMessageSquare } from "react-icons/fi";
 import { FiSettings } from "react-icons/fi";
 import { FiLogOut } from "react-icons/fi";
-import NavItem from "./NavItem";
+import NavItem from "../components/NavItem";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,7 +33,7 @@ export function Navbar() {
             icon={FiCalendar}
             label="Timetable"
           ></NavItem>
-          <NavItem to="/mod" icon={FiBookOpen} label="Courses"></NavItem>
+          <NavItem to="/modules/" icon={FiBookOpen} label="Courses"></NavItem>
           <NavItem to="/forum" icon={FiMessageSquare} label="Forum"></NavItem>
         </div>
 

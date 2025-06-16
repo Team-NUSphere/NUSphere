@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 //import Signup from "./pages/Signup";
 //import Login from "./pages/Login";
 import AuthPage from "./pages/AuthPage";
@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage";
 import PublicRoutes from "./components/PublicRoutes";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
+import Modules from "./pages/Modules";
 
 export const router = createBrowserRouter([
   {
@@ -33,8 +34,12 @@ export const router = createBrowserRouter([
         element: <div> Hello, timetable </div>,
       },
       {
-        path: "/mod",
-        element: <div> Hello, mod </div>,
+        path: "/modules/:moduleCode",
+        element: <Modules />,
+      },
+      {
+        path: "/modules",
+        element: <Navigate to="/modules/ABM5003" replace />,
       },
       {
         path: "/forum",

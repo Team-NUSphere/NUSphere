@@ -21,6 +21,7 @@ const NavItem = ({ to, icon: Icon, label }: NavItemProps) => {
           }
         )
       }
+      end={false}
     >
       <Icon className="w-auto text-3xl h-auto mb-1" />
       <span className="text-xs text-center">{label}</span>

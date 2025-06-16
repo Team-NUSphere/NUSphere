@@ -7,6 +7,7 @@ import {
 } from "react";
 import { onAuthStateChanged, type User, type Unsubscribe } from "firebase/auth";
 import { auth } from "../firebase";
+import { backend } from "../constants";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -79,7 +80,6 @@ export async function authenticateWithBackend(request: string) {
   }
   try {
     console.log("authenticating with backend");
-    const backend = "http://localhost:3001";
     console.log(backend);
     const response = await fetch(backend + `/${request}`, {
       method: "POST",
