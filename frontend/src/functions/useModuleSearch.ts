@@ -22,7 +22,6 @@ export default function useModuleSearch(query: string, pageNumber: number) {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    console.log("loading");
 
     const controller = new AbortController();
     const signal = controller.signal;

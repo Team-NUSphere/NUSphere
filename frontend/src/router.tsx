@@ -7,6 +7,7 @@ import PublicRoutes from "./components/PublicRoutes";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
 import Modules from "./pages/Modules";
+import UserTimetable from "./pages/UserTimetable";
 
 export const router = createBrowserRouter([
   {
@@ -31,7 +32,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/timetable",
-        element: <div> Hello, timetable </div>,
+        element: <UserTimetable />,
       },
       {
         path: "/modules/:moduleCode",
