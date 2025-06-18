@@ -3,6 +3,7 @@ import { Options, Sequelize } from "sequelize";
 
 import * as dbConfig from "./config/config.cjs";
 import Class from "./models/Class.js";
+import Enrollment from "./models/Enrollment.js";
 import Module from "./models/Module.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
@@ -34,14 +35,18 @@ Module.initModel(sequelize);
 User.initModel(sequelize);
 UserEvent.initModel(sequelize);
 UserTimetable.initModel(sequelize);
+Enrollment.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
+  Enrollment: Enrollment,
   Module: Module,
   User: User,
   UserEvent: UserEvent,
   UserTimetable: UserTimetable,
 };
+
+await sequelize.sync();
 
 Object.keys(db).forEach((modelName) => {
   console.log("associating");
@@ -49,6 +54,7 @@ Object.keys(db).forEach((modelName) => {
 });
 
 await sequelize.sync();
+await UserEvent.sync({ force: true });
 
 export default db;
 

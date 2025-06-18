@@ -21,7 +21,9 @@ import {
 } from "sequelize";
 
 import Class from "./Class.js";
+import Enrollment from "./Enrollment.js";
 import User from "./User.js";
+import UserTimetable from "./UserTimetable.js";
 
 interface ModuleCreationAttributes extends InferCreationAttributes<Module> {
   Classes?: InferCreationAttributes<Class>[];
@@ -29,6 +31,9 @@ interface ModuleCreationAttributes extends InferCreationAttributes<Module> {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Module extends HasManyMixin<Class, number, "Class", "Classes"> {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
+interface Module
+  extends HasManyMixin<Enrollment, string, "Enrollment", "Enrollments"> {}
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Module extends BelongsToManyMixin<User, string, "User", "Users"> {}
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -40,24 +45,31 @@ class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
   declare moduleCredit: number;
   declare moduleId: ModuleCode;
   declare title: ModuleTitle;
+  declare lessonTypes: string[];
+  declare defaultClasses: string[];
 
   declare Classes?: NonAttribute<Class[]>;
-
-  declare Users?: NonAttribute<User[]>;
+  declare UserTimetables?: NonAttribute<UserTimetable[]>;
+  declare Enrollments?: NonAttribute<Enrollment[]>;
 
   static associate() {
     Module.hasMany(Class, { as: "Classes", foreignKey: "moduleId" });
-    Module.belongsToMany(User, {
-      as: "Users",
+    Module.belongsToMany(UserTimetable, {
+      as: "UserTimetables",
       foreignKey: "moduleId",
-      otherKey: "uid",
-      through: "Enrollments",
+      otherKey: "timetableId",
+      through: Enrollment,
     });
+    Module.hasMany(Enrollment, { as: "Enrollments", foreignKey: "moduleId" });
   }
 
   static initModel(sequelize: Sequelize) {
     Module.init(
       {
+        defaultClasses: {
+          allowNull: false,
+          type: DataTypes.ARRAY(DataTypes.STRING),
+        },
         department: {
           type: DataTypes.STRING,
         },
@@ -71,6 +83,9 @@ class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
         gradingBasis: {
           allowNull: true,
           type: DataTypes.STRING,
+        },
+        lessonTypes: {
+          type: DataTypes.ARRAY(DataTypes.STRING),
         },
         moduleCredit: {
           type: DataTypes.FLOAT,

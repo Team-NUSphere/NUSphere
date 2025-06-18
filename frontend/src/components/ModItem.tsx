@@ -1,7 +1,12 @@
 import clsx from "clsx";
 import { NavLink } from "react-router-dom";
+import { FiPlusCircle, FiXCircle } from "react-icons/fi";
+import {
+  getTimetableContext,
+  type modInfo,
+} from "../contexts/timetableContext";
 
-type ModItemProps = {
+export type ModItemProps = {
   moduleCode: string;
   moduleName: string;
   homeOffice: string;
@@ -14,6 +19,13 @@ const ModItem = ({
   homeOffice,
   courseUnits,
 }: ModItemProps) => {
+  const { registerModule, removeModule } = getTimetableContext();
+  const module: modInfo = {
+    moduleId: moduleCode,
+    title: moduleName,
+    faculty: homeOffice,
+    moduleCredit: courseUnits,
+  };
   return (
     <li>
       <NavLink
@@ -31,6 +43,12 @@ const ModItem = ({
             <b>{moduleCode}</b>
           </span>
           <span>{moduleName}</span>
+          <button>
+            <FiPlusCircle onClick={() => registerModule(module)} />
+          </button>
+          <button onClick={() => removeModule(module.moduleId)}>
+            <FiXCircle />
+          </button>
         </div>
         <div className="text-gray-500">
           <span className="mr-1">{homeOffice}</span>•

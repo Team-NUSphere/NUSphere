@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-classes */
 import { BelongsToMixin } from "#db/types/associationtypes.js";
 import {
   CreationOptional,
@@ -11,6 +12,17 @@ import {
 
 import UserTimetable from "./UserTimetable.js";
 
+export interface UserEventType {
+  day: string;
+  description?: string;
+  endTime: string;
+  eventId?: string;
+  name: string;
+  startTime: string;
+  venue?: string;
+  weeks?: number[];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserEvent
   extends BelongsToMixin<UserTimetable, number, "UserTimetable"> {}
@@ -22,11 +34,13 @@ class UserEvent extends Model<
   declare description?: CreationOptional<string>;
   declare endTime: CreationOptional<string>;
   declare eventId: CreationOptional<string>;
-  declare isRecurring: boolean;
   declare name: string;
   declare startTime?: string;
+  declare venue?: CreationOptional<string>;
+  declare weeks?: CreationOptional<number[]>;
+  declare day: string;
 
-  declare timetableId: CreationOptional<number>;
+  declare timetableId: CreationOptional<string>;
 
   declare UserTimetable?: NonAttribute<UserTimetable>;
 
@@ -40,7 +54,11 @@ class UserEvent extends Model<
   static initModel(sequelize: Sequelize) {
     UserEvent.init(
       {
+        day: {
+          type: DataTypes.STRING,
+        },
         description: {
+          allowNull: true,
           type: DataTypes.TEXT,
         },
         endTime: {
@@ -53,11 +71,6 @@ class UserEvent extends Model<
           type: DataTypes.UUID,
           unique: true,
         },
-        isRecurring: {
-          allowNull: false,
-          defaultValue: "false",
-          type: DataTypes.BOOLEAN,
-        },
         name: {
           allowNull: false,
           type: DataTypes.STRING,
@@ -67,7 +80,15 @@ class UserEvent extends Model<
         },
         timetableId: {
           allowNull: false,
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
+        },
+        venue: {
+          allowNull: true,
+          type: DataTypes.STRING,
+        },
+        weeks: {
+          allowNull: true,
+          type: DataTypes.ARRAY(DataTypes.INTEGER),
         },
       },
       {

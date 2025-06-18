@@ -29,9 +29,15 @@ async function populateModuleTable() {
     console.log(`${moduleCode}: ${title}`);
     console.log(timetable);
     if (!timetable) continue;
+    const lessonTypeSet = new Set<string>();
+    const defaultClasses: string[] = [];
 
     const timetableFormatted: InferCreationAttributes<Class>[] = timetable.map(
       (data) => {
+        if (!lessonTypeSet.has(data.lessonType)) {
+          lessonTypeSet.add(data.lessonType);
+          defaultClasses.push(data.classNo);
+        }
         if (Array.isArray(data.weeks)) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { size, ...rest } = data;
@@ -54,10 +60,12 @@ async function populateModuleTable() {
     await Module.create(
       {
         Classes: timetableFormatted,
+        defaultClasses: defaultClasses,
         department: department,
         description: description,
         faculty: faculty,
         gradingBasis: gradingBasisDescription,
+        lessonTypes: [...lessonTypeSet],
         moduleCredit: parseFloat(moduleCredit),
         moduleId: moduleCode,
         title: title,

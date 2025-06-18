@@ -44,11 +44,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/forum",
-        element: <div> Hello, forum </div>,
+        element: <div> Hello, forum page has yet to be implemented </div>,
       },
       {
         path: "/settings",
-        element: <div> Hello, settings </div>,
+        element: <div> Hello, settings page has yet to be implemented </div>,
       },
     ],
   },

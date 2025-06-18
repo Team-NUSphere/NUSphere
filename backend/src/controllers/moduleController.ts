@@ -22,7 +22,6 @@ export const handleGetModList = async (
       res.json(modList);
       res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(422);
       next(error);
     }
     return;
@@ -31,12 +30,10 @@ export const handleGetModList = async (
       const { modules: modList } = await searchMod(
         "",
         parseInt(typeof params.page === "string" ? params.page : "1"),
-        10,
+        20,
       );
       res.json(modList);
-      res.sendStatus(200);
     } catch (error) {
-      res.sendStatus(422);
       next(error);
     }
     return;
@@ -87,13 +84,11 @@ export const handleGetModDetails = async (
       res.sendStatus(404);
     }
   } catch (error) {
-    res.sendStatus(404);
     next(error);
   }
 };
 
 const searchModDetails = async (moduleCode: string) => {
-  console.log(moduleCode);
   const modDetails = await Module.findOne({ where: { moduleId: moduleCode } });
   return modDetails;
 };

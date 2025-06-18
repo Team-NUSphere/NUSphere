@@ -1,5 +1,5 @@
 /* eslint-disable perfectionist/sort-classes */
-import { BelongsToManyMixin, HasOneMixin } from "#db/types/associationtypes.js";
+import { HasOneMixin } from "#db/types/associationtypes.js";
 import {
   DataTypes,
   InferAttributes,
@@ -9,29 +9,49 @@ import {
   Sequelize,
 } from "sequelize";
 
+import Enrollment from "./Enrollment.js";
 import Module from "./Module.js";
+import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface User extends HasOneMixin<UserTimetable, number, "Timetable"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
-interface User
-  extends BelongsToManyMixin<Module, string, "Module", "Modules"> {}
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
 
   declare Timetable?: NonAttribute<UserTimetable>;
-  declare Modules?: NonAttribute<Module[]>;
+
+  async getUserTimetable() {
+    let userTimetable = await this.getTimetable({
+      include: [
+        {
+          as: "Events",
+          model: UserEvent,
+        },
+        {
+          as: "Modules",
+          model: Module,
+        },
+        {
+          as: "Enrollments",
+          model: Enrollment,
+        },
+      ],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!userTimetable) {
+      userTimetable = await this.createTimetable();
+      userTimetable.Events = [];
+      userTimetable.Modules = [];
+      userTimetable.Enrollments = [];
+    }
+    this.Timetable = userTimetable;
+    return userTimetable;
+  }
 
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
-    User.belongsToMany(Module, {
-      as: "Modules",
-      foreignKey: "uid",
-      otherKey: "moduleId",
-      through: "Enrollments",
-    });
   }
 
   static initModel(sequelize: Sequelize) {

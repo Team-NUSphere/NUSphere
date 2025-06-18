@@ -1,15 +1,12 @@
 import { useState } from "react";
 import DayColumn from "../components/DayColumn";
 import { format } from "date-fns";
+import type { UserEventType } from "../contexts/timetableContext";
 
 export default function Timetable({
-  type = "/userTimetable",
-  id = "/",
   startHour = 0,
   numOfHours = 24,
 }: {
-  type: string;
-  id: string;
   startHour: number;
   numOfHours: number;
 }) {

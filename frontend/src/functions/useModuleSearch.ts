@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { backend } from "../constants";
-
-type modInfo = {
-  moduleId: string;
-  title: string;
-  faculty: string;
-  moduleCredit: number;
-};
+import type { modInfo } from "../contexts/timetableContext";
 
 export default function useModuleSearch(query: string, pageNumber: number) {
   const [moduleList, setModuleList] = useState<modInfo[]>([]);

@@ -1,10 +1,12 @@
 import { corsOptions } from "#configs/corsOptions.js";
 import db from "#db/index.js";
 import firebaseApp from "#firebase-admin.js";
+import authMiddleware from "#middlewares/authHandler.js";
 import errorHandler from "#middlewares/errorHandler.js";
 import loginRouter from "#routes/login.js";
 import moduleRouter from "#routes/module.js";
 import registerRouter from "#routes/register.js";
+import userTimetableRouter from "#routes/userTimetable.js";
 import cors from "cors";
 import express from "express";
 
@@ -23,11 +25,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded());
 
+app.use("/", authMiddleware);
+
 //routes
 app.get("/", middleware);
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
 app.use("/modules", moduleRouter);
+app.use("/userTimetable", userTimetableRouter);
 
 // 404 catch all
 app.all("*name", (req, res, next) => {

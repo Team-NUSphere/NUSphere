@@ -46,24 +46,17 @@ class Class extends Model<
   declare lessonType: LessonType;
   declare startTime: StartTime;
   declare venue: Venue;
-  declare weeks: CreationOptional<number[]>;
-  declare startDate: CreationOptional<string>;
-  declare endDate: CreationOptional<string>;
-  declare weekInterval: CreationOptional<number>;
+  declare weeks?: CreationOptional<number[]>;
+  declare startDate?: CreationOptional<string>;
+  declare endDate?: CreationOptional<string>;
+  declare weekInterval?: CreationOptional<number>;
 
   declare moduleId: CreationOptional<string>;
 
   declare Module?: NonAttribute<Module>;
-  declare UserTimetables?: NonAttribute<UserTimetable[]>;
 
   static associate() {
     Class.belongsTo(Module, { as: "Module", foreignKey: "moduleId" });
-    Class.belongsToMany(UserTimetable, {
-      as: "UserTimetables",
-      foreignKey: "classId",
-      otherKey: "timetableId",
-      through: "SelectedClasses",
-    });
   }
 
   static initModel(sequelize: Sequelize) {
