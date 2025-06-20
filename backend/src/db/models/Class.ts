@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
 import {
   BelongsToManyMixin,
@@ -24,9 +26,8 @@ import {
 import Module from "./Module.js";
 import UserTimetable from "./UserTimetable.js";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Class extends BelongsToMixin<Module, string, "Module"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
+
 interface Class
   extends BelongsToManyMixin<
     UserTimetable,
@@ -34,7 +35,7 @@ interface Class
     "UserTimetable",
     "UserTimetables"
   > {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+
 class Class extends Model<
   InferAttributes<Class>,
   InferCreationAttributes<Class>

@@ -20,7 +20,6 @@ export const handleGetModList = async (
         10,
       );
       res.json(modList);
-      res.sendStatus(200);
     } catch (error) {
       next(error);
     }

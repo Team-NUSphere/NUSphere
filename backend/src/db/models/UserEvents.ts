@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
 import { BelongsToMixin } from "#db/types/associationtypes.js";
 import {
@@ -23,19 +25,18 @@ export interface UserEventType {
   weeks?: number[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserEvent
   extends BelongsToMixin<UserTimetable, number, "UserTimetable"> {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+
 class UserEvent extends Model<
   InferAttributes<UserEvent>,
   InferCreationAttributes<UserEvent>
 > {
   declare description?: CreationOptional<string>;
-  declare endTime: CreationOptional<string>;
+  declare endTime: string;
   declare eventId: CreationOptional<string>;
   declare name: string;
-  declare startTime?: string;
+  declare startTime: string;
   declare venue?: CreationOptional<string>;
   declare weeks?: CreationOptional<number[]>;
   declare day: string;

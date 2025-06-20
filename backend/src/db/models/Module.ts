@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-modules */
 /* eslint-disable perfectionist/sort-classes */
 import {
@@ -29,14 +31,11 @@ interface ModuleCreationAttributes extends InferCreationAttributes<Module> {
   Classes?: InferCreationAttributes<Class>[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Module extends HasManyMixin<Class, number, "Class", "Classes"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Module
   extends HasManyMixin<Enrollment, string, "Enrollment", "Enrollments"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Module extends BelongsToManyMixin<User, string, "User", "Users"> {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+
 class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
   declare department: Department;
   declare description: CreationOptional<string>;

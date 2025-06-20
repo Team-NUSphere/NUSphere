@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { HasOneMixin } from "#db/types/associationtypes.js";
+import { HasManyMixin, HasOneMixin } from "#db/types/associationtypes.js";
 import {
   DataTypes,
   InferAttributes,
@@ -9,14 +11,17 @@ import {
   Sequelize,
 } from "sequelize";
 
+import Comment from "./Comment.js";
 import Enrollment from "./Enrollment.js";
 import Module from "./Module.js";
+import Post from "./Post.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
-interface User extends HasOneMixin<UserTimetable, number, "Timetable"> {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+interface User extends HasOneMixin<UserTimetable, string, "Timetable"> {}
+interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
+interface User extends HasManyMixin<Comment, string, "Comment", "Comments"> {}
+
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
 
@@ -52,6 +57,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
+    User.hasMany(Post, { as: "Posts", foreignKey: "uid" });
+    User.hasMany(Comment, { as: "Comments", foreignKey: "uid" });
   }
 
   static initModel(sequelize: Sequelize) {

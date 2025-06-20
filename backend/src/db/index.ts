@@ -3,8 +3,11 @@ import { Options, Sequelize } from "sequelize";
 
 import * as dbConfig from "./config/config.cjs";
 import Class from "./models/Class.js";
+import Comment from "./models/Comment.js";
 import Enrollment from "./models/Enrollment.js";
+import ForumGroup from "./models/ForumGroup.js";
 import Module from "./models/Module.js";
+import Post from "./models/Post.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
@@ -36,11 +39,17 @@ User.initModel(sequelize);
 UserEvent.initModel(sequelize);
 UserTimetable.initModel(sequelize);
 Enrollment.initModel(sequelize);
+Post.initModel(sequelize);
+ForumGroup.initModel(sequelize);
+Comment.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
+  Comment: Comment,
   Enrollment: Enrollment,
+  ForumGroup: ForumGroup,
   Module: Module,
+  Post: Post,
   User: User,
   UserEvent: UserEvent,
   UserTimetable: UserTimetable,
@@ -54,7 +63,6 @@ Object.keys(db).forEach((modelName) => {
 });
 
 await sequelize.sync();
-await UserEvent.sync({ force: true });
 
 export default db;
 

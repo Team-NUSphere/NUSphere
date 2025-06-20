@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
 import {
   BelongsToManyMixin,
@@ -21,18 +23,14 @@ import Module from "./Module.js";
 import User from "./User.js";
 import UserEvent, { UserEventType } from "./UserEvents.js";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserTimetable
   extends HasManyMixin<UserEvent, string, "Event", "Events"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserTimetable
   extends HasManyMixin<Enrollment, string, "Enrollment", "Enrollments"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserTimetable extends BelongsToMixin<User, string, "User"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface UserTimetable
   extends BelongsToManyMixin<Module, string, "Module", "Modules"> {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+
 class UserTimetable extends Model<
   InferAttributes<UserTimetable>,
   InferCreationAttributes<UserTimetable>
@@ -87,7 +85,6 @@ class UserTimetable extends Model<
 
     return classes;
   }
-
   // Read
   async getAllEvents(): Promise<UserEvent[]> {
     this.Events ??= await this.getEvents();

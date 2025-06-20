@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
 import { BelongsToMixin } from "#db/types/associationtypes.js";
 import {
@@ -14,12 +16,10 @@ import {
 import Module from "./Module.js";
 import UserTimetable from "./UserTimetable.js";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Enrollment
   extends BelongsToMixin<UserTimetable, string, "UserTimetable"> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-declaration-merging
 interface Enrollment extends BelongsToMixin<Module, string, "Module"> {}
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+
 class Enrollment extends Model<
   InferAttributes<Enrollment>,
   InferCreationAttributes<Enrollment>
@@ -101,10 +101,12 @@ class Enrollment extends Model<
         moduleId: {
           allowNull: false,
           type: DataTypes.STRING,
+          unique: "tt_unique_constraint",
         },
         timetableId: {
           allowNull: false,
           type: DataTypes.STRING,
+          unique: "tt_unique_constraint",
         },
       },
       {
