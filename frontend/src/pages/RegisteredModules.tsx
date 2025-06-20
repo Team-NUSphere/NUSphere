@@ -8,15 +8,9 @@ export default function RegisteredModules() {
   const { userModules } = getTimetableContext();
   const allModules: modInfo[] = Object.values(userModules);
   return (
-    <div>
+    <div className="w-full overflow-y-auto">
       {allModules.map((event) => (
-        <ModItem
-          key={event.moduleId}
-          moduleCode={event.moduleId}
-          moduleName={event.title}
-          homeOffice={event.faculty}
-          courseUnits={event.moduleCredit}
-        />
+        <ModItem key={event.moduleId} module={event} registered={true} />
       ))}
     </div>
   );

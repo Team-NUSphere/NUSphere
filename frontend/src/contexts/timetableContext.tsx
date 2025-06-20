@@ -29,7 +29,7 @@ export type UserEventType = {
 };
 type UserEventsType = Record<string, UserEventType>;
 
-type UserClassType = {
+export type UserClassType = {
   classNo: string;
   day: string;
   endTime: string;
@@ -37,7 +37,7 @@ type UserClassType = {
   lessonType: string;
   startTime: string;
   venue: string;
-  weeks?: string;
+  weeks?: number[];
   startDate?: string;
   endDate?: string;
   weekInterval?: string;
@@ -140,6 +140,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     })
       .then((res) => {
         setUserClasses((prev) => [...prev, ...res.data]);
+        console.log(userClasses);
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -173,7 +174,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
       }
     });
     setUserClasses((prev) =>
-      prev.filter((lesson) => lesson.moduleId === moduleCode)
+      prev.filter((lesson) => lesson.moduleId !== moduleCode)
     );
     setUserModules((prev) =>
       Object.fromEntries(

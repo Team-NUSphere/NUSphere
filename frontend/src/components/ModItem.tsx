@@ -7,52 +7,58 @@ import {
 } from "../contexts/timetableContext";
 
 export type ModItemProps = {
-  moduleCode: string;
-  moduleName: string;
-  homeOffice: string;
-  courseUnits: number;
+  module: modInfo;
+  registered: boolean;
 };
 
-const ModItem = ({
-  moduleCode,
-  moduleName,
-  homeOffice,
-  courseUnits,
-}: ModItemProps) => {
+const ModItem = ({ module, registered }: ModItemProps) => {
   const { registerModule, removeModule } = getTimetableContext();
-  const module: modInfo = {
-    moduleId: moduleCode,
-    title: moduleName,
-    faculty: homeOffice,
-    moduleCredit: courseUnits,
-  };
   return (
     <li>
       <NavLink
-        to={`/modules/${moduleCode}`}
-        className={({ isActive }) => {
-          console.log(`NavLink for ${moduleCode}: isActive = ${isActive}`);
-          return clsx("my-1 p-1 rounded-md text-blue-600 block", {
-            "bg-blue-100": isActive,
-            "hover:bg-gray-100": !isActive,
-          });
-        }}
+        to={`/modules/${module.moduleId}`}
+        className={({ isActive }) =>
+          clsx(
+            "flex flex-col my-1 p-1 rounded-md text-blue-600 transition-colors duration-200 ease-out",
+            {
+              "bg-blue-100": isActive,
+              "hover:bg-gray-100": !isActive,
+            }
+          )
+        }
       >
-        <div className="mb-1">
+        <div className="">
           <span className="mr-2">
-            <b>{moduleCode}</b>
+            <b>{module.moduleId}</b>
           </span>
-          <span>{moduleName}</span>
-          <button>
-            <FiPlusCircle onClick={() => registerModule(module)} />
-          </button>
-          <button onClick={() => removeModule(module.moduleId)}>
-            <FiXCircle />
-          </button>
+          <span>{module.title}</span>
         </div>
-        <div className="text-gray-500">
-          <span className="mr-1">{homeOffice}</span>•
-          <span className="ml-1">{`${courseUnits} Units`}</span>
+        <span className="text-gray-500">{module.faculty}</span>
+        <div className="flex relative">
+          <span className="text-gray-500">{`${module.moduleCredit} Units`}</span>
+          <div className="absolute right-0 text-xl">
+            {!registered ? (
+              <button>
+                <FiPlusCircle
+                  onClick={(e) => {
+                    registerModule(module);
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                />
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  removeModule(module.moduleId);
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
+                <FiXCircle />
+              </button>
+            )}
+          </div>
         </div>
       </NavLink>
     </li>
