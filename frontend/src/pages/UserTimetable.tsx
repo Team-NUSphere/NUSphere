@@ -1,4 +1,3 @@
-import { FiPlusCircle } from "react-icons/fi";
 import { getTimetableContext } from "../contexts/timetableContext";
 import Timetable from "./Timetable";
 import AddEventModal from "../components/AddEventModal";
