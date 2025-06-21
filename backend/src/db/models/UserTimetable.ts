@@ -139,16 +139,29 @@ class UserTimetable extends Model<
   }
 
   // Update
-  async editEvent(event: UserEventType) {
+  async editOrMakeEvent(event: UserEventType) {
     if (!event.eventId)
       throw new Error("There is no eventId to reference update");
     await this.getAllEvents();
-    const userEvent = this.Events?.find(
+    let userEvent = this.Events?.find(
       (uevent) => uevent.eventId === event.eventId,
     );
-    if (!userEvent) throw new Error("There is no event with such EventId");
-    userEvent.set({ ...event });
-    await userEvent.save();
+    if (!userEvent) {
+      userEvent = await UserEvent.create({
+        day: event.day,
+        description: event.description,
+        endTime: event.endTime,
+        eventId: event.eventId,
+        name: event.name,
+        startTime: event.startTime,
+        timetableId: this.timetableId,
+        venue: event.venue,
+        weeks: event.weeks,
+      });
+    } else {
+      userEvent.set({ ...event });
+      await userEvent.save();
+    }
     this.Events = await this.getEvents();
     return userEvent;
   }

@@ -206,7 +206,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const controller = new AbortController();
     const signal = controller.signal;
     axios({
-      method: "PUT",
+      method: "PATCH",
       url: `${backend}/userTimetable/modules/${moduleCode}`,
       headers: {
         "Content-Type": "application/json",
@@ -263,7 +263,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     return controller.abort;
   }
 
-  // function modifyEvent -> put req, backend send status code, retry until 200
+  // function modifyEvent -> put req(full event information), backend send status code, retry until 200
   async function modifyEvent(event: UserEventType) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();

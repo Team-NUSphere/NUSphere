@@ -57,7 +57,7 @@ export const handleUpdateEvent = async (
     const userTimetable = await req.user.getUserTimetable();
     const event: null | UserEventType = req.body as null | UserEventType;
     if (!event) throw new Error("No event found in request body");
-    await userTimetable.editEvent(event);
+    await userTimetable.editOrMakeEvent(event);
     res.status(200);
   } catch (error) {
     next(error);
