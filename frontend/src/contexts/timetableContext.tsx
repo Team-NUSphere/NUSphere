@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import { backend } from "../constants";
+import { backendHttp } from "../constants";
 import axios from "axios";
 
 export type modInfo = {
@@ -27,7 +27,7 @@ export type UserEventType = {
   weeks?: number[];
   day: string;
 };
-type UserEventsType = Record<string, UserEventType>;
+export type UserEventsType = Record<string, UserEventType>;
 
 export type UserClassType = {
   classNo: string;
@@ -93,7 +93,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "GET",
-      url: `${backend}/userTimetable/modules`,
+      url: `${backendHttp}/userTimetable/modules`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -131,7 +131,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "POST",
-      url: `${backend}/userTimetable/modules/${mod.moduleId}`,
+      url: `${backendHttp}/userTimetable/modules/${mod.moduleId}`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -160,7 +160,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "DELETE",
-      url: `${backend}/userTimetable/modules/${moduleCode}`,
+      url: `${backendHttp}/userTimetable/modules/${moduleCode}`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -207,7 +207,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "PATCH",
-      url: `${backend}/userTimetable/modules/${moduleCode}`,
+      url: `${backendHttp}/userTimetable/modules/${moduleCode}`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -242,7 +242,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "GET",
-      url: `${backend}/userTimetable/events`,
+      url: `${backendHttp}/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -270,7 +270,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "PUT",
-      url: `${backend}/userTimetable/events`,
+      url: `${backendHttp}/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -300,7 +300,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "POST",
-      url: `${backend}/userTimetable/events`,
+      url: `${backendHttp}/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,
@@ -329,7 +329,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     const signal = controller.signal;
     axios({
       method: "DELETE",
-      url: `${backend}/userTimetable/events`,
+      url: `${backendHttp}/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userIdToken}`,

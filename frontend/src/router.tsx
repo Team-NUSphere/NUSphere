@@ -50,6 +50,10 @@ export const router = createBrowserRouter([
         path: "/settings",
         element: <div> Hello, settings page has yet to be implemented </div>,
       },
+      {
+        path: "/room/:roomId",
+        element: <div> Hello, rooms page has yet to be implemented </div>,
+      },
     ],
   },
 ]);

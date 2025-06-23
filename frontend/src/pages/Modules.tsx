@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { backend } from "../constants";
+import { backendHttp } from "../constants";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -12,7 +12,7 @@ export default function Modules() {
     const signal = controller.signal;
     axios({
       method: "GET",
-      url: `${backend}/modules/${moduleCode}`,
+      url: `${backendHttp}/modules/${moduleCode}`,
       signal: signal,
     })
       .then((res) => {

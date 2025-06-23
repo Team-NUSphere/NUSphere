@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { backend } from "../constants";
+import { backendHttp } from "../constants";
 import type { User } from "firebase/auth";
 
 type Event = {
@@ -41,7 +41,7 @@ export default async function useTimetableSearch(
 
     axios({
       method: "GET",
-      url: `${backend}${path}`,
+      url: `${backendHttp}${path}`,
       headers: {
         "Content-Type": "application/json",
         ...(userIdToken ? { Authorization: `Bearer ${userIdToken}` } : {}),

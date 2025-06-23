@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { backend } from "../constants";
+import { backendHttp } from "../constants";
 import type { modInfo } from "../contexts/timetableContext";
 
 export default function useModuleSearch(query: string, pageNumber: number) {
@@ -22,7 +22,7 @@ export default function useModuleSearch(query: string, pageNumber: number) {
 
     axios({
       method: "GET",
-      url: `${backend}/modules/modList`,
+      url: `${backendHttp}/modules/modList`,
       params: {
         q: query,
         page: pageNumber,

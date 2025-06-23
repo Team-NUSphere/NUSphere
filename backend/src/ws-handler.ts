@@ -1,4 +1,3 @@
-import UserEvents from "#db/models/UserEvents.js";
 import { firebaseAuth } from "#firebase-admin.js";
 import { logEvents } from "#middlewares/eventLogger.js";
 import { DecodedIdToken } from "firebase-admin/auth";
@@ -11,8 +10,40 @@ export interface AuthedWebSocket extends WebSocket {
 }
 
 const rooms = new Map<string, Set<WebSocket>>();
-const userToRoom = new Map<string, string>();
+const userToRoomAndSocket = new Map<
+  string,
+  { room: string; socket: WebSocket }
+>();
 const socketToUser = new Map<WebSocket, { room: string; userId: string }>();
+
+export function broadcastToRoom(
+  room: string,
+  message: string,
+  excludeUserId?: string,
+) {
+  const clients = rooms.get(room);
+  if (!clients) return;
+
+  for (const client of clients) {
+    const userId = (client as AuthedWebSocket).userId;
+    if (
+      client.readyState === WebSocket.OPEN &&
+      (!excludeUserId || userId !== excludeUserId)
+    ) {
+      client.send(message);
+    }
+  }
+}
+
+export function createRoom() {
+  const randomRoomId = createRandomRoomId(6);
+  if (!rooms.has(randomRoomId)) rooms.set(randomRoomId, new Set());
+  return randomRoomId;
+}
+
+export function getRoomForUser(userId: string): null | string {
+  return userToRoomAndSocket.get(userId)?.room ?? null;
+}
 
 export function setupWebSocket(server: Server, wss: WebSocketServer) {
   server.on("upgrade", (req, socket, head) => {
@@ -51,10 +82,11 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
     ws.on("error", onSocketPostError);
 
     const { room, userId } = ws;
+    terminateConnection(userId);
     if (!rooms.has(room)) rooms.set(room, new Set());
     rooms.get(room)?.add(ws);
 
-    userToRoom.set(userId, room);
+    userToRoomAndSocket.set(userId, { room, socket: ws });
     socketToUser.set(ws, { room, userId });
 
     console.log(`User ${userId} connected to room ${room}`);
@@ -65,45 +97,25 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
 
     ws.on("close", () => {
       rooms.get(room)?.delete(ws);
-      userToRoom.delete(userId);
+      userToRoomAndSocket.delete(userId);
       socketToUser.delete(ws);
       if (rooms.get(room)?.size === 0) rooms.delete(room);
       console.log(`User ${userId} disconnected from room ${room}`);
     });
   });
 
-  function getRoomForUser(userId: string): null | string {
-    return userToRoom.get(userId) ?? null;
-  }
-
-  function broadcastToRoom(
-    room: string,
-    events: UserEvents[],
-    excludeUserId?: string,
-  ) {
-    const formattedMessage = JSON.stringify(
-      events.map((event) => event.toJSON()),
-    );
-    const clients = rooms.get(room);
-    if (!clients) return;
-
-    for (const client of clients) {
-      const { room, userId } = socketToUser.get(client) ?? {
-        room: null,
-        userId: null,
-      };
-      if (room && userId) {
-        if (
-          client.readyState === WebSocket.OPEN &&
-          (!excludeUserId || userId !== excludeUserId)
-        ) {
-          client.send(formattedMessage);
-        }
-      }
-    }
-  }
-
   return { broadcastToRoom: broadcastToRoom, getRoomForUser: getRoomForUser };
+}
+
+function createRandomRoomId(length = 6) {
+  for (let i = 0; i < 10; i++) {
+    const randomRoomId = Math.random()
+      .toString(36)
+      .substring(2, length + 2);
+    if (!rooms.has(randomRoomId)) return randomRoomId;
+  }
+  const fallBackId = Date.now().toString(36).slice(-length);
+  return fallBackId;
 }
 
 function onSocketPostError(err: Error) {
@@ -126,4 +138,16 @@ function onSocketPreError(err: Error) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     logEvents("Error handling error", "ErrorHandlerError.txt");
   }
+}
+
+function terminateConnection(uid: string) {
+  const entry = userToRoomAndSocket.get(uid);
+  if (!entry) return;
+  const { room, socket } = entry;
+  const roomSet = rooms.get(room);
+  if (!roomSet) return;
+  roomSet.delete(socket);
+  socketToUser.delete(socket);
+  userToRoomAndSocket.delete(uid);
+  if (socket.readyState === WebSocket.OPEN) socket.close();
 }
