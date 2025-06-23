@@ -14,7 +14,7 @@ import {
 
 import UserTimetable from "./UserTimetable.js";
 
-export interface UserEventType {
+export interface UserModelType {
   day: string;
   description?: string;
   endTime: string;

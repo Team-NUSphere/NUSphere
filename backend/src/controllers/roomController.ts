@@ -1,11 +1,7 @@
 import { createRoom } from "#ws-handler.js";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 
-const handleCreateRoom = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
+const handleCreateRoom = (req: Request, res: Response): void => {
   if (!req.user) {
     res.sendStatus(500);
     return;

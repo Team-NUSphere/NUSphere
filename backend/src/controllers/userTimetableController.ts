@@ -1,7 +1,58 @@
 import User from "#db/models/User.js";
-import { UserEventType } from "#db/models/UserEvents.js";
+import { UserModelType } from "#db/models/UserEvents.js";
 import { NextFunction, Request, Response } from "express";
 import _ from "lodash";
+
+export interface modInfo {
+  faculty: string;
+  moduleCredit: number;
+  moduleId: string;
+  title: string;
+}
+export interface socketDataType {
+  dataType?: "classes" | "events" | "modules";
+  eventId?: string; // for delete events
+  moduleId?: string; // for delete modules
+  type: "add" | "create" | "delete" | "init" | "remove" | "update";
+  userData?: Record<
+    string,
+    {
+      classes?: UserClassType[];
+      events?: UserEventsType;
+      modules?: UserModulesType;
+    }
+  >;
+  userId?: string; // for remove and delete operations
+}
+
+export interface UserClassType {
+  classId: string;
+  classNo: string;
+  day: string;
+  endDate?: string;
+  endTime: string;
+  lessonType: string;
+  moduleId: string;
+  startDate?: string;
+  startTime: string;
+  venue: string;
+  weekInterval?: string;
+  weeks?: number[];
+}
+export type UserEventsType = Record<string, UserModelType>;
+
+export interface UserEventType {
+  day: string;
+  description?: string;
+  endTime: string;
+  eventId: string;
+  name: string;
+  startTime?: string;
+  venue?: string;
+  weeks?: number[];
+}
+
+export type UserModulesType = Record<string, modInfo>;
 
 export const handleGetAllEvents = async (
   req: Request,
@@ -34,7 +85,7 @@ export const handleCreateNewEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserEventType = req.body as null | UserEventType;
+    const event: null | UserModelType = req.body as null | UserModelType;
     if (!event) throw new Error("No event found in request body");
     await userTimetable.makeNewEvent(event);
     res.status(200);
@@ -55,7 +106,7 @@ export const handleUpdateEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserEventType = req.body as null | UserEventType;
+    const event: null | UserModelType = req.body as null | UserModelType;
     if (!event) throw new Error("No event found in request body");
     await userTimetable.editOrMakeEvent(event);
     res.status(200);
