@@ -3,6 +3,7 @@ import { firebaseAuth } from "#firebase-admin.js";
 import { NextFunction, Request, Response } from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 
+// include custom property user in Request interface
 declare module "express-serve-static-core" {
   interface Request {
     user?: User;
