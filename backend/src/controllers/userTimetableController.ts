@@ -3,54 +3,6 @@ import { UserModelType } from "#db/models/UserEvents.js";
 import { NextFunction, Request, Response } from "express";
 import _ from "lodash";
 
-export interface socketDataType {
-  dataType?: "classes" | "events" | "modules";
-  eventId?: string; // for delete events
-  moduleId?: string; // for delete modules
-  type: "add" | "create" | "delete" | "init" | "remove" | "update";
-  userData?: Record<
-    string,
-    {
-      classes?: UserClassType[];
-      events?: UserEventsType;
-      modules?: UserModulesType;
-    }
-  >;
-  userId?: string; // for remove and delete operations
-}
-interface modInfo {
-  faculty: string;
-  moduleCredit: number;
-  moduleId: string;
-  title: string;
-}
-interface UserClassType {
-  classId: string;
-  classNo: string;
-  day: string;
-  endDate?: string;
-  endTime: string;
-  lessonType: string;
-  moduleId: string;
-  startDate?: string;
-  startTime: string;
-  venue: string;
-  weekInterval?: string;
-  weeks?: number[];
-}
-type UserEventsType = Record<string, UserEventType>;
-interface UserEventType {
-  day: string;
-  description?: string;
-  endTime: string;
-  eventId: string;
-  name: string;
-  startTime?: string;
-  venue?: string;
-  weeks?: number[];
-}
-type UserModulesType = Record<string, modInfo>;
-
 export const handleGetAllEvents = async (
   req: Request,
   res: Response,

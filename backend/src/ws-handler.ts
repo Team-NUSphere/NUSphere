@@ -1,4 +1,8 @@
-import { socketDataType } from "#controllers/userTimetableController.js";
+import Class from "#db/models/Class.js";
+import Module from "#db/models/Module.js";
+import User from "#db/models/User.js";
+import UserEvent from "#db/models/UserEvents.js";
+import UserTimetable from "#db/models/UserTimetable.js";
 import { firebaseAuth } from "#firebase-admin.js";
 import { logEvents } from "#middlewares/eventLogger.js";
 import { DecodedIdToken } from "firebase-admin/auth";
@@ -9,6 +13,54 @@ export interface AuthedWebSocket extends WebSocket {
   room: string;
   userId: string;
 }
+export interface socketDataType {
+  dataType?: "classes" | "events" | "modules";
+  eventId?: string; // for delete events
+  moduleId?: string; // for delete modules
+  type: "add" | "create" | "delete" | "init" | "remove" | "update";
+  userData?: Record<
+    string,
+    {
+      classes?: UserClassType[];
+      events?: UserEventsType;
+      modules?: UserModulesType;
+    }
+  >;
+  userId?: string; // for remove and delete operations
+}
+interface modInfo {
+  faculty: string;
+  moduleCredit: number;
+  moduleId: string;
+  title: string;
+}
+interface UserClassType {
+  classId: number;
+  classNo: string;
+  day: string;
+  endDate?: string;
+  endTime: string;
+  lessonType: string;
+  moduleId: string;
+  startDate?: string;
+  startTime: string;
+  venue: string;
+  weekInterval?: number;
+  weeks?: number[];
+}
+type UserEventsType = Record<string, UserEventType>;
+interface UserEventType {
+  day: string;
+  description?: string;
+  endTime: string;
+  eventId: string;
+  name: string;
+  startTime?: string;
+  venue?: string;
+  weeks?: number[];
+}
+
+type UserModulesType = Record<string, modInfo>;
 
 const rooms = new Map<string, Set<WebSocket>>();
 const userToRoomAndSocket = new Map<
@@ -92,6 +144,38 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
 
     console.log(`User ${userId} connected to room ${room}`);
 
+    getFullEventClassModule(userId)
+      .then((data) => {
+        if (!data) return;
+        broadcastToRoom(
+          room,
+          {
+            type: "add",
+            userData: {
+              [userId]: data,
+            },
+          },
+          userId,
+        );
+      })
+      .catch((error: unknown) => {
+        console.log(error);
+      });
+
+    getAllInRoomEventClassModule(userId, room)
+      .then((data) => {
+        if (!data) return;
+        ws.send(
+          JSON.stringify({
+            type: "init",
+            userData: data,
+          } as socketDataType),
+        );
+      })
+      .catch((error: unknown) => {
+        console.log(error);
+      });
+
     ws.on("message", (msg) => {
       console.log(msg);
     });
@@ -108,6 +192,24 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
   return { broadcastToRoom: broadcastToRoom, getRoomForUser: getRoomForUser };
 }
 
+function classToSocketClass(classes: Class[]) {
+  const socketClass: UserClassType[] = classes.map((lesson) => ({
+    classId: lesson.classId,
+    classNo: lesson.classNo,
+    day: lesson.day,
+    endDate: lesson.endDate,
+    endTime: lesson.endTime,
+    lessonType: lesson.lessonType,
+    moduleId: lesson.moduleId,
+    startDate: lesson.startDate,
+    startTime: lesson.startTime,
+    venue: lesson.venue,
+    weekInterval: lesson.weekInterval,
+    weeks: lesson.weeks,
+  }));
+  return socketClass;
+}
+
 function createRandomRoomId(length = 6) {
   for (let i = 0; i < 10; i++) {
     const randomRoomId = Math.random()
@@ -117,6 +219,85 @@ function createRandomRoomId(length = 6) {
   }
   const fallBackId = Date.now().toString(36).slice(-length);
   return fallBackId;
+}
+
+function eventToSocketEvent(events: UserEvent[]) {
+  const socketEvent: UserEventsType = {};
+  for (const event of events) {
+    socketEvent[event.eventId] = {
+      day: event.day,
+      description: event.description,
+      endTime: event.endTime,
+      eventId: event.eventId,
+      name: event.name,
+      startTime: event.startTime,
+      venue: event.venue,
+      weeks: event.weeks,
+    };
+  }
+  return socketEvent;
+}
+
+async function getAllInRoomEventClassModule(
+  excludeUserId: string,
+  room: string,
+) {
+  const clients = rooms.get(room);
+  if (!clients) return;
+  const returnData: Record<
+    string,
+    {
+      classes: UserClassType[];
+      events: UserEventsType;
+      modules: UserModulesType;
+    }
+  > = {};
+
+  for (const client of clients) {
+    const userId = (client as AuthedWebSocket).userId;
+    if (!excludeUserId || userId !== excludeUserId) {
+      const userData = await getFullEventClassModule(userId);
+      if (!userData) continue;
+      returnData[userId] = userData;
+    }
+  }
+
+  return returnData;
+}
+
+async function getFullEventClassModule(userId: string) {
+  const userTimetable = (
+    await User.findByPk(userId, {
+      include: [
+        {
+          as: "Timetable",
+          model: UserTimetable,
+        },
+      ],
+    })
+  )?.Timetable;
+  if (!userTimetable) return;
+  const allClasses = await userTimetable.getAllClasses();
+  const allEvents = await userTimetable.getAllEvents();
+  const allModules = await userTimetable.getAllModules();
+  return {
+    classes: classToSocketClass(allClasses),
+    events: eventToSocketEvent(allEvents),
+    modules: moduleToSocketModule(allModules),
+  };
+}
+
+function moduleToSocketModule(mods: Module[]) {
+  const socketModule: UserModulesType = {};
+  for (const mod of mods) {
+    socketModule[mod.moduleId] = {
+      faculty: mod.faculty,
+      moduleCredit: mod.moduleCredit,
+      moduleId: mod.moduleId,
+      title: mod.title,
+    };
+  }
+  return socketModule;
 }
 
 function onSocketPostError(err: Error) {

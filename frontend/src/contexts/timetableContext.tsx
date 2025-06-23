@@ -33,14 +33,14 @@ export type UserClassType = {
   classNo: string;
   day: string;
   endTime: string;
-  classId: string;
+  classId: number;
   lessonType: string;
   startTime: string;
   venue: string;
   weeks?: number[];
   startDate?: string;
   endDate?: string;
-  weekInterval?: string;
+  weekInterval?: number;
   moduleId: string;
 };
 
