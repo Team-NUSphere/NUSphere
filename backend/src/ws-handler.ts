@@ -1,3 +1,4 @@
+import { socketDataType } from "#controllers/userTimetableController.js";
 import { firebaseAuth } from "#firebase-admin.js";
 import { logEvents } from "#middlewares/eventLogger.js";
 import { DecodedIdToken } from "firebase-admin/auth";
@@ -18,7 +19,7 @@ const socketToUser = new Map<WebSocket, { room: string; userId: string }>();
 
 export function broadcastToRoom(
   room: string,
-  message: string,
+  message: socketDataType,
   excludeUserId?: string,
 ) {
   const clients = rooms.get(room);
@@ -30,7 +31,7 @@ export function broadcastToRoom(
       client.readyState === WebSocket.OPEN &&
       (!excludeUserId || userId !== excludeUserId)
     ) {
-      client.send(message);
+      client.send(JSON.stringify(message));
     }
   }
 }

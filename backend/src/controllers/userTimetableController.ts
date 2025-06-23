@@ -3,12 +3,6 @@ import { UserModelType } from "#db/models/UserEvents.js";
 import { NextFunction, Request, Response } from "express";
 import _ from "lodash";
 
-export interface modInfo {
-  faculty: string;
-  moduleCredit: number;
-  moduleId: string;
-  title: string;
-}
 export interface socketDataType {
   dataType?: "classes" | "events" | "modules";
   eventId?: string; // for delete events
@@ -24,8 +18,13 @@ export interface socketDataType {
   >;
   userId?: string; // for remove and delete operations
 }
-
-export interface UserClassType {
+interface modInfo {
+  faculty: string;
+  moduleCredit: number;
+  moduleId: string;
+  title: string;
+}
+interface UserClassType {
   classId: string;
   classNo: string;
   day: string;
@@ -39,9 +38,8 @@ export interface UserClassType {
   weekInterval?: string;
   weeks?: number[];
 }
-export type UserEventsType = Record<string, UserModelType>;
-
-export interface UserEventType {
+type UserEventsType = Record<string, UserEventType>;
+interface UserEventType {
   day: string;
   description?: string;
   endTime: string;
@@ -51,8 +49,7 @@ export interface UserEventType {
   venue?: string;
   weeks?: number[];
 }
-
-export type UserModulesType = Record<string, modInfo>;
+type UserModulesType = Record<string, modInfo>;
 
 export const handleGetAllEvents = async (
   req: Request,
