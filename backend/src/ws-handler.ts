@@ -186,6 +186,14 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
       socketToUser.delete(ws);
       if (rooms.get(room)?.size === 0) rooms.delete(room);
       console.log(`User ${userId} disconnected from room ${room}`);
+      broadcastToRoom(
+        room,
+        {
+          type: "remove",
+          userId: userId,
+        },
+        userId,
+      );
     });
   });
 
