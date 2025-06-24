@@ -16,6 +16,13 @@ import Comment from "./Comment.js";
 import ForumGroup from "./ForumGroup.js";
 import User from "./User.js";
 
+export interface PostType {
+  postId?: string;
+  title: string;
+  details: string;
+  likes?: number;
+}
+
 interface Post extends BelongsToMixin<ForumGroup, string, "ForumGroup"> {}
 interface Post extends BelongsToMixin<User, string, "User"> {}
 interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
@@ -24,7 +31,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare postId: CreationOptional<string>;
   declare title: string;
   declare details: string;
-  // declare likes: number;
+  declare likes: CreationOptional<number>;
 
   declare groupId: CreationOptional<string>;
   declare uid: CreationOptional<string>;
@@ -65,6 +72,11 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
         uid: {
           type: DataTypes.STRING,
         },
+        likes: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        }
       },
       {
         sequelize,

@@ -11,7 +11,7 @@ import {
   Sequelize,
 } from "sequelize";
 
-import Post from "./Post.js";
+import Post, {PostType} from "./Post.js";
 
 interface ForumGroup extends HasManyMixin<Post, string, "Post", "Posts"> {}
 
@@ -22,6 +22,49 @@ class ForumGroup extends Model<
   declare groupId: CreationOptional<string>;
 
   declare Posts?: NonAttribute<Post[]>;
+
+  // Create
+  async makeNewPost(post: PostType) {
+    const newPost = await Post.create({
+      title: post.title,
+      details: post.details,
+      likes: post.likes,
+      groupId: this.groupId,
+    });
+    this.Posts = await this.getPosts();
+    return newPost;
+  }
+
+  // Read
+  async getAllPosts(): Promise<Post[]> {
+    this.Posts ??= await this.getPosts();
+    return this.Posts;
+  }
+
+  // Update
+  async editPost(post: PostType) {
+    if (!post.postId) {
+      throw new Error("There is no eventId to reference update");
+    }
+    await this.getAllPosts();
+    const userPost = this.Posts?.find((p) => p.postId === post.postId);
+    if (!userPost) {
+      throw new Error("There is no post with such postId");
+    }
+    userPost.set({ ...post});
+    await userPost.save();
+    this.Posts = await this.getPosts();
+    return userPost;
+  }
+
+  // Delete
+  async deletePost(postId: string) {
+    await this.getAllPosts();
+    const post = this.Posts?.find((p) => p.postId === postId);
+    if (post) await post.destroy();
+    this.Posts = await this.getPosts();
+    return this.Posts;
+  }
 
   static associate() {
     ForumGroup.hasMany(Post, { as: "Posts", foreignKey: "groupid" });
