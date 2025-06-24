@@ -11,7 +11,6 @@ import { backendRaw, backend } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
-  UserEventType,
   UserModulesType,
 } from "./timetableContext";
 
