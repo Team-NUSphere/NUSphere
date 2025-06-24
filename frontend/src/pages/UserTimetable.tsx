@@ -5,7 +5,7 @@ import AddEventModal from "../components/AddEventModal";
 export default function UserTimetable() {
   const { userClasses } = getTimetableContext();
   return (
-    <div className="w-full relative">
+    <div className="w-full h-full relative">
       <Timetable
         startHour={8}
         numOfHours={11}

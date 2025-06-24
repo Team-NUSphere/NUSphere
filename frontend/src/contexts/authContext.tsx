@@ -12,7 +12,7 @@ import {
   onIdTokenChanged,
 } from "firebase/auth";
 import { auth } from "../firebase";
-import { backendHttp } from "../constants";
+import { backend } from "../constants";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -104,8 +104,8 @@ export async function authenticateWithBackend(request: string) {
   }
   try {
     console.log("authenticating with backend");
-    console.log(backendHttp);
-    const response = await fetch(backendHttp + `/${request}`, {
+    console.log(backend);
+    const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

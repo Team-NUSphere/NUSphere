@@ -11,7 +11,7 @@ import { FiUsers } from "react-icons/fi";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getWebSocketContext } from "../contexts/webSocketContext";
 import axios from "axios";
-import { backendHttp } from "../constants";
+import { backend } from "../constants";
 
 export default function roomItemModal() {
   const location = useLocation();

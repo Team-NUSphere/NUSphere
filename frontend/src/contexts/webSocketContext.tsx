@@ -7,7 +7,7 @@ import {
 } from "react";
 import { getAuth } from "./authContext";
 import axios from "axios";
-import { backend, backendHttp } from "../constants";
+import { backendRaw, backend } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
@@ -34,6 +34,13 @@ interface WebSocketContextType {
   connectWebSocket: (room: string) => void;
   terminateWebSocket: () => void;
   createNewRoom: () => void;
+  syncedData: {
+    [userId: string]: {
+      events?: UserEventsType;
+      classes?: UserClassType[];
+      modules?: UserModulesType;
+    };
+  } | null;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -312,7 +319,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     try {
       const ws = new WebSocket(
-        `ws://${backend}/?token=${userIdToken}&room=${room}`
+        `ws://${backendRaw}/?token=${userIdToken}&room=${room}`
       );
       ws.onopen = () => {
         setIsConnected(true);
@@ -345,7 +352,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
   function createNewRoom() {
     axios({
       method: "GET",
-      url: `${backendHttp}/room/create`,
+      url: `${backend}/room/create`,
       headers: {
         Authorization: `Bearer ${userIdToken}`,
       },
@@ -370,6 +377,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         connectWebSocket: connectWebSocket,
         terminateWebSocket: terminateWebSocket,
         createNewRoom: createNewRoom,
+        syncedData: syncedData,
       }}
     >
       {children}
