@@ -14,7 +14,6 @@ import type {
   UserEventType,
   UserModulesType,
 } from "./timetableContext";
-import { set } from "date-fns";
 
 // Hook function
 export function getWebSocketContext(): WebSocketContextType {
@@ -281,13 +280,10 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         return;
       }
       setSyncedData((prevData) => {
-        if (!prevData) return { [userId]: userData };
+        if (!prevData) return userData;
         return {
           ...prevData,
-          [userId]: {
-            ...prevData[userId],
-            ...userData,
-          },
+          ...userData,
         };
       });
       return;

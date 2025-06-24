@@ -116,7 +116,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         }
       });
 
-    return controller.abort;
+    return () => controller.abort();
   }
 
   // registerModule -> send post req, backend return list of default classes
@@ -260,7 +260,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         }
       });
 
-    return controller.abort;
+    return () => controller.abort();
   }
 
   // function modifyEvent -> put req(full event information), backend send status code, retry until 200

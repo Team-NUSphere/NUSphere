@@ -94,8 +94,63 @@ export function createRoom() {
   return randomRoomId;
 }
 
+export function eventsToSocketEvents(events: UserEvent[]) {
+  const socketEvent: UserEventsType = {};
+  for (const event of events) {
+    socketEvent[event.eventId] = formatEventToSocketEvent(event);
+  }
+  return socketEvent;
+}
+
+export function formatClassToSocketClass(lesson: Class): UserClassType {
+  return {
+    classId: lesson.classId,
+    classNo: lesson.classNo,
+    day: lesson.day,
+    endDate: lesson.endDate,
+    endTime: lesson.endTime,
+    lessonType: lesson.lessonType,
+    moduleId: lesson.moduleId,
+    startDate: lesson.startDate,
+    startTime: lesson.startTime,
+    venue: lesson.venue,
+    weekInterval: lesson.weekInterval,
+    weeks: lesson.weeks,
+  };
+}
+
+export function formatEventToSocketEvent(event: UserEvent): UserEventType {
+  return {
+    day: event.day,
+    description: event.description,
+    endTime: event.endTime,
+    eventId: event.eventId,
+    name: event.name,
+    startTime: event.startTime,
+    venue: event.venue,
+    weeks: event.weeks,
+  };
+}
+
+export function formatModuleToSocketModule(mod: Module): modInfo {
+  return {
+    faculty: mod.faculty,
+    moduleCredit: mod.moduleCredit,
+    moduleId: mod.moduleId,
+    title: mod.title,
+  };
+}
+
 export function getRoomForUser(userId: string): null | string {
   return userToRoomAndSocket.get(userId)?.room ?? null;
+}
+
+export function modulesToSocketModules(mods: Module[]) {
+  const socketModule: UserModulesType = {};
+  for (const mod of mods) {
+    socketModule[mod.moduleId] = formatModuleToSocketModule(mod);
+  }
+  return socketModule;
 }
 
 export function setupWebSocket(server: Server, wss: WebSocketServer) {
@@ -147,6 +202,7 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
     getFullEventClassModule(userId)
       .then((data) => {
         if (!data) return;
+        console.log(data);
         broadcastToRoom(
           room,
           {
@@ -154,6 +210,7 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
             userData: {
               [userId]: data,
             },
+            userId: userId,
           },
           userId,
         );
@@ -201,20 +258,9 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
 }
 
 function classToSocketClass(classes: Class[]) {
-  const socketClass: UserClassType[] = classes.map((lesson) => ({
-    classId: lesson.classId,
-    classNo: lesson.classNo,
-    day: lesson.day,
-    endDate: lesson.endDate,
-    endTime: lesson.endTime,
-    lessonType: lesson.lessonType,
-    moduleId: lesson.moduleId,
-    startDate: lesson.startDate,
-    startTime: lesson.startTime,
-    venue: lesson.venue,
-    weekInterval: lesson.weekInterval,
-    weeks: lesson.weeks,
-  }));
+  const socketClass: UserClassType[] = classes.map((lesson) =>
+    formatClassToSocketClass(lesson),
+  );
   return socketClass;
 }
 
@@ -227,23 +273,6 @@ function createRandomRoomId(length = 6) {
   }
   const fallBackId = Date.now().toString(36).slice(-length);
   return fallBackId;
-}
-
-function eventToSocketEvent(events: UserEvent[]) {
-  const socketEvent: UserEventsType = {};
-  for (const event of events) {
-    socketEvent[event.eventId] = {
-      day: event.day,
-      description: event.description,
-      endTime: event.endTime,
-      eventId: event.eventId,
-      name: event.name,
-      startTime: event.startTime,
-      venue: event.venue,
-      weeks: event.weeks,
-    };
-  }
-  return socketEvent;
 }
 
 async function getAllInRoomEventClassModule(
@@ -290,22 +319,9 @@ async function getFullEventClassModule(userId: string) {
   const allModules = await userTimetable.getAllModules();
   return {
     classes: classToSocketClass(allClasses),
-    events: eventToSocketEvent(allEvents),
-    modules: moduleToSocketModule(allModules),
+    events: eventsToSocketEvents(allEvents),
+    modules: modulesToSocketModules(allModules),
   };
-}
-
-function moduleToSocketModule(mods: Module[]) {
-  const socketModule: UserModulesType = {};
-  for (const mod of mods) {
-    socketModule[mod.moduleId] = {
-      faculty: mod.faculty,
-      moduleCredit: mod.moduleCredit,
-      moduleId: mod.moduleId,
-      title: mod.title,
-    };
-  }
-  return socketModule;
 }
 
 function onSocketPostError(err: Error) {
