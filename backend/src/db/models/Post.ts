@@ -20,6 +20,7 @@ export interface PostType {
   postId?: string;
   title: string;
   details: string;
+  timestamp: Date;
   likes?: number;
 }
 

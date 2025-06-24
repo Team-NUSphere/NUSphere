@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ForumHeader from "../components/ForumHeader";
 import CreatePostForm from "../components/CreatePostForm";
 import { formatDistanceToNow } from "date-fns";
-import { FaRegThumbsUp, FaRegThumbsDown } from "react-icons/fa";
+import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegMessage } from "react-icons/fa6";
 import { IoEyeOutline } from "react-icons/io5";
 
