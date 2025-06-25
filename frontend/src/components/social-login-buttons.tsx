@@ -1,8 +1,27 @@
 "use client";
 
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase";
+import { authenticateWithBackend } from "../contexts/authContext";
+
 export function SocialLoginButtons() {
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: string) => {
     console.log(`Logging in with ${provider}`);
+    switch (provider) {
+      case "google":
+        const providerGoogle = new GoogleAuthProvider();
+        await signInWithPopup(auth, providerGoogle);
+        await authenticateWithBackend("login");
+        break;
+      case "apple":
+        break;
+      case "facebook":
+        // Handle Facebook login logic here
+        break;
+      default:
+        console.error("Unknown provider:", provider);
+        break;
+    }
   };
 
   return (
@@ -10,7 +29,7 @@ export function SocialLoginButtons() {
       {/* Google Button */}
       <button
         className="h-12 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center"
-        onClick={() => handleSocialLogin("google")}
+        onClick={async () => await handleSocialLogin("google")}
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path

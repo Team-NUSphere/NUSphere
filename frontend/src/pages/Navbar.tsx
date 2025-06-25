@@ -14,8 +14,6 @@ import NavItem from "../components/NavItem";
 import RoomItemModal from "../components/roomItemModal";
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const navigate = useNavigate();
   const handleSignOut = async () => {
     try {
@@ -44,7 +42,16 @@ export function Navbar() {
 
         <div className="flex flex-col justify-start items-center space-y-5 w-full p-2">
           <NavItem to="/settings" icon={FiSettings} label="Settings"></NavItem>
-          <NavItem to="/logout" icon={FiLogOut} label="Logout"></NavItem>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleSignOut();
+            }}
+            className="flex flex-col text-gray-500 hover:bg-gray-100 items-center justify-center p-2 aspect-square w-full rounded-md transition-colors select-none"
+          >
+            <FiLogOut className="w-auto text-3xl h-auto mb-1" />
+            <span className="text-xs text-center">Logout</span>
+          </button>
         </div>
       </div>
     </nav>

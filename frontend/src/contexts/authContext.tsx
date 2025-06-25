@@ -100,17 +100,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const originalRequest = error.config;
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-        }
-        try {
-          const newAccessToken = await auth.currentUser?.getIdToken();
-          if (newAccessToken) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-            setUserIdToken(newAccessToken);
-            return axiosApi(originalRequest);
+          try {
+            const newAccessToken = await auth.currentUser?.getIdToken();
+            if (newAccessToken) {
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              setUserIdToken(newAccessToken);
+              return axiosApi(originalRequest);
+            }
+          } catch (refreshError) {
+            console.error("Failed to refresh token:", refreshError);
+            return Promise.reject(error);
           }
-        } catch (refreshError) {
-          console.error("Failed to refresh token:", refreshError);
-          return Promise.reject(error);
         }
       }
     );
