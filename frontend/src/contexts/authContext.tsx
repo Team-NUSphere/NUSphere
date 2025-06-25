@@ -13,6 +13,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { backend } from "../constants";
+import axiosApi from "../functions/axiosApi";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -74,6 +75,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    const interceptor = axiosApi.interceptors.request.use(
+      (config) => {
+        if (userIdToken) {
+          config.headers.Authorization = `Bearer ${userIdToken}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      axiosApi.interceptors.request.eject(interceptor);
+    };
+  }, [userIdToken]);
+
+  useEffect(() => {
+    const interceptor = axiosApi.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+        }
+        try {
+          const newAccessToken = await auth.currentUser?.getIdToken();
+          if (newAccessToken) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            setUserIdToken(newAccessToken);
+            return axiosApi(originalRequest);
+          }
+        } catch (refreshError) {
+          console.error("Failed to refresh token:", refreshError);
+          return Promise.reject(error);
+        }
+      }
+    );
+    return () => {
+      axiosApi.interceptors.request.eject(interceptor);
+    };
+  }, [userIdToken]);
 
   return (
     <AuthContext.Provider

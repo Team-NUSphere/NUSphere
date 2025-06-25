@@ -6,13 +6,13 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import axios from "axios";
-import { backendRaw, backend } from "../constants";
+import { backendRaw } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
   UserModulesType,
 } from "./timetableContext";
+import axiosApi from "../functions/axiosApi";
 
 // Hook function
 export function getWebSocketContext(): WebSocketContextType {
@@ -345,12 +345,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
   }
 
   function createNewRoom() {
-    axios({
+    axiosApi({
       method: "GET",
-      url: `${backend}/room/create`,
-      headers: {
-        Authorization: `Bearer ${userIdToken}`,
-      },
+      url: `/room/create`,
     })
       .then((response) => {
         const newRoomId = response.data;

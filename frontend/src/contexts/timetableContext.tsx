@@ -8,6 +8,7 @@ import {
 import { getAuth } from "./authContext";
 import { backend } from "../constants";
 import axios from "axios";
+import axiosApi from "../functions/axiosApi";
 
 export type modInfo = {
   moduleId: string;
@@ -91,12 +92,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
 
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "GET",
-      url: `${backend}/userTimetable/modules`,
+      url: "/userTimetable/modules",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       signal: signal,
     })
@@ -129,12 +129,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
 
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "POST",
-      url: `${backend}/userTimetable/modules/${mod.moduleId}`,
+      url: `/userTimetable/modules/${mod.moduleId}`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       signal: signal,
     })
@@ -158,12 +157,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "DELETE",
-      url: `${backend}/userTimetable/modules/${moduleCode}`,
+      url: `/userTimetable/modules/${moduleCode}`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       signal: signal,
     }).catch((e) => {
@@ -205,12 +203,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     );
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "PATCH",
-      url: `${backend}/userTimetable/modules/${moduleCode}`,
+      url: `/userTimetable/modules/${moduleCode}`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       params: {
         lessonType: lessonType,
@@ -240,12 +237,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "GET",
-      url: `${backend}/userTimetable/events`,
+      url: "/userTimetable/events",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       signal: signal,
     })
@@ -260,7 +256,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         }
       });
 
-    return () => controller.abort();
+    return () => controller.abort;
   }
 
   // function modifyEvent -> put req(full event information), backend send status code, retry until 200
@@ -268,12 +264,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "PUT",
-      url: `${backend}/userTimetable/events`,
+      url: `/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       data: event,
       signal: signal,
@@ -298,12 +293,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "POST",
-      url: `${backend}/userTimetable/events`,
+      url: "/userTimetable/events",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       data: event,
       signal: signal,
@@ -327,12 +321,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axios({
+    axiosApi({
       method: "DELETE",
-      url: `${backend}/userTimetable/events`,
+      url: `/userTimetable/events`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userIdToken}`,
       },
       params: {
         eventId: eventId,
