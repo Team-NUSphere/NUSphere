@@ -20,6 +20,7 @@ class ForumGroup extends Model<
   InferCreationAttributes<ForumGroup>
 > {
   declare groupId: CreationOptional<string>;
+  declare groupName: string;
 
   declare Posts?: NonAttribute<Post[]>;
 
@@ -34,6 +35,10 @@ class ForumGroup extends Model<
           allowNull: false,
           defaultValue: DataTypes.UUIDV4,
           type: DataTypes.UUID,
+        },
+        groupName: {
+          allowNull: false,
+          type: DataTypes.STRING,
         },
       },
       {

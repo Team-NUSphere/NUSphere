@@ -1,4 +1,3 @@
-// components/AddEventModal.tsx
 import {
   Dialog,
   DialogPanel,
@@ -27,7 +26,7 @@ export default function AddEventModal() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     console.log("Saving event:", { eventName, eventTime });
-    // You can add logic to update your timetable state here
+
     closeModal();
   }
 

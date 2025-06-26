@@ -12,9 +12,10 @@ const NavItem = ({ to, icon: Icon, label }: NavItemProps) => {
   return (
     <NavLink
       to={to}
+      draggable={false}
       className={({ isActive }) =>
         clsx(
-          "flex flex-col items-center justify-center p-2 aspect-square w-full rounded-md transition-colors",
+          "flex flex-col items-center justify-center p-2 aspect-square w-full rounded-md transition-colors select-none",
           {
             "bg-blue-100 text-blue-600": isActive,
             "text-gray-500 hover:bg-gray-100": !isActive,

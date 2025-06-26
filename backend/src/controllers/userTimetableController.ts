@@ -1,7 +1,60 @@
+import Class from "#db/models/Class.js";
+import Module from "#db/models/Module.js";
 import User from "#db/models/User.js";
-import { UserEventType } from "#db/models/UserEvents.js";
+import UserEvent, { UserModelType } from "#db/models/UserEvents.js";
+import {
+  broadcastToRoom,
+  eventsToSocketEvents,
+  formatClassToSocketClass,
+  getRoomForUser,
+  modulesToSocketModules,
+  socketDataType,
+} from "#ws-handler.js";
 import { NextFunction, Request, Response } from "express";
 import _ from "lodash";
+
+function handleBroadcastToRoom({
+  classes,
+  dataType,
+  eventId,
+  events,
+  moduleId,
+  modules,
+  type,
+  userId,
+}: {
+  classes?: Class[];
+  dataType: "classes" | "events" | "modules";
+  eventId?: string;
+  events?: UserEvent;
+  moduleId?: string;
+  modules?: Module;
+  type: "create" | "delete" | "update";
+  userId: string;
+}) {
+  const room = getRoomForUser(userId);
+  if (!room) return;
+  const socketEvent = events ? eventsToSocketEvents([events]) : undefined;
+  const socketClasses = classes
+    ? classes.map((lesson) => formatClassToSocketClass(lesson))
+    : undefined;
+  const socketModules = modules ? modulesToSocketModules([modules]) : undefined;
+  const messageFormatted: socketDataType = {
+    dataType: dataType,
+    eventId: eventId,
+    moduleId: moduleId,
+    type: type,
+    userData: {
+      [userId]: {
+        classes: socketClasses,
+        events: socketEvent,
+        modules: socketModules,
+      },
+    },
+    userId: userId,
+  };
+  broadcastToRoom(room, messageFormatted, userId);
+}
 
 export const handleGetAllEvents = async (
   req: Request,
@@ -34,10 +87,17 @@ export const handleCreateNewEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserEventType = req.body as null | UserEventType;
+    const event: null | UserModelType = req.body as null | UserModelType;
     if (!event) throw new Error("No event found in request body");
-    await userTimetable.makeNewEvent(event);
+    const userEvent = await userTimetable.makeNewEvent(event);
     res.status(200);
+
+    handleBroadcastToRoom({
+      dataType: "events",
+      events: userEvent,
+      type: "create",
+      userId: req.user.uid,
+    });
   } catch (error) {
     next(error);
   }
@@ -55,10 +115,17 @@ export const handleUpdateEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserEventType = req.body as null | UserEventType;
+    const event: null | UserModelType = req.body as null | UserModelType;
     if (!event) throw new Error("No event found in request body");
-    await userTimetable.editEvent(event);
+    const userEvent = await userTimetable.editOrMakeEvent(event);
     res.status(200);
+
+    handleBroadcastToRoom({
+      dataType: "events",
+      events: userEvent,
+      type: "update",
+      userId: req.user.uid,
+    });
   } catch (error) {
     next(error);
   }
@@ -79,6 +146,13 @@ export const handleDeleteEvent = async (
     if (params.eventId && typeof params.eventId === "string") {
       const userTimetable = await req.user.getUserTimetable();
       await userTimetable.deleteEvent(params.eventId);
+
+      handleBroadcastToRoom({
+        dataType: "events",
+        eventId: params.eventId,
+        type: "delete",
+        userId: req.user.uid,
+      });
     } else {
       throw new Error("Inappropriate parameters in delete event request");
     }
@@ -99,8 +173,18 @@ export const handleRegisterModule = async (
   const userTimetable = await req.user.getUserTimetable();
   try {
     const moduleCode = req.params.moduleCode;
+    const userModule = await Module.findByPk(moduleCode);
+    if (!userModule) throw new Error(`No such module code: ${moduleCode}`);
     const classes = await userTimetable.registerNewModule(moduleCode);
     res.json(classes);
+
+    handleBroadcastToRoom({
+      classes: classes,
+      dataType: "modules",
+      modules: userModule,
+      type: "create",
+      userId: req.user.uid,
+    });
   } catch (error) {
     next(error);
   }
@@ -132,6 +216,13 @@ export const handleUpdateClasses = async (
         classNo,
       );
       res.json(classes);
+
+      handleBroadcastToRoom({
+        classes: classes,
+        dataType: "classes",
+        type: "update",
+        userId: req.user.uid,
+      });
     }
 
     throw new Error("Wrong format of query parameters in handleUpdateClass");
@@ -154,6 +245,13 @@ export const handleDeleteModule = async (
     const moduleCode = req.params.moduleCode;
     await userTimetable.unregisterModule(moduleCode);
     res.status(200);
+
+    handleBroadcastToRoom({
+      dataType: "modules",
+      moduleId: moduleCode,
+      type: "delete",
+      userId: req.user.uid,
+    });
   } catch (error) {
     next(error);
   }

@@ -1,9 +1,6 @@
 import DayColumn from "../components/DayColumn";
 import { format } from "date-fns";
-import {
-  getTimetableContext,
-  type UserClassType,
-} from "../contexts/timetableContext";
+import { type UserClassType } from "../contexts/timetableContext";
 
 export default function Timetable({
   startHour = 0,
