@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import SignOutButton from "../components/SignOutButton";
 
 export default function HomePage() {
@@ -164,6 +165,8 @@ export default function HomePage() {
     },
   };
 
+  const navigate = useNavigate();
+
   return (
     <div style={styles.container}>
       {/* Navbar */}
@@ -194,6 +197,10 @@ export default function HomePage() {
             onMouseLeave={(e) => {
               e.currentTarget.style.boxShadow = "none";
               e.currentTarget.style.transform = "scale(1)";
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/timetable", { replace: true });
             }}
           >
             Get Started
