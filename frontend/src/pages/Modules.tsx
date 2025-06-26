@@ -2,11 +2,28 @@ import { useParams } from "react-router-dom";
 import { backend } from "../constants";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import ModInfo from "../components/ModInfo";
+import Timetable from "./Timetable";
+import type {
+  UserClassType,
+  UserModulesType,
+} from "../contexts/timetableContext";
+
+interface ModuleDetails {
+  moduleId: string;
+  title?: string;
+  description?: string;
+  faculty?: string;
+  department?: string;
+  gradingBasis?: string;
+  moduleCredit?: number;
+  Classes?: UserClassType[];
+}
 
 export default function Modules() {
   const { moduleCode } = useParams();
-  let modInfo: object = { moduleCode: moduleCode };
-  const [displayData, setDisplayData] = useState(JSON.stringify(modInfo));
+  let modInfo: ModuleDetails = { moduleId: moduleCode || "" };
+  const [moduleData, setModuleData] = useState(modInfo);
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -17,7 +34,7 @@ export default function Modules() {
     })
       .then((res) => {
         modInfo = res.data;
-        setDisplayData(JSON.stringify(modInfo));
+        setModuleData(modInfo);
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -32,9 +49,13 @@ export default function Modules() {
   }, [moduleCode]);
 
   return (
-    <div>
-      <h1>{`mod details: ${moduleCode}`}</h1>
-      <p>{displayData}</p>
+    <div className="w-full h-full overflow-y-auto">
+      <ModInfo module={moduleData} />
+      <Timetable
+        startHour={8}
+        numOfHours={11}
+        classes={moduleData.Classes || []}
+      ></Timetable>
     </div>
   );
 }
