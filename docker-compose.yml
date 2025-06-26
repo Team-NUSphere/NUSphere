@@ -33,7 +33,6 @@ services:
       - ./backend/src:/app/src
       - ./backend/package.json:/app/package.json
       - ./backend/package-lock.json:/app/package-lock.json
-      - node_modules_volume:/app/node_modules
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACKEND_PORT}

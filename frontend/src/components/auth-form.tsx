@@ -18,7 +18,7 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/timetable";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

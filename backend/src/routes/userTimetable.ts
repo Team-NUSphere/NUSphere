@@ -21,7 +21,7 @@ router
 router
   .route("/modules/:moduleCode")
   .post(handleRegisterModule)
-  .put(handleUpdateClasses)
+  .patch(handleUpdateClasses)
   .delete(handleDeleteModule);
 
 router.get("/modules", handleGetAllUserModules);

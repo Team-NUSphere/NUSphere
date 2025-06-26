@@ -8,7 +8,11 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
 import Modules from "./pages/Modules";
 import UserTimetable from "./pages/UserTimetable";
+<<<<<<< HEAD
 import Forum from "./pages/Forum";
+=======
+import Room from "./pages/Room";
+>>>>>>> dev
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +54,10 @@ export const router = createBrowserRouter([
       {
         path: "/settings",
         element: <div> Hello, settings page has yet to be implemented </div>,
+      },
+      {
+        path: "/room/:roomId",
+        element: <Room />,
       },
     ],
   },
