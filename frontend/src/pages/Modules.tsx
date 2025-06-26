@@ -4,10 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import ModInfo from "../components/ModInfo";
 import Timetable from "./Timetable";
-import type {
-  UserClassType,
-  UserModulesType,
-} from "../contexts/timetableContext";
+import type { UserClassType } from "../contexts/timetableContext";
 
 interface ModuleDetails {
   moduleId: string;
