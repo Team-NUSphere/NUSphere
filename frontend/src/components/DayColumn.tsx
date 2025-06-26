@@ -49,7 +49,7 @@ export default function DayColumn({
               (differenceInMinutes(startTime, baseTime) * 100) / numOfMinutes;
             const heightPercentage =
               (differenceInMinutes(endTime, startTime) * 100) / numOfMinutes;
-            const zIndex = topPercentage;
+            const zIndex = Math.floor(topPercentage);
 
             return (
               <DayClass
