@@ -8,11 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
 import Modules from "./pages/Modules";
 import UserTimetable from "./pages/UserTimetable";
-<<<<<<< HEAD
-import Forum from "./pages/Forum";
-=======
 import Room from "./pages/Room";
->>>>>>> dev
+import Forum from "./pages/Forum";
 
 export const router = createBrowserRouter([
   {
