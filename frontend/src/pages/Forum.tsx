@@ -43,7 +43,7 @@ export default function Forum() {
 
   const [posts, setPosts] = useState<Post[]>([
     {
-      postId: "1",
+      postId: "3",
       title: "Need help with assignment 1",
       details:
         "I'm struggling with the first part of the assignment. Can someone explain the concept of recursion?",

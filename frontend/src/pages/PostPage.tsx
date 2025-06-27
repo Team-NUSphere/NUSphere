@@ -1,49 +1,53 @@
-import { useState } from "react"
-import { formatDistanceToNow } from "date-fns"
-import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa"
-import { IoEyeOutline } from "react-icons/io5"
-import { FiSend } from "react-icons/fi"
-import CommentItem from "../components/CommentItem"
+import { useState, useEffect } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
+import { IoEyeOutline } from "react-icons/io5";
+import { FiSend } from "react-icons/fi";
+import CommentItem from "../components/CommentItem";
 
 interface User {
-  userId: string
-  username: string
+  userId: string;
+  username: string;
 }
 
 interface Post {
-  postId: string
-  title: string
-  details: string
-  timestamp: Date
-  groupName: string
-  likes: number
-  author: User
-  views: number
-  isLiked: boolean
+  postId: string;
+  title: string;
+  details: string;
+  timestamp: Date;
+  groupName: string;
+  likes: number;
+  author: User;
+  views: number;
+  isLiked: boolean;
 }
 
 interface Comment {
-  commentId: string
-  comment: string
-  timestamp: Date
-  parentId: string
-  parentType: "ParentComment" | "ParentPost"
-  uid: string
-  author: User
-  likes: number
-  isLiked: boolean
-  replies?: Comment[]
+  commentId: string;
+  comment: string;
+  timestamp: Date;
+  parentId: string;
+  parentType: "ParentComment" | "ParentPost";
+  uid: string;
+  author: User;
+  likes: number;
+  isLiked: boolean;
+  replies?: Comment[];
 }
 
 interface PostPageProps {
-  postId: string
-  onBack: () => void
-  currentUser: User
+  postId: string;
+  onBack: () => void;
+  currentUser: User;
 }
 
-export default function PostPage({ postId, onBack, currentUser }: PostPageProps) {
-  const [newComment, setNewComment] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export default function PostPage({
+  postId,
+  onBack,
+  currentUser,
+}: PostPageProps) {
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mock data - replace with actual data from your backend
   const [post] = useState<Post>({
@@ -57,7 +61,7 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
     likes: 20,
     views: 150,
     isLiked: false,
-  })
+  });
 
   const [comments, setComments] = useState<Comment[]>([
     {
@@ -74,7 +78,8 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
       replies: [
         {
           commentId: "2",
-          comment: "That's a great analogy! Can you provide a simple code example?",
+          comment:
+            "That's a great analogy! Can you provide a simple code example?",
           timestamp: new Date("2025-06-23T16:00:00Z"),
           parentId: "1",
           parentType: "ParentComment",
@@ -112,7 +117,8 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
     },
     {
       commentId: "5",
-      comment: "I recommend watching some YouTube videos on recursion. Visual explanations really help!",
+      comment:
+        "I recommend watching some YouTube videos on recursion. Visual explanations really help!",
       timestamp: new Date("2025-06-23T18:00:00Z"),
       parentId: "1",
       parentType: "ParentPost",
@@ -121,18 +127,28 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
       likes: 7,
       isLiked: false,
     },
-  ])
+  ]);
+
+  const fetchPostData = async () => {
+    // TODO: Fetch post data from backend
+    console.log("Fetching post data for postId:", postId);
+  }
+
+  const fetchComments = async () => {
+    // TODO: Fetch comments from backend
+    console.log("Fetching comments for post:", postId);
+  }
 
   // Handler functions with TODO comments
   const handleLikePost = () => {
     // TODO: Implement like post functionality
-    console.log("Like post:", postId)
-  }
+    console.log("Like post:", postId);
+  };
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim()) return
+    if (!newComment.trim()) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     // TODO: Implement submit comment functionality
     console.log("Submit comment:", {
@@ -140,7 +156,7 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
       parentId: postId,
       parentType: "ParentPost",
       uid: currentUser.userId,
-    })
+    });
 
     // Mock adding comment to state
     const mockComment: Comment = {
@@ -153,16 +169,16 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
       author: currentUser,
       likes: 0,
       isLiked: false,
-    }
+    };
 
-    setComments([...comments, mockComment])
-    setNewComment("")
-    setIsSubmitting(false)
-  }
+    setComments([...comments, mockComment]);
+    setNewComment("");
+    setIsSubmitting(false);
+  };
 
   const handleLikeComment = (commentId: string) => {
     // TODO: Implement like comment functionality
-    console.log("Like comment:", commentId)
+    console.log("Like comment:", commentId);
 
     // Mock update comment likes
     const updateCommentLikes = (commentsList: Comment[]): Comment[] => {
@@ -172,24 +188,24 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
             ...comment,
             likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
             isLiked: !comment.isLiked,
-          }
+          };
         }
         if (comment.replies) {
           return {
             ...comment,
             replies: updateCommentLikes(comment.replies),
-          }
+          };
         }
-        return comment
-      })
-    }
+        return comment;
+      });
+    };
 
-    setComments(updateCommentLikes(comments))
-  }
+    setComments(updateCommentLikes(comments));
+  };
 
   const handleReplyToComment = (parentCommentId: string, replyText: string) => {
     // TODO: Implement reply to comment functionality
-    console.log("Reply to comment:", { parentCommentId, replyText })
+    console.log("Reply to comment:", { parentCommentId, replyText });
 
     // Mock adding reply
     const mockReply: Comment = {
@@ -202,7 +218,7 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
       author: currentUser,
       likes: 0,
       isLiked: false,
-    }
+    };
 
     const addReplyToComment = (commentsList: Comment[]): Comment[] => {
       return commentsList.map((comment) => {
@@ -210,30 +226,40 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
           return {
             ...comment,
             replies: [...(comment.replies || []), mockReply],
-          }
+          };
         }
         if (comment.replies) {
           return {
             ...comment,
             replies: addReplyToComment(comment.replies),
-          }
+          };
         }
-        return comment
-      })
-    }
+        return comment;
+      });
+    };
 
-    setComments(addReplyToComment(comments))
-  }
+    setComments(addReplyToComment(comments));
+  };
+
+  useEffect(() => {
+    fetchPostData();
+    fetchComments();
+  }, [postId]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <button
+            onClick={onBack}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
             <FaArrowLeft className="w-4 h-4 text-gray-600" />
           </button>
-          <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">{post.groupName}</span>
+          <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+            {post.groupName}
+          </span>
         </div>
 
         {/* Scrollable Content: Post, Add Comment, Comments */}
@@ -245,16 +271,24 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">{post.author.username.charAt(0).toUpperCase()}</span>
+                <span className="text-sm font-medium text-gray-600">
+                  {post.author.username.charAt(0).toUpperCase()}
+                </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">{post.author.username}</p>
-                <p className="text-sm text-gray-500">{formatDistanceToNow(post.timestamp, { addSuffix: true })}</p>
+                <p className="font-medium text-gray-900">
+                  {post.author.username}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {formatDistanceToNow(post.timestamp, { addSuffix: true })}
+                </p>
               </div>
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-3">{post.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-3">
+                {post.title}
+              </h1>
               <p className="text-gray-700 leading-relaxed">{post.details}</p>
             </div>
 
@@ -265,7 +299,9 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
                   post.isLiked ? "text-blue-600" : "text-gray-500"
                 }`}
               >
-                <FaRegThumbsUp className={`w-4 h-4 ${post.isLiked ? "fill-current" : ""}`} />
+                <FaRegThumbsUp
+                  className={`w-4 h-4 ${post.isLiked ? "fill-current" : ""}`}
+                />
                 <span className="text-sm font-medium">{post.likes}</span>
               </button>
 
@@ -285,7 +321,9 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
           <div>
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-medium text-gray-600">{currentUser.username.charAt(0).toUpperCase()}</span>
+                <span className="text-xs font-medium text-gray-600">
+                  {currentUser.username.charAt(0).toUpperCase()}
+                </span>
               </div>
               <div className="flex-1">
                 <textarea
@@ -325,5 +363,5 @@ export default function PostPage({ postId, onBack, currentUser }: PostPageProps)
         </div>
       </div>
     </div>
-  )
+  );
 }
