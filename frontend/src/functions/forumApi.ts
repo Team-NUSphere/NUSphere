@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { Post, Group, Reply, User } from "../types";
 import { backend } from "../constants";
+import { useEffect, useState } from "react";
+import axiosApi from "./axiosApi";
 
 /** ------------------------ POSTS ------------------------ **/
 
@@ -46,9 +48,50 @@ export async function likePost(postId: string): Promise<void> {
 
 /** ------------------------ GROUPS ------------------------ **/
 
-export async function fetchAllGroups(): Promise<Group[]> {
-  const res = await axios.get(`${backend}/groups`);
-  return res.data;
+export async function fetchAllGroups(
+  query: string = "",
+  pageNumber: number = 1
+) {
+  const [groupList, setGroupList] = useState<Group[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setGroupList([]);
+  }, [query]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: "/modules/modList",
+      params: {
+        q: query,
+        p: pageNumber,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        setGroupList((prev) => [...new Set([...prev, ...res.data])]);
+        setHasMore(res.data.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [query, pageNumber]);
 }
 
 export async function fetchGroupById(groupId: string): Promise<Group> {
@@ -82,15 +125,23 @@ export async function addReplyToPost(
   postId: string,
   content: string
 ): Promise<Reply> {
-  const res = await axios.post(`${backend}/posts/${postId}/replies`, { content });
+  const res = await axios.post(`${backend}/posts/${postId}/replies`, {
+    content,
+  });
   return res.data;
 }
 
-export async function likeReply(postId: string, replyId: string): Promise<void> {
+export async function likeReply(
+  postId: string,
+  replyId: string
+): Promise<void> {
   await axios.post(`${backend}/posts/${postId}/replies/${replyId}/like`);
 }
 
-export async function deleteReply(postId: string, replyId: string): Promise<void> {
+export async function deleteReply(
+  postId: string,
+  replyId: string
+): Promise<void> {
   await axios.delete(`${backend}/posts/${postId}/replies/${replyId}`);
 }
 
