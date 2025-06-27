@@ -1,13 +1,16 @@
 import PostCard from "./PostCard";
-import type { Post } from "../types";
+import type { User, Post } from "../types";
 
 interface PostListProps {
   posts: Post[];
   onLike: (postId: string) => void;
   onPostClick: (postId: string) => void;
+  currentUser: User;
+  onEdit?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export default function PostList({ posts, onLike, onPostClick }: PostListProps) {
+export default function PostList({ posts, onLike, onPostClick, currentUser, onEdit, onDelete }: PostListProps) {
   if (posts.length === 0) {
     return <div className="text-gray-500">No posts found.</div>;
   }
@@ -20,6 +23,9 @@ export default function PostList({ posts, onLike, onPostClick }: PostListProps) 
           post={{ ...post, replies: post.replies }}
           onLike={onLike}
           onPostClick={onPostClick}
+          showActions={post.author.userId === currentUser.userId}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </div>

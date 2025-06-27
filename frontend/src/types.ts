@@ -32,6 +32,6 @@ export interface Group {
   description: string;
   postCount: number;
   createdAt: Date;
-  isOwner: boolean;
+  author: User;
   posts: Post[];
 }

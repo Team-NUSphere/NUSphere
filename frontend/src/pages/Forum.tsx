@@ -9,44 +9,7 @@ import PostPage from "./PostPage";
 import PostCard from "../components/PostCard";
 import GroupList from "../components/GroupList";
 import PostList from "../components/PostList";
-
-interface User {
-  userId: string;
-  username: string;
-}
-
-interface Reply {
-  replyId: string;
-  author: User;
-  content: string;
-  timestamp: Date;
-  likes: number;
-  isLiked: boolean;
-}
-
-interface Post {
-  postId: string;
-  title: string;
-  details: string;
-  timestamp: Date;
-  groupName: string;
-  groupId: string;
-  likes: number;
-  author: User;
-  replies: Reply[];
-  views: number;
-  isLiked: boolean;
-}
-
-interface Group {
-  groupId: string;
-  groupName: string;
-  description: string;
-  postCount: number;
-  createdAt: Date;
-  isOwner: boolean;
-  posts: Post[];
-}
+import type { Post, Group, User, Reply } from "../types";
 
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -66,6 +29,17 @@ export default function Forum() {
   // This is for the Post and Group tabs
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  // Mock current user
+  const currentUser: User = {
+    userId: "123",
+    username: "CurrentUser",
+  };
+
+  const user2: User = {
+    userId: "1234",
+    username: "User2",
+  };
 
   const [posts, setPosts] = useState<Post[]>([
     {
@@ -101,7 +75,7 @@ export default function Forum() {
       description: "Discussion and help for CS1101 assignments and lectures.",
       postCount: 120,
       createdAt: new Date("2025-06-01T09:00:00Z"),
-      isOwner: false,
+      author: user2,
       posts: [
         {
           postId: "1",
@@ -135,7 +109,7 @@ export default function Forum() {
       description: "Object-oriented programming, Java, and more.",
       postCount: 85,
       createdAt: new Date("2025-06-10T14:30:00Z"),
-      isOwner: true,
+      author: currentUser,
       posts: [],
     },
     {
@@ -144,7 +118,7 @@ export default function Forum() {
       description: "Share resources and discuss data structures concepts.",
       postCount: 150,
       createdAt: new Date("2025-06-15T11:20:00Z"),
-      isOwner: false,
+      author: currentUser,
       posts: [],
     },
     {
@@ -153,16 +127,10 @@ export default function Forum() {
       description: "Advanced algorithms, problem-solving, and exam prep.",
       postCount: 60,
       createdAt: new Date("2025-06-18T16:45:00Z"),
-      isOwner: true,
+      author: user2,
       posts: [],
     },
   ];
-
-  // Mock current user
-  const currentUser: User = {
-    userId: "123",
-    username: "CurrentUser",
-  };
 
   // Mock data - replace with actual data from your backend
   const [myPosts, setMyPosts] = useState<Post[]>([
@@ -204,7 +172,7 @@ export default function Forum() {
         "A group for discussing advanced algorithm concepts and problem-solving techniques.",
       postCount: 15,
       createdAt: new Date("2025-06-20T09:00:00Z"),
-      isOwner: true,
+      author: currentUser,
       posts: [
         {
           postId: "1",
@@ -239,7 +207,7 @@ export default function Forum() {
         "Share and collaborate on web development projects and get feedback.",
       postCount: 8,
       createdAt: new Date("2025-06-18T14:30:00Z"),
-      isOwner: true,
+      author: currentUser,
       posts: [],
     },
   ]);
@@ -273,10 +241,6 @@ export default function Forum() {
     setShowCreatePost(true);
   };
 
-  const handleCreatePost = () => {
-    console.log("Creating post");
-  };
-
   const handleLike = (postId: string) => {
     console.log("Like button clicked");
     setPosts(
@@ -298,16 +262,51 @@ export default function Forum() {
     setSelectedPostId(postId);
   };
 
-  const handleBackToForum = () => {
-    setSelectedPostId(null);
-  };
-
   const filteredPosts = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.details.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.groupName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  function renderPostView() {
+    if (!selectedPostId) return null;
+    return (
+      <PostPage
+        postId={selectedPostId}
+        onBack={() => setSelectedPostId(null)}
+        currentUser={currentUser}
+      />
+    );
+  }
+
+  function renderGroupView() {
+    if (!selectedGroupId) return null;
+    const group = [...groups, ...myGroups].find(
+      (g) => g.groupId === selectedGroupId
+    );
+    return (
+      <div>
+        <button
+          onClick={() => setSelectedGroupId(null)}
+          className="mb-4 text-blue-600 hover:underline text-sm"
+        >
+          ← Back to Groups
+        </button>
+        <h3 className="text-lg font-semibold mb-4">
+          {group?.groupName || "Group"} Posts
+        </h3>
+        <PostList
+          posts={group?.posts || []}
+          currentUser={currentUser}
+          onLike={handleLike}
+          onPostClick={setSelectedPostId}
+          onEdit={handleEditPost}
+          onDelete={handleDeletePost}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 w-full">
@@ -323,7 +322,7 @@ export default function Forum() {
         {showCreatePost ? (
           <CreatePostForm
             onCancel={() => setShowCreatePost(false)}
-            onSubmit={handleCreatePost}
+            onSubmit={() => {}}
             postTitle={postTitle}
             setPostTitle={setPostTitle}
             postContent={postContent}
@@ -368,11 +367,12 @@ export default function Forum() {
                   My Posts & Groups
                 </button>
               </div>
-              {activeTab === "posts" && (
-                <div className="space-y-4 mt-4">
-                  {
-                    //TODO
-                    /* Sort Options
+              {activeTab === "posts" &&
+                (selectedPostId ? (
+                  renderPostView()
+                ) : (
+                  //TODO
+                  /* Sort Options
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
                       <button
@@ -407,165 +407,60 @@ export default function Forum() {
                       </button>
                     </div>
                   </div> */
-                  }
-
-                  {selectedPostId ? (
-                    <PostPage
-                      postId={selectedPostId}
-                      onBack={handleBackToForum}
-                      currentUser={currentUser}
-                    />
-                  ) : (
-                    <PostList
-                      posts={filteredPosts}
-                      onLike={handleLike}
-                      onPostClick={handlePostClick}
-                    />
-                  )}
-                </div>
-              )}
-              {activeTab === "groups" &&
-                (selectedGroupId ? (
-                  <div>
-                    <button
-                      onClick={() => setSelectedGroupId(null)}
-                      className="mb-4 text-blue-600 hover:underline text-sm"
-                    >
-                      ← Back to Groups
-                    </button>
-                    <h3 className="text-lg font-semibold mb-4">
-                      {groups.find((g) => g.groupId === selectedGroupId)
-                        ?.groupName || "Group"}{" "}
-                      Posts
-                    </h3>
-                    <PostList
-                      posts={
-                        groups.find((g) => g.groupId === selectedGroupId)
-                          ?.posts || []
-                      }
-                      onLike={handleLike}
-                      onPostClick={setSelectedPostId}
-                    />
-                  </div>
-                ) : (
-                  <GroupList groups={groups} onClick={setSelectedGroupId} />
+                  <PostList
+                    posts={filteredPosts}
+                    currentUser={currentUser}
+                    onLike={handleLike}
+                    onPostClick={setSelectedPostId}
+                    onEdit={handleEditPost}
+                    onDelete={handleDeletePost}
+                  />
                 ))}
-              {activeTab === "myPostsGroups" && (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* My Posts Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">My Posts</h3>
-                    <div className="space-y-4">
-                      {myPosts.length === 0 ? (
-                        <div className="text-gray-500">
-                          You have not created any posts yet.
-                        </div>
-                      ) : (
-                        myPosts.map((post) => (
-                          <div
-                            key={post.postId}
-                            className="bg-white border border-gray-200 rounded-lg p-4"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                                {post.groupName}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {formatDistanceToNow(post.timestamp, {
-                                  addSuffix: true,
-                                })}
-                              </span>
-                            </div>
-                            <h4 className="font-semibold text-gray-900">
-                              {post.title}
-                            </h4>
-                            <p className="text-gray-700 mb-2 line-clamp-2">
-                              {post.details}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>
-                                <FaRegThumbsUp className="inline mr-1" />
-                                {post.likes}
-                              </span>
-                              <span>
-                                <FaRegMessage className="inline mr-1" />
-                                {post.replies.length}
-                              </span>
-                              <span>
-                                <IoEyeOutline className="inline mr-1" />
-                                {post.views}
-                              </span>
-                            </div>
-                            <div className="mt-2 flex gap-2">
-                              <button
-                                onClick={() => handleEditPost(post.postId)}
-                                className="text-blue-600 hover:underline text-xs"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeletePost(post.postId)}
-                                className="text-red-600 hover:underline text-xs"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
+
+              {activeTab === "groups" &&
+                (selectedPostId ? (
+                  renderPostView()
+                ) : selectedGroupId ? (
+                  renderGroupView()
+                ) : (
+                  <GroupList
+                    groups={groups}
+                    currentUser={currentUser}
+                    onClick={setSelectedGroupId}
+                    onEdit={handleEditGroup}
+                    onDelete={handleDeleteGroup}
+                  />
+                ))}
+              {activeTab === "myPostsGroups" &&
+                (selectedPostId ? (
+                  renderPostView()
+                ) : selectedGroupId ? (
+                  renderGroupView()
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">My Posts</h3>
+                      <PostList
+                        posts={myPosts}
+                        currentUser={currentUser}
+                        onLike={handleLike}
+                        onPostClick={setSelectedPostId}
+                        onEdit={handleEditPost}
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">My Groups</h3>
+                      <GroupList
+                        groups={myGroups}
+                        currentUser={currentUser}
+                        onClick={setSelectedGroupId}
+                        onEdit={handleEditGroup}
+                        onDelete={handleDeleteGroup}
+                      />
                     </div>
                   </div>
-                  {/* My Groups Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">My Groups</h3>
-                    <div className="space-y-4">
-                      {myGroups.length === 0 ? (
-                        <div className="text-gray-500">
-                          You have not created any groups yet.
-                        </div>
-                      ) : (
-                        myGroups.map((group) => (
-                          <div
-                            key={group.groupId}
-                            className="bg-white border border-gray-200 rounded-lg p-4"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-semibold text-gray-900">
-                                {group.groupName}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {formatDistanceToNow(group.createdAt, {
-                                  addSuffix: true,
-                                })}
-                              </span>
-                            </div>
-                            <p className="text-gray-700 mb-2 line-clamp-2">
-                              {group.description}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>{group.postCount} posts</span>
-                            </div>
-                            <div className="mt-2 flex gap-2">
-                              <button
-                                onClick={() => handleEditGroup(group.groupId)}
-                                className="text-blue-600 hover:underline text-xs"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteGroup(group.groupId)}
-                                className="text-red-600 hover:underline text-xs"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+                ))}
             </div>
           </div>
         )}
