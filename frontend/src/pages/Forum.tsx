@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ForumHeader from "../components/ForumHeader";
 import CreatePostForm from "../components/CreatePostForm";
-import { formatDistanceToNow } from "date-fns";
-import { FaRegThumbsUp } from "react-icons/fa";
-import { FaRegMessage } from "react-icons/fa6";
-import { IoEyeOutline } from "react-icons/io5";
-import PostPage from "./PostPage";
-import PostCard from "../components/PostCard";
-import GroupList from "../components/GroupList";
-import PostList from "../components/PostList";
 import type { Post, Group, User, Reply } from "../types";
+import { NavLink, Outlet } from "react-router-dom";
 
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -51,17 +44,16 @@ export default function Forum() {
       timestamp: new Date("2025-06-23T14:45:00Z"),
       groupName: "CS1101",
       likes: 5,
-      replies: [
-        {
-          replyId: "1",
-          author: { userId: "2", username: "TutorUser" },
-          content:
-            "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-          timestamp: new Date(),
-          likes: 2,
-          isLiked: false,
-        },
-      ],
+      replies: {},
+      // {
+      //   replyId: "1",
+      //   author: { userId: "2", username: "TutorUser" },
+      //   content:
+      //     "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
+      //   timestamp: new Date(),
+      //   likes: 2,
+      //   isLiked: false,
+      // },
       isLiked: false,
       views: 100,
       groupId: "1",
@@ -86,17 +78,19 @@ export default function Forum() {
           timestamp: new Date("2025-06-23T14:45:00Z"),
           groupName: "CS1101",
           likes: 5,
-          replies: [
-            {
-              replyId: "1",
-              author: { userId: "2", username: "TutorUser" },
-              content:
-                "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-              timestamp: new Date(),
-              likes: 2,
-              isLiked: false,
-            },
-          ],
+          replies: {},
+          // [
+          //   {
+          //     replyId: "1",
+          //     author: { userId: "2", username: "TutorUser" },
+          //     content:
+          //       "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
+          //     timestamp: new Date(),
+          //     likes: 2,
+          //     isLiked: false,
+          //     replies: {},
+          //   },
+          // ],
           isLiked: false,
           views: 100,
           groupId: "1",
@@ -143,7 +137,7 @@ export default function Forum() {
       timestamp: new Date("2025-06-25T10:30:00Z"),
       groupName: "CS2040",
       likes: 8,
-      replies: [],
+      replies: {},
       views: 45,
       isLiked: false,
       groupId: "3",
@@ -157,7 +151,7 @@ export default function Forum() {
       timestamp: new Date("2025-06-24T15:20:00Z"),
       groupName: "CS1101",
       likes: 12,
-      replies: [],
+      replies: {},
       views: 89,
       isLiked: false,
       groupId: "1",
@@ -183,17 +177,18 @@ export default function Forum() {
           timestamp: new Date("2025-06-23T14:45:00Z"),
           groupName: "CS1101",
           likes: 5,
-          replies: [
-            {
-              replyId: "1",
-              author: { userId: "2", username: "TutorUser" },
-              content:
-                "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-              timestamp: new Date(),
-              likes: 2,
-              isLiked: false,
-            },
-          ],
+          replies: {},
+          // [
+          //   {
+          //     replyId: "1",
+          //     author: { userId: "2", username: "TutorUser" },
+          //     content:
+          //       "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
+          //     timestamp: new Date(),
+          //     likes: 2,
+          //     isLiked: false,
+          //   },
+          // ],
           isLiked: false,
           views: 100,
           groupId: "1",
@@ -269,48 +264,9 @@ export default function Forum() {
       post.groupName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  function renderPostView() {
-    if (!selectedPostId) return null;
-    return (
-      <PostPage
-        postId={selectedPostId}
-        onBack={() => setSelectedPostId(null)}
-        currentUser={currentUser}
-      />
-    );
-  }
-
-  function renderGroupView() {
-    if (!selectedGroupId) return null;
-    const group = [...groups, ...myGroups].find(
-      (g) => g.groupId === selectedGroupId
-    );
-    return (
-      <div>
-        <button
-          onClick={() => setSelectedGroupId(null)}
-          className="mb-4 text-blue-600 hover:underline text-sm"
-        >
-          ← Back to Groups
-        </button>
-        <h3 className="text-lg font-semibold mb-4">
-          {group?.groupName || "Group"} Posts
-        </h3>
-        <PostList
-          posts={group?.posts || []}
-          currentUser={currentUser}
-          onLike={handleLike}
-          onPostClick={setSelectedPostId}
-          onEdit={handleEditPost}
-          onDelete={handleDeletePost}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen p-4 w-full">
-      <div className="mx-auto space-y-6">
+      <div className="mx-auto space-y-6 sticky h-full">
         <ForumHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -332,135 +288,91 @@ export default function Forum() {
             setSelectedGroup={setSelectedGroup}
           />
         ) : (
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-3 h-full overflow-y-auto">
             {/* Navigation Tabs */}
             <div className="w-full mb-6">
               <div className="flex border-b border-gray-200">
-                <button
-                  onClick={() => setActiveTab("posts")}
-                  className={`flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg ${
-                    activeTab === "posts"
-                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                <NavLink
+                  to="/forum/post"
+                  draggable={false}
+                  replace={true}
+                  className={({ isActive }) =>
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`
+                  }
                 >
                   Posts
-                </button>
-                <button
-                  onClick={() => setActiveTab("groups")}
-                  className={`flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg ${
-                    activeTab === "groups"
-                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                </NavLink>
+                <NavLink
+                  to="/forum/group"
+                  draggable={false}
+                  replace={true}
+                  className={({ isActive }) =>
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`
+                  }
                 >
                   Groups
-                </button>
-                <button
-                  onClick={() => setActiveTab("myPostsGroups")}
-                  className={`flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg ${
-                    activeTab === "myPostsGroups"
-                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                </NavLink>
+                <NavLink
+                  to="/forum/mine"
+                  draggable={false}
+                  replace={true}
+                  className={({ isActive }) =>
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`
+                  }
                 >
                   My Posts & Groups
-                </button>
+                </NavLink>
               </div>
-              {activeTab === "posts" &&
-                (selectedPostId ? (
-                  renderPostView()
-                ) : (
-                  //TODO
-                  /* Sort Options
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setSortBy("relevance")}
-                        className={`px-3 py-1 text-sm rounded-md ${
-                          sortBy === "relevance"
-                            ? "bg-blue-600 text-white"
-                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        Relevance
-                      </button>
-                      <button
-                        onClick={() => setSortBy("hot")}
-                        className={`px-3 py-1 text-sm rounded-md ${
-                          sortBy === "hot"
-                            ? "bg-blue-600 text-white"
-                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        Hot
-                      </button>
-                      <button
-                        onClick={() => setSortBy("new")}
-                        className={`px-3 py-1 text-sm rounded-md ${
-                          sortBy === "new"
-                            ? "bg-blue-600 text-white"
-                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        New
-                      </button>
-                    </div>
-                  </div> */
-                  <PostList
-                    posts={filteredPosts}
-                    currentUser={currentUser}
-                    onLike={handleLike}
-                    onPostClick={setSelectedPostId}
-                    onEdit={handleEditPost}
-                    onDelete={handleDeletePost}
-                  />
-                ))}
 
-              {activeTab === "groups" &&
-                (selectedPostId ? (
-                  renderPostView()
-                ) : selectedGroupId ? (
-                  renderGroupView()
-                ) : (
-                  <GroupList
-                    groups={groups}
-                    currentUser={currentUser}
-                    onClick={setSelectedGroupId}
-                    onEdit={handleEditGroup}
-                    onDelete={handleDeleteGroup}
-                  />
-                ))}
-              {activeTab === "myPostsGroups" &&
-                (selectedPostId ? (
-                  renderPostView()
-                ) : selectedGroupId ? (
-                  renderGroupView()
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">My Posts</h3>
-                      <PostList
-                        posts={myPosts}
-                        currentUser={currentUser}
-                        onLike={handleLike}
-                        onPostClick={setSelectedPostId}
-                        onEdit={handleEditPost}
-                        onDelete={handleDeletePost}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">My Groups</h3>
-                      <GroupList
-                        groups={myGroups}
-                        currentUser={currentUser}
-                        onClick={setSelectedGroupId}
-                        onEdit={handleEditGroup}
-                        onDelete={handleDeleteGroup}
-                      />
-                    </div>
-                  </div>
-                ))}
+              <Outlet
+                context={{
+                  activeTab,
+                  setActiveTab,
+                  selectedPostId,
+                  setSelectedPostId,
+                  selectedGroupId,
+                  setSelectedGroupId,
+                  currentUser,
+                  posts,
+                  groups,
+                  myPosts,
+                  myGroups,
+                  handleLike,
+                  handleEditPost,
+                  handleDeletePost,
+                  handleEditGroup,
+                  handleDeleteGroup,
+                  filteredPosts,
+                  setShowCreatePost,
+                  postTitle,
+                  setPostTitle,
+                  postContent,
+                  setPostContent,
+                  selectedGroup,
+                  setSelectedGroup,
+                  searchQuery,
+                  setSearchQuery,
+                  showCreatePost,
+                  handleCreateClick,
+                  editingPost,
+                  setEditingPost,
+                  editingGroup,
+                  setEditingGroup,
+                  handlePostClick,
+                }}
+              />
             </div>
           </div>
         )}
@@ -468,3 +380,137 @@ export default function Forum() {
     </div>
   );
 }
+
+// {activeTab === "posts" &&
+//   (selectedPostId ? (
+//     renderPostView()
+//   ) : (
+//     //TODO
+//     /* Sort Options
+//     <div className="flex items-center justify-between">
+//       <div className="flex gap-2">
+//         <button
+//           onClick={() => setSortBy("relevance")}
+//           className={`px-3 py-1 text-sm rounded-md ${
+//             sortBy === "relevance"
+//               ? "bg-blue-600 text-white"
+//               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+//           }`}
+//         >
+//           Relevance
+//         </button>
+//         <button
+//           onClick={() => setSortBy("hot")}
+//           className={`px-3 py-1 text-sm rounded-md ${
+//             sortBy === "hot"
+//               ? "bg-blue-600 text-white"
+//               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+//           }`}
+//         >
+//           Hot
+//         </button>
+//         <button
+//           onClick={() => setSortBy("new")}
+//           className={`px-3 py-1 text-sm rounded-md ${
+//             sortBy === "new"
+//               ? "bg-blue-600 text-white"
+//               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+//           }`}
+//         >
+//           New
+//         </button>
+//       </div>
+//     </div> */
+//     <PostList
+//       posts={filteredPosts}
+//       currentUser={currentUser}
+//       onLike={handleLike}
+//       onPostClick={setSelectedPostId}
+//       onEdit={handleEditPost}
+//       onDelete={handleDeletePost}
+//     />
+//   ))}
+
+// {activeTab === "groups" &&
+//   (selectedPostId ? (
+//     renderPostView()
+//   ) : selectedGroupId ? (
+//     renderGroupView()
+//   ) : (
+//     <GroupList
+//       groups={groups}
+//       currentUser={currentUser}
+//       onClick={setSelectedGroupId}
+//       onEdit={handleEditGroup}
+//       onDelete={handleDeleteGroup}
+//     />
+//   ))}
+
+// {activeTab === "myPostsGroups" &&
+//   (selectedPostId ? (
+//     renderPostView()
+//   ) : selectedGroupId ? (
+//     renderGroupView()
+//   ) : (
+//     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//       <div>
+//         <h3 className="text-lg font-semibold mb-2">My Posts</h3>
+//         <PostList
+//           posts={myPosts}
+//           currentUser={currentUser}
+//           onLike={handleLike}
+//           onPostClick={setSelectedPostId}
+//           onEdit={handleEditPost}
+//           onDelete={handleDeletePost}
+//         />
+//       </div>
+//       <div>
+//         <h3 className="text-lg font-semibold mb-2">My Groups</h3>
+//         <GroupList
+//           groups={myGroups}
+//           currentUser={currentUser}
+//           onClick={setSelectedGroupId}
+//           onEdit={handleEditGroup}
+//           onDelete={handleDeleteGroup}
+//         />
+//       </div>
+//     </div>
+//   ))}
+// function renderGroupView() {
+//   if (!selectedGroupId) return null;
+//   const group = [...groups, ...myGroups].find(
+//     (g) => g.groupId === selectedGroupId
+//   );
+//   return (
+//     <div>
+//       <button
+//         onClick={() => setSelectedGroupId(null)}
+//         className="mb-4 text-blue-600 hover:underline text-sm"
+//       >
+//         ← Back to Groups
+//       </button>
+//       <h3 className="text-lg font-semibold mb-4">
+//         {group?.groupName || "Group"} Posts
+//       </h3>
+//       <PostList
+//       // posts={group?.posts || []}
+//       // currentUser={currentUser}
+//       // onLike={handleLike}
+//       // onPostClick={setSelectedPostId}
+//       // onEdit={handleEditPost}
+//       // onDelete={handleDeletePost}
+//       />
+//     </div>
+//   );
+// }
+
+// function renderPostView() {
+//   if (!selectedPostId) return null;
+//   return (
+//     <PostPage
+//       postId={selectedPostId}
+//       onBack={() => setSelectedPostId(null)}
+//       currentUser={currentUser}
+//     />
+//   );
+// }

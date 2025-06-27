@@ -10,6 +10,11 @@ export interface Reply {
   timestamp: Date;
   likes: number;
   isLiked: boolean;
+  replies: ReplyRecord;
+}
+
+export interface ReplyRecord {
+  [replyId: string]: Reply;
 }
 
 export interface Post {
@@ -21,9 +26,13 @@ export interface Post {
   groupId: string;
   likes: number;
   author: User;
-  replies: Reply[];
+  replies: ReplyRecord;
   views: number;
   isLiked: boolean;
+}
+
+export interface PostRecord {
+  [postId: string]: Post;
 }
 
 export interface Group {
@@ -33,5 +42,5 @@ export interface Group {
   postCount: number;
   createdAt: Date;
   author: User;
-  posts: Post[];
+  posts: Post[]; //not useful for now, it would be better to segregate what we can seperate
 }

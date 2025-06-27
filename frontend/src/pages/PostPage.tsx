@@ -4,6 +4,7 @@ import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import CommentItem from "../components/CommentItem";
+import { Link, useOutletContext, useParams } from "react-router-dom";
 
 interface User {
   userId: string;
@@ -36,16 +37,14 @@ interface Comment {
 }
 
 interface PostPageProps {
-  postId: string;
-  onBack: () => void;
   currentUser: User;
 }
 
-export default function PostPage({
-  postId,
-  onBack,
-  currentUser,
-}: PostPageProps) {
+export default function PostPage() {
+  const postId = useParams();
+  if (!postId) return null;
+
+  const { currentUser } = useOutletContext<PostPageProps>();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -132,12 +131,12 @@ export default function PostPage({
   const fetchPostData = async () => {
     // TODO: Fetch post data from backend
     console.log("Fetching post data for postId:", postId);
-  }
+  };
 
   const fetchComments = async () => {
     // TODO: Fetch comments from backend
     console.log("Fetching comments for post:", postId);
-  }
+  };
 
   // Handler functions with TODO comments
   const handleLikePost = () => {
@@ -251,12 +250,12 @@ export default function PostPage({
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
-          <button
-            onClick={onBack}
+          <Link
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            to="/forum/post"
           >
             <FaArrowLeft className="w-4 h-4 text-gray-600" />
-          </button>
+          </Link>
           <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
             {post.groupName}
           </span>

@@ -1,27 +1,26 @@
+import { Link, useOutletContext } from "react-router-dom";
 import type { User, Group } from "../types";
 
 interface GroupListProps {
   groups: Group[];
-  onClick: (groupId: string) => void;
   currentUser: User;
-  onEdit?: (groupId: string) => void;
-  onDelete?: (groupId: string) => void;
+  handleEditGroup?: (groupId: string) => void;
+  handleDeleteGroup?: (groupId: string) => void;
 }
 
-export default function GroupList({
-  groups,
-  onClick,
-  currentUser,
-  onEdit,
-  onDelete,
-}: GroupListProps) {
+export default function GroupList({ groupList = [] }: { groupList?: Group[] }) {
+  const { groups, currentUser, handleEditGroup, handleDeleteGroup } =
+    useOutletContext<GroupListProps>();
+
+  if (!groupList || groupList.length === 0) groupList = groups;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      {groups.map((group) => (
-        <div
+    <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 mt-4 h-min">
+      {groupList.map((group) => (
+        <Link
           key={group.groupId}
           className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => onClick(group.groupId)}
+          to={`/forum/group/${group.groupId}`}
         >
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -39,7 +38,7 @@ export default function GroupList({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEdit?.(group.groupId);
+                  handleEditGroup?.(group.groupId);
                 }}
                 className="text-blue-600 hover:underline text-sm"
               >
@@ -48,7 +47,7 @@ export default function GroupList({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete?.(group.groupId);
+                  handleDeleteGroup?.(group.groupId);
                 }}
                 className="text-red-600 hover:underline text-sm"
               >
@@ -56,7 +55,7 @@ export default function GroupList({
               </button>
             </div>
           )}
-        </div>
+        </Link>
       ))}
     </div>
   );

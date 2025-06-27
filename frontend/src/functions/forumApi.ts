@@ -1,23 +1,108 @@
 import axios from "axios";
-import type { Post, Group, Reply, User } from "../types";
+import type { Post, Group, Reply, User, PostRecord } from "../types";
 import { backend } from "../constants";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
 
 /** ------------------------ POSTS ------------------------ **/
 
-export async function fetchAllPosts(): Promise<Post[]> {
-  const res = await axios.get(`${backend}/posts`);
-  return res.data;
+export async function fetchAllPosts(pageNumber: number = 1) {
+  const [postList, setPostList] = useState<PostRecord>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: "/forum/posts",
+      params: {
+        p: pageNumber,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        const postList = res.data as Post[];
+        setPostList((prev) => ({
+          ...prev,
+          ...Object.fromEntries(postList.map((post) => [post.postId, post])),
+        }));
+        setHasMore(postList.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [pageNumber]);
+
+  return { postList, loading, error, hasMore };
 }
 
-export async function fetchPostsByGroupId(groupId: string): Promise<Post[]> {
-  const res = await axios.get(`${backend}/groups/${groupId}/posts`);
-  return res.data;
+export async function fetchPostsByGroupId(
+  groupId: string,
+  pageNumber: number = 1
+) {
+  const [postList, setPostList] = useState<PostRecord>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: `/forum/${groupId}/posts`,
+      params: {
+        p: pageNumber,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        const postList = res.data as Post[];
+        setPostList((prev) => ({
+          ...prev,
+          ...Object.fromEntries(postList.map((post) => [post.postId, post])),
+        }));
+        setHasMore(postList.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [pageNumber]);
+
+  return { postList, loading, error, hasMore };
 }
 
+// Since all about a post is eagerly loaded, we likely would not need this
 export async function fetchPostById(postId: string): Promise<Post> {
-  const res = await axios.get(`${backend}/posts/${postId}`);
+  const res = await axiosApi({
+    method: "GET",
+    url: `/forum/posts/${postId}`,
+  });
   return res.data;
 }
 
@@ -25,9 +110,17 @@ export async function createPost(
   title: string,
   details: string,
   groupId: string
-): Promise<Post> {
-  const res = await axios.post(`${backend}/posts`, { title, details, groupId });
-  return res.data;
+): Promise<number> {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/forum/posts/`,
+    params: {
+      title: title,
+      details: details,
+      groupId: groupId,
+    },
+  });
+  return res.status;
 }
 
 export async function updatePost(
@@ -70,7 +163,7 @@ export async function fetchAllGroups(
 
     axiosApi({
       method: "GET",
-      url: "/modules/modList",
+      url: "/forum/groups",
       params: {
         q: query,
         p: pageNumber,
@@ -92,12 +185,15 @@ export async function fetchAllGroups(
       });
     return () => controller.abort();
   }, [query, pageNumber]);
+
+  return { groupList, loading, error, hasMore };
 }
 
-export async function fetchGroupById(groupId: string): Promise<Group> {
-  const res = await axios.get(`${backend}/groups/${groupId}`);
-  return res.data;
-}
+// Probably not useful
+// export async function fetchGroupById(groupId: string): Promise<Group> {
+//   const res = await axios.get(`${backend}/groups/${groupId}`);
+//   return res.data;
+// }
 
 export async function createGroup(
   groupName: string,
