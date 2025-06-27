@@ -51,6 +51,6 @@ const handleExportEvents = (events: EventAttributes[]) => {
     const blob = new Blob([val], {
       type: "text/calendar;charset=utf-8",
     });
-    saveAs(blob, "timetable.ics");
+    saveAs(blob, "timetable.ics"); // file format for timetable
   });
 };

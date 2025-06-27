@@ -1,3 +1,4 @@
+import Class from "#db/models/Class.js";
 import Module from "#db/models/Module.js";
 import { NextFunction, Request, Response } from "express";
 import { Op, Sequelize } from "sequelize";
@@ -78,7 +79,7 @@ export const handleGetModDetails = async (
   try {
     const modDetails = await searchModDetails(moduleCode);
     if (modDetails) {
-      res.json(modDetails.toJSON());
+      res.json(modDetails);
     } else {
       res.sendStatus(404);
     }
@@ -88,6 +89,12 @@ export const handleGetModDetails = async (
 };
 
 const searchModDetails = async (moduleCode: string) => {
-  const modDetails = await Module.findOne({ where: { moduleId: moduleCode } });
+  const modDetails = await Module.findOne({
+    include: {
+      as: "Classes",
+      model: Class,
+    },
+    where: { moduleId: moduleCode },
+  });
   return modDetails;
 };

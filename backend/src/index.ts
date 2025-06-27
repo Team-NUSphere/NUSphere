@@ -49,10 +49,12 @@ app.all("*name", (req, res, next) => {
 // Global error handler -> Logging
 app.use(errorHandler);
 
+//express
 const server = app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
 
 export const wss = new WebSocketServer({ noServer: true });
 
+// web socket
 export const { broadcastToRoom, getRoomForUser } = setupWebSocket(server, wss);

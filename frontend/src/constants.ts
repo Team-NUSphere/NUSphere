@@ -1,2 +1,3 @@
-export const backendRaw = "localhost:3001";
-export const backend = `http://${backendRaw}`;
+export const backendRaw = "localhost:3001"; // raw
+export const backend = `http://${backendRaw}`; // api
+// wss://backend/...
