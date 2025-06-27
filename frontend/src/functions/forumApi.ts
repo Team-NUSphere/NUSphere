@@ -9,6 +9,11 @@ export async function fetchAllPosts(): Promise<Post[]> {
   return res.data;
 }
 
+export async function fetchPostsByGroupId(groupId: string): Promise<Post[]> {
+  const res = await axios.get(`${backend}/groups/${groupId}/posts`);
+  return res.data;
+}
+
 export async function fetchPostById(postId: string): Promise<Post> {
   const res = await axios.get(`${backend}/posts/${postId}`);
   return res.data;
