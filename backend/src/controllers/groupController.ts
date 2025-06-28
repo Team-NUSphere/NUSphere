@@ -73,18 +73,20 @@ export const handleGetGroupPostList = async (
   next: NextFunction,
 ): Promise<void> => {
   const params = req.query;
+  const groupId = req.params.groupId;
   try {
-    if (typeof params.groupId == "string") {
-      const page = typeof params.page == "string" ? parseInt(params.page) : 1;
-      const group: ForumGroup | null = await ForumGroup.findByPk(
-        params.groupId,
-      );
+    if (typeof params.q == "string" && typeof params.page === "string") {
+      const page = parseInt(params.page);
+      const group: ForumGroup | null = await ForumGroup.findByPk(groupId);
       if (!group) {
         res.status(404).json({ error: "Group not found" });
         return;
       }
-      const { posts } = await searchGroupPosts(params.groupId, page, 10);
-      res.json(posts);
+      const { posts } = await searchGroupPosts(groupId, params.q, page, 10);
+      res.json({
+        groupName: group.groupName,
+        posts: posts,
+      });
     } else {
       throw new Error("No such group id. Make sure group id is a string");
     }
@@ -94,16 +96,106 @@ export const handleGetGroupPostList = async (
   return;
 };
 
-const searchGroupPosts = async (groupId: string, page = 1, pageSize = 10) => {
+const searchGroupPosts = async (
+  groupId: string,
+  query: string,
+  page = 1,
+  pageSize = 10,
+) => {
   const offset = (page - 1) * pageSize;
   const { count, rows } = await Post.findAndCountAll({
-    attributes: ["postId", "title", "details", "groupId", "uid"],
+    attributes: [
+      "postId",
+      "title",
+      "details",
+      "groupId",
+      "uid",
+      "likes",
+      "createdAt",
+      "views",
+      "replies",
+    ],
     limit: pageSize,
     offset: offset,
     order: [["createdAt", "DESC"]],
     where: {
-      groupId: groupId,
+      [Op.and]: {
+        groupId: groupId,
+        title: {
+          [Op.iLike]: `%${query}%`,
+        },
+      },
     },
+  });
+  return {
+    currentPage: page,
+    posts: rows,
+    totalCount: count,
+    totalPages: Math.ceil(count / pageSize),
+  };
+};
+
+export const handleGetAllPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const params = req.query;
+  try {
+    if (typeof params.q == "string" && typeof params.page === "string") {
+      const page = parseInt(params.page);
+      const { posts } = await searchAllPosts(params.q, page, 10);
+      const formattedPosts = await Promise.all(
+        posts.map((post) => post.getGroupName()),
+      );
+      console.log(posts);
+      console.log(formattedPosts);
+      res.json(formattedPosts);
+    } else {
+      const { posts } = await searchAllPosts(
+        "",
+        parseInt(typeof params.page === "string" ? params.page : "1"),
+        10,
+      );
+      const formattedPosts = await Promise.all(
+        posts.map((post) => post.getGroupName()),
+      );
+      res.json(formattedPosts);
+    }
+  } catch (error) {
+    next(error);
+  }
+  return;
+};
+
+const searchAllPosts = async (query: string, page = 1, pageSize = 10) => {
+  const offset = (page - 1) * pageSize;
+  const whereClause: {
+    title?: {
+      [Op.iLike]: string;
+    };
+  } = {};
+  if (query.trim()) {
+    whereClause.title = {
+      [Op.iLike]: `%${query}%`,
+    };
+  }
+  const { count, rows } = await Post.findAndCountAll({
+    attributes: [
+      "postId",
+      "title",
+      "details",
+      "groupId",
+      "uid",
+      "likes",
+      "createdAt",
+      "views",
+      "replies",
+    ],
+    limit: pageSize,
+    offset: offset,
+    order: [["createdAt", "DESC"]],
+    where: whereClause,
   });
   return {
     currentPage: page,
@@ -127,11 +219,33 @@ export const handleCreateGroup = async (
       ownerId: req.user.uid,
       ownerType: "User",
     });
-    console.log(group?.toJSON());
     res.json(group);
   } catch (error) {
     next(error);
   }
+};
+
+export const handleCreateNewPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const data = req.body as { details: string; title: string };
+  const groupId = req.params.groupId;
+  try {
+    const group = await ForumGroup.findByPk(groupId);
+    if (!group) throw new Error("Forum group not found");
+    const post = await group.createPost({
+      details: data.details,
+      title: data.title,
+      uid: req.user?.uid,
+    });
+    await group.increment("postCount");
+    res.json(post);
+  } catch (error) {
+    next(error);
+  }
+  return;
 };
 
 // Update
@@ -156,6 +270,35 @@ export const handleUpdateGroup = async (
     const updated = await group.update({
       description: data.description,
       groupName: data.name,
+    });
+
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleUpdatePost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const postId = req.params.postId;
+  const data = req.body as { details: string; title: string };
+  try {
+    const posts = await req.user?.getPosts({
+      where: {
+        postId: postId,
+      },
+    });
+    if (!posts || posts.length === 0)
+      throw new Error(
+        `User ${req.user?.uid ?? ""} does not own this post ${postId}, cannot update post`,
+      );
+    const post = posts[0];
+    const updated = await post.update({
+      details: data.details,
+      title: data.title,
     });
 
     console.log(updated.toJSON());
@@ -184,6 +327,32 @@ export const handleDeleteGroup = async (
       );
     const group = groups[0];
     await group.destroy();
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleDeletePost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const postId = req.params.postId;
+  try {
+    const posts = await req.user?.getPosts({
+      where: {
+        postId: postId,
+      },
+    });
+    if (!posts || posts.length === 0)
+      throw new Error(
+        `User ${req.user?.uid ?? ""} does not own this post ${postId}, cannot update post`,
+      );
+    const post = posts[0];
+    const group = await post.getForumGroup();
+    await post.destroy();
+    await group.decrement("postCount");
     res.status(200);
   } catch (error) {
     next(error);

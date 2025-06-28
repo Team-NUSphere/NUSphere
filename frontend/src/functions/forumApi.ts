@@ -1,16 +1,20 @@
 import axios from "axios";
-import type { Post, Group, Reply, User, PostRecord } from "../types";
+import type { Post, Group, Reply } from "../types";
 import { backend } from "../constants";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
 
 /** ------------------------ POSTS ------------------------ **/
 
-export async function fetchAllPosts(pageNumber: number = 1) {
-  const [postList, setPostList] = useState<PostRecord>({});
+export function fetchAllPosts(query: string = "", pageNumber: number = 1) {
+  const [postList, setPostList] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setPostList([]);
+  }, [query]);
 
   useEffect(() => {
     setLoading(true);
@@ -23,16 +27,14 @@ export async function fetchAllPosts(pageNumber: number = 1) {
       method: "GET",
       url: "/forum/posts",
       params: {
-        p: pageNumber,
+        q: query,
+        page: pageNumber,
       },
       signal: signal,
     })
       .then((res) => {
         const postList = res.data as Post[];
-        setPostList((prev) => ({
-          ...prev,
-          ...Object.fromEntries(postList.map((post) => [post.postId, post])),
-        }));
+        setPostList((prev) => [...new Set([...prev, ...res.data])]);
         setHasMore(postList.length > 0);
         setLoading(false);
       })
@@ -45,19 +47,29 @@ export async function fetchAllPosts(pageNumber: number = 1) {
         setLoading(false);
       });
     return () => controller.abort();
-  }, [pageNumber]);
+  }, [pageNumber, query]);
 
-  return { postList, loading, error, hasMore };
+  function deletePostFromList(postId: string) {
+    setPostList((prev) => prev.filter((post) => post.postId !== postId));
+  }
+
+  return { postList, loading, error, hasMore, deletePostFromList };
 }
 
-export async function fetchPostsByGroupId(
+export function fetchPostsByGroupId(
   groupId: string,
+  query: string = "",
   pageNumber: number = 1
 ) {
-  const [postList, setPostList] = useState<PostRecord>({});
+  const [postList, setPostList] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const [groupName, setGroupName] = useState<string>("");
+
+  useEffect(() => {
+    setPostList([]);
+  }, [query]);
 
   useEffect(() => {
     setLoading(true);
@@ -68,20 +80,35 @@ export async function fetchPostsByGroupId(
 
     axiosApi({
       method: "GET",
-      url: `/forum/${groupId}`,
+      url: `/forum/group/${groupId}`,
       params: {
-        p: pageNumber,
+        page: pageNumber,
+        q: query,
       },
       signal: signal,
     })
       .then((res) => {
-        const postList = res.data as Post[];
-        setPostList((prev) => ({
-          ...prev,
-          ...Object.fromEntries(postList.map((post) => [post.postId, post])),
-        }));
+        const postList = res.data.posts?.map(
+          (post: {
+            postId: string;
+            title: string;
+            details: string;
+            createdAt: Date;
+            groupId: string;
+            likes: number;
+            uid: string;
+            views: number;
+            isLiked: boolean;
+            replies: number;
+          }) => ({
+            ...post,
+            groupName: res.data.groupName,
+          })
+        );
+        setPostList((prev) => [...new Set([...prev, ...postList])]);
         setHasMore(postList.length > 0);
         setLoading(false);
+        setGroupName(res.data.groupName);
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -92,12 +119,15 @@ export async function fetchPostsByGroupId(
         setLoading(false);
       });
     return () => controller.abort();
-  }, [pageNumber]);
+  }, [pageNumber, query]);
 
-  return { postList, loading, error, hasMore };
+  function deletePostFromList(postId: string) {
+    setPostList((prev) => prev.filter((post) => post.postId !== postId));
+  }
+
+  return { postList, loading, error, hasMore, groupName, deletePostFromList };
 }
 
-// Since all about a post is eagerly loaded, we likely would not need this
 export async function fetchPostById(postId: string): Promise<Post> {
   const res = await axiosApi({
     method: "GET",
@@ -112,12 +142,11 @@ export async function createPost(
   groupId: string
 ): Promise<number> {
   const res = await axiosApi({
-    method: "GET",
-    url: `/forum/posts/`,
-    params: {
+    method: "POST",
+    url: `/forum/group/${groupId}`,
+    data: {
       title: title,
       details: details,
-      groupId: groupId,
     },
   });
   return res.status;
@@ -127,12 +156,22 @@ export async function updatePost(
   postId: string,
   updates: Partial<Pick<Post, "title" | "details">>
 ): Promise<Post> {
-  const res = await axios.put(`${backend}/posts/${postId}`, updates);
+  const res = await axiosApi({
+    method: "PUT",
+    url: `/forum/post/${postId}`,
+    data: {
+      title: updates.title,
+      details: updates.details,
+    },
+  });
   return res.data;
 }
 
 export async function deletePost(postId: string): Promise<void> {
-  await axios.delete(`${backend}/posts/${postId}`);
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/post/${postId}`,
+  });
 }
 
 export async function likePost(postId: string): Promise<void> {
@@ -190,12 +229,6 @@ export function fetchAllGroups(query: string = "", pageNumber: number = 1) {
 
   return { groupList, loading, error, hasMore, deleteGroupFromList };
 }
-
-// Probably not useful
-// export async function fetchGroupById(groupId: string): Promise<Group> {
-//   const res = await axios.get(`${backend}/groups/${groupId}`);
-//   return res.data;
-// }
 
 export async function createGroup(
   groupName: string,

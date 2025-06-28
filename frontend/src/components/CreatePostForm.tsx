@@ -2,71 +2,34 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa";
-import { createGroup } from "../functions/forumApi";
+import { createGroup, createPost } from "../functions/forumApi";
 
 interface CreatePostFormProps {
   onCancel: () => void;
   onSubmit: () => void;
-  postTitle: string;
-  setPostTitle: (title: string) => void;
-  postContent: string;
-  setPostContent: (content: string) => void;
-  groups: string[];
-  selectedGroup: string;
-  setSelectedGroup: (group: string) => void;
+  selectedGroup: {
+    groupId: string;
+    groupName: string;
+  };
 }
 
 export default function CreatePostForm({
   onCancel,
   onSubmit,
-  postTitle,
-  setPostTitle,
-  postContent,
-  setPostContent,
-  groups,
   selectedGroup,
-  setSelectedGroup,
 }: CreatePostFormProps) {
-  const [search, setSearch] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
   const [createType, setCreateType] = useState<"post" | "group">("post");
+
+  const [postTitle, setPostTitle] = useState("");
+  const [postContent, setPostContent] = useState("");
 
   // Group creation states
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
 
-  const filteredGroups = groups.filter((group) =>
-    group.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-
-    if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showDropdown]);
-
-  const handleCreatePost = () => {
-    // TODO: Implement post creation logic
-    console.log("Creating post:", {
-      title: postTitle,
-      content: postContent,
-      group: selectedGroup,
-    });
+  const handleCreatePost = async () => {
+    await createPost(postTitle, postContent, selectedGroup.groupId);
+    onCancel();
     onSubmit();
   };
 
@@ -133,43 +96,14 @@ export default function CreatePostForm({
             {/* Group selection with search functionality */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Select Group <span className="text-red-500">*</span>
+                Selected Group
               </label>
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative">
                 <input
                   type="text"
-                  placeholder="Choose a group for your post"
-                  onFocus={() => setShowDropdown(!showDropdown)}
-                  onChange={(e) => setSearch(e.target.value)}
-                  value={selectedGroup || search}
+                  value={selectedGroup.groupName}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                 />
-                <FaAngleDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                {showDropdown && (
-                  <div className="absolute z-10 bg-white border border-gray-200 mt-1 rounded-lg max-h-60 overflow-y-auto shadow-lg w-full">
-                    {filteredGroups.map((group) => (
-                      <div
-                        key={group}
-                        className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
-                        onClick={() => {
-                          setSelectedGroup(group);
-                          setSearch("");
-                          setShowDropdown(false);
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <FaUsers className="w-4 h-4 text-gray-400" />
-                          {group}
-                        </div>
-                      </div>
-                    ))}
-                    {filteredGroups.length === 0 && (
-                      <div className="px-4 py-3 text-gray-500 text-center">
-                        No groups found
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
 
@@ -272,3 +206,29 @@ export default function CreatePostForm({
     </div>
   );
 }
+
+// {showDropdown && (
+//   <div className="absolute z-10 bg-white border border-gray-200 mt-1 rounded-lg max-h-60 overflow-y-auto shadow-lg w-full">
+//     {filteredGroups.map((group) => (
+//       <div
+//         key={group}
+//         className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+//         onClick={() => {
+//           setSelectedGroup(group);
+//           setSearch("");
+//           setShowDropdown(false);
+//         }}
+//       >
+//         <div className="flex items-center gap-2">
+//           <FaUsers className="w-4 h-4 text-gray-400" />
+//           {group}
+//         </div>
+//       </div>
+//     ))}
+//     {filteredGroups.length === 0 && (
+//       <div className="px-4 py-3 text-gray-500 text-center">
+//         No groups found
+//       </div>
+//     )}
+//   </div>
+// )}

@@ -77,6 +77,7 @@ class Comment extends Model<
         commentId: {
           allowNull: false,
           defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,
           type: DataTypes.UUID,
         },
         parentId: {

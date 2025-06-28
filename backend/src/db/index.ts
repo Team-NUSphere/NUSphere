@@ -62,6 +62,7 @@ Object.keys(db).forEach((modelName) => {
 });
 
 await sequelize.sync();
+
 export default db;
 
 // export const sequelize = new Sequelize(databaseUrl, {

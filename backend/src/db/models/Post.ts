@@ -42,9 +42,15 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare ForumGroup?: NonAttribute<ForumGroup>;
   declare User?: NonAttribute<User>;
   declare Replies?: NonAttribute<Comment[]>;
+  declare groupName?: NonAttribute<string>;
+
+  async getGroupName() {
+    this.groupName = (await this.getForumGroup()).groupName;
+    return this;
+  }
 
   static associate() {
-    Post.belongsTo(ForumGroup, { as: "ForumGroup", foreignKey: "groupid" });
+    Post.belongsTo(ForumGroup, { as: "ForumGroup", foreignKey: "groupId" });
     Post.belongsTo(User, { as: "User", foreignKey: "uid" });
     Post.hasMany(Comment, {
       as: "Replies",
@@ -61,7 +67,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
           type: DataTypes.TEXT,
         },
         groupId: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
         },
         likes: {
           allowNull: false,
@@ -71,6 +77,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
         postId: {
           allowNull: false,
           defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,
           type: DataTypes.UUID,
         },
         replies: {

@@ -1,5 +1,5 @@
-import Post from "#db/models/Post.js";
 import ForumGroup from "#db/models/ForumGroup.js";
+import Post from "#db/models/Post.js";
 import { PostType } from "#db/models/Post.js";
 import { NextFunction, Request, Response } from "express";
 import _ from "lodash";
@@ -16,8 +16,8 @@ export const handleGetAllPosts = async (
   try {
     const groupId = req.params.groupId;
     const posts = await Post.findAll({
-      where: { groupId },
       include: ["User", "Replies"],
+      where: { groupId },
     });
     res.json(posts);
   } catch (error) {
@@ -49,29 +49,6 @@ export const handleCreateNewPost = async (
   return;
 };
 
-export const handleUpdatePost = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  if (!req.user) {
-    res.sendStatus(500);
-    return;
-  }
-  try {
-    const groupId = req.params.groupId;
-    const post: null | PostType = req.body as null | PostType;
-    if (!post) throw new Error("No post found in request body");
-    const forumGroup = await ForumGroup.findByPk(groupId);
-    if (!forumGroup) throw new Error("Forum group not found");
-    await forumGroup.editPost(post);
-    res.status(200);
-  } catch (error) {
-    next(error);
-  }
-  return;
-};
-
 export const handleDeletePost = async (
   req: Request,
   res: Response,
@@ -90,7 +67,9 @@ export const handleDeletePost = async (
       if (!forumGroup) throw new Error("Forum group not found");
       await forumGroup.deletePost(postId);
     } else {
-        throw new Error("Inappropriate parameters provided in delete post request");
+      throw new Error(
+        "Inappropriate parameters provided in delete post request",
+      );
     }
     res.status(200);
   } catch (error) {

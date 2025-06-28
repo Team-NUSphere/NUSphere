@@ -30,6 +30,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   declare Timetable?: NonAttribute<UserTimetable>;
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
+  declare Comments?: NonAttribute<Comment[]>;
+  declare Posts?: NonAttribute<Post[]>;
 
   async getUserTimetable() {
     let userTimetable = await this.getTimetable({

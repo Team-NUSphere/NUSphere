@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import type { Group, Post } from "../types";
 import GroupList from "./GroupList";
-import PostList from "./PostList";
+import PostList from "../components/PostList";
 
 export default function MyPostsGroups() {
   const { myPosts, myGroups } = useOutletContext<{

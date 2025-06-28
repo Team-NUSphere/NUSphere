@@ -1,56 +1,42 @@
 "use client";
 
-import type React from "react";
-
 import { formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import type { User, Post } from "../types";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 
 interface PostCardProps {
   post: Post;
   onLike: (postId: string) => void;
-  onPostClick: (postId: string) => void;
-  onEdit?: (postId: string) => void;
-  onDelete?: (postId: string) => void;
-  showActions?: boolean;
+  handleDeletePost: (postId: string) => void;
 }
 
 export default function PostCard({
   post,
   onLike,
-  onPostClick,
-  onEdit,
-  onDelete,
-  showActions,
+  handleDeletePost,
 }: PostCardProps) {
-  const handlePostClick = (e: React.MouseEvent) => {
-    // Prevent navigation when clicking on interactive elements
-    if ((e.target as HTMLElement).closest("button")) {
-      return;
-    }
-    onPostClick(post.postId);
-  };
+  const { currentUser, handleEditPost } = useOutletContext<{
+    currentUser: User;
+    handleEditPost?: (post: Post) => void;
+  }>();
 
   return (
     <Link to={`/forum/post/${post.postId}`} className="no-underline">
-      <div
-        onClick={handlePostClick}
-        className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-      >
+      <div className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
         <div className="p-6">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <Link
                 className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full transition-colors hover:bg-blue-200"
-                to={`/forum/group/${post.groupId}`}
+                to={`/forum/group/${post.groupName}`}
               >
                 {post.groupName}
               </Link>
               <span className="text-sm text-gray-500">
-                {post.author.username} •{" "}
-                {formatDistanceToNow(post.timestamp, {
+                {post.uid} •{" "}
+                {formatDistanceToNow(post.createdAt, {
                   addSuffix: true,
                 })}
               </span>
@@ -81,7 +67,7 @@ export default function PostCard({
 
             <div className="flex items-center gap-2 px-2 py-1 text-sm text-gray-500">
               <FaRegComment className="w-4 h-4" />
-              {post.replies.length}
+              {post.replies}
             </div>
 
             <div className="flex items-center gap-2 px-2 py-1 text-sm text-gray-500">
@@ -89,16 +75,22 @@ export default function PostCard({
               {post.views}
             </div>
           </div>
-          {showActions && (
+          {post.uid === currentUser.userId && (
             <div className="mt-2 flex gap-3 text-xs">
               <button
-                onClick={() => onEdit?.(post.postId)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleEditPost?.(post);
+                }}
                 className="text-blue-600 hover:underline"
               >
                 Edit
               </button>
               <button
-                onClick={() => onDelete?.(post.postId)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeletePost(post.postId);
+                }}
                 className="text-red-600 hover:underline"
               >
                 Delete

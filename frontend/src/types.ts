@@ -21,14 +21,14 @@ export interface Post {
   postId: string;
   title: string;
   details: string;
-  timestamp: Date;
+  createdAt: Date;
   groupName: string;
   groupId: string;
   likes: number;
-  author: User;
-  replies: ReplyRecord;
+  uid: string;
   views: number;
   isLiked: boolean;
+  replies: number;
 }
 
 export interface PostRecord {

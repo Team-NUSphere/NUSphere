@@ -10,11 +10,11 @@ import Modules from "./pages/Modules";
 import UserTimetable from "./pages/UserTimetable";
 import Room from "./pages/Room";
 import Forum from "./pages/Forum";
-import PostList from "./pages/PostList";
 import GroupList from "./pages/GroupList";
 import GroupPostsLists from "./pages/GroupPostsLists";
 import MyPostsGroups from "./pages/MyPostsGroups";
 import PostPage from "./pages/PostPage";
+import MainPostList from "./pages/MainPostList";
 
 export const router = createBrowserRouter([
   {
@@ -55,7 +55,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "/forum/post",
-            element: <PostList />,
+            element: <MainPostList />,
           },
           {
             path: "/forum/post/:postId",

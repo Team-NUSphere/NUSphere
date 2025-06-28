@@ -1,33 +1,28 @@
 import {
+  handleCreateGroup,
   handleCreateNewPost,
+  handleDeleteGroup,
   handleDeletePost,
   handleGetAllPosts,
-  handleUpdatePost,
-} from "#controllers/forumController.js";
-import {
-  handleCreateGroup,
-  handleDeleteGroup,
   handleGetGroupList,
   handleGetGroupPostList,
   handleUpdateGroup,
+  handleUpdatePost,
 } from "#controllers/groupController.js";
 import express from "express";
 
 const router = express.Router();
 
-router.route("/posts").get(handleGetAllPosts);
+router.get("/posts", handleGetAllPosts);
 
-router
-  .route("/:groupId/posts")
-  .post(handleCreateNewPost)
-  .put(handleUpdatePost)
-  .delete(handleDeletePost);
+router.route("/post/:postId").put(handleUpdatePost).delete(handleDeletePost);
 //get all posts in a group
 
 router.route("/groups").get(handleGetGroupList).post(handleCreateGroup);
 router
   .route("/group/:groupId")
   .get(handleGetGroupPostList)
+  .post(handleCreateNewPost)
   .put(handleUpdateGroup)
   .delete(handleDeleteGroup);
 

@@ -6,6 +6,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { getAuth } from "../contexts/authContext";
 import CreateGroupForm from "../components/CreateGroupForm";
 import EditGroupForm from "../components/EditGroupForm";
+import EditPostForm from "../components/EditPostForm";
 
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -16,159 +17,31 @@ export default function Forum() {
   };
   const location = useLocation();
 
-  // TODO: const [sortBy, setSortBy] = useState("relevance");
-
-  // This is for create post
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-  const [postTitle, setPostTitle] = useState("");
-  const [postContent, setPostContent] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState<{
+    groupId: string;
+    groupName: string;
+  } | null>(null);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showEditPost, setShowEditPost] = useState(false);
   const [showEditGroup, setShowEditGroup] = useState(false);
 
-  const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
-
   // This is for the Post and Group tabs
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  const user2: User = {
-    userId: "1234",
-    username: "User2",
-  };
-
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      postId: "3",
-      title: "Need help with assignment 1",
-      details:
-        "I'm struggling with the first part of the assignment. Can someone explain the concept of recursion?",
-      author: { userId: "1", username: "StudentUser" },
-      timestamp: new Date("2025-06-23T14:45:00Z"),
-      groupName: "CS1101",
-      likes: 5,
-      replies: {},
-      // {
-      //   replyId: "1",
-      //   author: { userId: "2", username: "TutorUser" },
-      //   content:
-      //     "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-      //   timestamp: new Date(),
-      //   likes: 2,
-      //   isLiked: false,
-      // },
-      isLiked: false,
-      views: 100,
-      groupId: "1",
-    },
-  ]);
-
-  // Mock data - replace with actual data from your backend
-  const [myPosts, setMyPosts] = useState<Post[]>([
-    {
-      postId: "1",
-      title: "My question about data structures",
-      details:
-        "I'm having trouble understanding binary trees. Can someone help?",
-      author: currentUser,
-      timestamp: new Date("2025-06-25T10:30:00Z"),
-      groupName: "CS2040",
-      likes: 8,
-      replies: {},
-      views: 45,
-      isLiked: false,
-      groupId: "3",
-    },
-    {
-      postId: "2",
-      title: "Study group for finals",
-      details:
-        "Looking for people to form a study group for the upcoming finals.",
-      author: currentUser,
-      timestamp: new Date("2025-06-24T15:20:00Z"),
-      groupName: "CS1101",
-      likes: 12,
-      replies: {},
-      views: 89,
-      isLiked: false,
-      groupId: "1",
-    },
-  ]);
-
-  const [myGroups, setMyGroups] = useState<Group[]>([
-    {
-      groupId: "4",
-      groupName: "Advanced Algorithms Study Group",
-      description:
-        "A group for discussing advanced algorithm concepts and problem-solving techniques.",
-      postCount: 15,
-      createdAt: new Date("2025-06-20T09:00:00Z"),
-      ownerId: userId || "currentUserId",
-      posts: [
-        {
-          postId: "1",
-          title: "Need help with assignment 1",
-          details:
-            "I'm struggling with the first part of the assignment. Can someone explain the concept of recursion?",
-          author: { userId: "1", username: "StudentUser" },
-          timestamp: new Date("2025-06-23T14:45:00Z"),
-          groupName: "CS1101",
-          likes: 5,
-          replies: {},
-          // [
-          //   {
-          //     replyId: "1",
-          //     author: { userId: "2", username: "TutorUser" },
-          //     content:
-          //       "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-          //     timestamp: new Date(),
-          //     likes: 2,
-          //     isLiked: false,
-          //   },
-          // ],
-          isLiked: false,
-          views: 100,
-          groupId: "1",
-        },
-      ],
-    },
-    {
-      groupId: "5",
-      groupName: "Web Development Projects",
-      description:
-        "Share and collaborate on web development projects and get feedback.",
-      postCount: 8,
-      createdAt: new Date("2025-06-18T14:30:00Z"),
-      ownerId: userId || "currentUserId",
-      posts: [],
-    },
-  ]);
-
   // Handler functions with TODO comments
-  const handleEditPost = (postId: string) => {
-    // TODO: Implement edit post functionality
-    console.log("Edit post:", postId);
-    setEditingPost(postId);
-  };
-
-  const handleDeletePost = (postId: string) => {
-    // TODO: Implement delete post functionality
-    console.log("Delete post:", postId);
-    setMyPosts(myPosts.filter((post) => post.postId !== postId));
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
+    setShowEditPost(true);
   };
 
   const handleEditGroup = (group: Group) => {
     setEditingGroup(group);
     setShowEditGroup(true);
-  };
-
-  const handleDeleteGroup = (groupId: string) => {
-    // TODO: Implement delete group functionality
-    console.log("Delete group:", groupId);
-    setMyGroups(myGroups.filter((group) => group.groupId !== groupId));
   };
 
   const handleCreateClick = () => {
@@ -186,33 +59,20 @@ export default function Forum() {
     return;
   };
 
-  const handleLike = (postId: string) => {
-    console.log("Like button clicked");
-    setPosts(
-      posts.map((post) =>
-        post.postId === postId
-          ? {
-              ...post,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-              isLiked: !post.isLiked,
-            }
-          : post
-      )
-    );
-  };
-
-  const handlePostClick = (postId: string) => {
-    // TODO: Navigate to post detail page
-    console.log("Navigate to post:", postId);
-    setSelectedPostId(postId);
-  };
-
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.details.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.groupName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const handleLike = (postId: string) => {
+  //   console.log("Like button clicked");
+  //   setPosts(
+  //     posts.map((post) =>
+  //       post.postId === postId
+  //         ? {
+  //             ...post,
+  //             likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+  //             isLiked: !post.isLiked,
+  //           }
+  //         : post
+  //     )
+  //   );
+  // };
 
   return (
     <div className="min-h-screen pl-4 pr-4 w-full overflow-y-auto">
@@ -231,13 +91,7 @@ export default function Forum() {
           <CreatePostForm
             onCancel={() => setShowCreatePost(false)}
             onSubmit={() => {}}
-            postTitle={postTitle}
-            setPostTitle={setPostTitle}
-            postContent={postContent}
-            setPostContent={setPostContent}
-            groups={[]}
-            selectedGroup={selectedGroup}
-            setSelectedGroup={setSelectedGroup}
+            selectedGroup={selectedGroup ?? { groupId: "", groupName: "" }}
           />
         ) : showCreateGroup ? (
           <CreateGroupForm onCancel={() => setShowCreateGroup(false)} />
@@ -248,6 +102,14 @@ export default function Forum() {
               setShowEditGroup(false);
               setEditingGroup(null);
             }}
+          />
+        ) : showEditPost ? (
+          <EditPostForm
+            onCancel={() => {
+              setShowEditPost(false);
+              setEditingPost(null);
+            }}
+            post={editingPost}
           />
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-3 h-full">
@@ -305,20 +167,10 @@ export default function Forum() {
                   selectedGroupId,
                   setSelectedGroupId,
                   currentUser,
-                  posts,
-                  myPosts,
-                  myGroups,
-                  handleLike,
+                  // handleLike,
                   handleEditPost,
-                  handleDeletePost,
                   handleEditGroup,
-                  handleDeleteGroup,
-                  filteredPosts,
                   setShowCreatePost,
-                  postTitle,
-                  setPostTitle,
-                  postContent,
-                  setPostContent,
                   selectedGroup,
                   setSelectedGroup,
                   searchQuery,
@@ -329,7 +181,6 @@ export default function Forum() {
                   setEditingPost,
                   editingGroup,
                   setEditingGroup,
-                  handlePostClick,
                 }}
               />
             </div>

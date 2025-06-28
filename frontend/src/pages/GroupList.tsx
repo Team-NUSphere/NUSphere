@@ -9,10 +9,11 @@ interface GroupListProps {
   currentUser: User;
   handleEditGroup?: (group: Group) => void;
   searchQuery: string;
+  setSelectedGroup: (group: { groupId: string; groupName: string }) => void;
 }
 
 export default function GroupList({ groups = [] }: { groups?: Group[] }) {
-  const { currentUser, handleEditGroup, searchQuery } =
+  const { currentUser, handleEditGroup, searchQuery, setSelectedGroup } =
     useOutletContext<GroupListProps>();
 
   if (groups && groups.length !== 0) {
@@ -113,6 +114,12 @@ export default function GroupList({ groups = [] }: { groups?: Group[] }) {
           key={group.groupId}
           className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
           to={`/forum/group/${group.groupId}`}
+          onClick={() => {
+            setSelectedGroup({
+              groupId: group.groupId,
+              groupName: group.groupName,
+            });
+          }}
         >
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">

@@ -45,7 +45,12 @@ class ForumGroup extends Model<
   declare Posts?: NonAttribute<Post[]>;
 
   static associate() {
-    ForumGroup.hasMany(Post, { as: "Posts", foreignKey: "groupid" });
+    ForumGroup.hasMany(Post, {
+      as: "Posts",
+      foreignKey: "groupId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
     ForumGroup.belongsTo(User, {
       as: "UserOwner",
       foreignKey: "ownerId",
@@ -68,6 +73,7 @@ class ForumGroup extends Model<
         groupId: {
           allowNull: false,
           defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,
           type: DataTypes.UUID,
         },
         groupName: {
