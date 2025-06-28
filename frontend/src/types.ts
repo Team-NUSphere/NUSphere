@@ -41,6 +41,6 @@ export interface Group {
   description: string;
   postCount: number;
   createdAt: Date;
-  author: User;
+  ownerId: string;
   posts: Post[]; //not useful for now, it would be better to segregate what we can seperate
 }

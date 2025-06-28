@@ -68,7 +68,7 @@ export async function fetchPostsByGroupId(
 
     axiosApi({
       method: "GET",
-      url: `/forum/${groupId}/posts`,
+      url: `/forum/${groupId}`,
       params: {
         p: pageNumber,
       },
@@ -141,14 +141,11 @@ export async function likePost(postId: string): Promise<void> {
 
 /** ------------------------ GROUPS ------------------------ **/
 
-export async function fetchAllGroups(
-  query: string = "",
-  pageNumber: number = 1
-) {
+export function fetchAllGroups(query: string = "", pageNumber: number = 1) {
   const [groupList, setGroupList] = useState<Group[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   useEffect(() => {
     setGroupList([]);
@@ -166,11 +163,12 @@ export async function fetchAllGroups(
       url: "/forum/groups",
       params: {
         q: query,
-        p: pageNumber,
+        page: pageNumber,
       },
       signal: signal,
     })
       .then((res) => {
+        if (!res) return;
         setGroupList((prev) => [...new Set([...prev, ...res.data])]);
         setHasMore(res.data.length > 0);
         setLoading(false);
@@ -186,7 +184,11 @@ export async function fetchAllGroups(
     return () => controller.abort();
   }, [query, pageNumber]);
 
-  return { groupList, loading, error, hasMore };
+  const deleteGroupFromList = (groupId: string) => {
+    setGroupList((prev) => prev.filter((g) => g.groupId !== groupId));
+  };
+
+  return { groupList, loading, error, hasMore, deleteGroupFromList };
 }
 
 // Probably not useful
@@ -199,7 +201,14 @@ export async function createGroup(
   groupName: string,
   description: string
 ): Promise<Group> {
-  const res = await axios.post(`${backend}/groups`, { groupName, description });
+  const res = await axiosApi({
+    method: "POST",
+    url: "/forum/groups",
+    data: {
+      name: groupName,
+      description: description,
+    },
+  });
   return res.data;
 }
 
@@ -207,12 +216,22 @@ export async function updateGroup(
   groupId: string,
   updates: Partial<Pick<Group, "groupName" | "description">>
 ): Promise<Group> {
-  const res = await axios.put(`${backend}/groups/${groupId}`, updates);
+  const res = await axiosApi({
+    method: "PUT",
+    url: `/forum/group/${groupId}`,
+    data: {
+      name: updates.groupName,
+      description: updates.description,
+    },
+  });
   return res.data;
 }
 
 export async function deleteGroup(groupId: string): Promise<void> {
-  await axios.delete(`${backend}/groups/${groupId}`);
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/group/${groupId}`,
+  });
 }
 
 /** ------------------------ REPLIES ------------------------ **/

@@ -98,9 +98,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error.response.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           try {
+            console.log("Refreshing token...");
             const newAccessToken = await auth.currentUser?.getIdToken();
             if (newAccessToken) {
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -115,7 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
     return () => {
-      axiosApi.interceptors.request.eject(interceptor);
+      axiosApi.interceptors.response.eject(interceptor);
     };
   }, [userIdToken]);
 

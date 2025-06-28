@@ -21,7 +21,7 @@ import Class from "./Class.js";
 import Enrollment from "./Enrollment.js";
 import Module from "./Module.js";
 import User from "./User.js";
-import UserEvent, { UserModelType } from "./UserEvents.js";
+import UserEvent, { UserEventType } from "./UserEvents.js";
 
 interface UserTimetable
   extends HasManyMixin<UserEvent, string, "Event", "Events"> {}
@@ -45,7 +45,7 @@ class UserTimetable extends Model<
   declare Modules?: NonAttribute<Module[]>;
 
   // Create
-  async makeNewEvent(event: UserModelType) {
+  async makeNewEvent(event: UserEventType) {
     const userEvent = await UserEvent.create({
       day: event.day,
       description: event.description,
@@ -139,7 +139,7 @@ class UserTimetable extends Model<
   }
 
   // Update
-  async editOrMakeEvent(event: UserModelType) {
+  async editOrMakeEvent(event: UserEventType) {
     if (!event.eventId)
       throw new Error("There is no eventId to reference update");
     await this.getAllEvents();

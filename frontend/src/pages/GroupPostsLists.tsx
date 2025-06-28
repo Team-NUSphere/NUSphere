@@ -9,7 +9,7 @@ export default function GroupPostsLists() {
   }>();
   const { groupId } = useParams();
   if (!groupId) return null;
-  const group = [...groups, ...myGroups].find((g) => g.groupId === groupId);
+  const group = [...myGroups].find((g) => g.groupId === groupId);
 
   return (
     <div>

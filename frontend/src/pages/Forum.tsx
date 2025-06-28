@@ -2,10 +2,19 @@ import { useState } from "react";
 import ForumHeader from "../components/ForumHeader";
 import CreatePostForm from "../components/CreatePostForm";
 import type { Post, Group, User, Reply } from "../types";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { getAuth } from "../contexts/authContext";
+import CreateGroupForm from "../components/CreateGroupForm";
+import EditGroupForm from "../components/EditGroupForm";
 
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const userId = getAuth().currentUser?.uid;
+  const currentUser: User = {
+    username: "You",
+    userId: userId || "currentUserId",
+  };
+  const location = useLocation();
 
   // TODO: const [sortBy, setSortBy] = useState("relevance");
 
@@ -13,21 +22,18 @@ export default function Forum() {
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
+
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showEditPost, setShowEditPost] = useState(false);
+  const [showEditGroup, setShowEditGroup] = useState(false);
 
   const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [editingGroup, setEditingGroup] = useState<string | null>(null);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
   // This is for the Post and Group tabs
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-
-  // Mock current user
-  const currentUser: User = {
-    userId: "123",
-    username: "CurrentUser",
-  };
 
   const user2: User = {
     userId: "1234",
@@ -59,72 +65,6 @@ export default function Forum() {
       groupId: "1",
     },
   ]);
-
-  const groups: Group[] = [
-    {
-      groupId: "1",
-      groupName: "CS1101 Programming Methodology",
-      description: "Discussion and help for CS1101 assignments and lectures.",
-      postCount: 120,
-      createdAt: new Date("2025-06-01T09:00:00Z"),
-      author: user2,
-      posts: [
-        {
-          postId: "1",
-          title: "Need help with assignment 1",
-          details:
-            "I'm struggling with the first part of the assignment. Can someone explain the concept of recursion?",
-          author: { userId: "1", username: "StudentUser" },
-          timestamp: new Date("2025-06-23T14:45:00Z"),
-          groupName: "CS1101",
-          likes: 5,
-          replies: {},
-          // [
-          //   {
-          //     replyId: "1",
-          //     author: { userId: "2", username: "TutorUser" },
-          //     content:
-          //       "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem.",
-          //     timestamp: new Date(),
-          //     likes: 2,
-          //     isLiked: false,
-          //     replies: {},
-          //   },
-          // ],
-          isLiked: false,
-          views: 100,
-          groupId: "1",
-        },
-      ],
-    },
-    {
-      groupId: "2",
-      groupName: "CS2030 Programming Methodology II",
-      description: "Object-oriented programming, Java, and more.",
-      postCount: 85,
-      createdAt: new Date("2025-06-10T14:30:00Z"),
-      author: currentUser,
-      posts: [],
-    },
-    {
-      groupId: "3",
-      groupName: "CS2040 Data Structures and Algorithms",
-      description: "Share resources and discuss data structures concepts.",
-      postCount: 150,
-      createdAt: new Date("2025-06-15T11:20:00Z"),
-      author: currentUser,
-      posts: [],
-    },
-    {
-      groupId: "4",
-      groupName: "CS3230 Algorithm Design and Analysis",
-      description: "Advanced algorithms, problem-solving, and exam prep.",
-      postCount: 60,
-      createdAt: new Date("2025-06-18T16:45:00Z"),
-      author: user2,
-      posts: [],
-    },
-  ];
 
   // Mock data - replace with actual data from your backend
   const [myPosts, setMyPosts] = useState<Post[]>([
@@ -166,7 +106,7 @@ export default function Forum() {
         "A group for discussing advanced algorithm concepts and problem-solving techniques.",
       postCount: 15,
       createdAt: new Date("2025-06-20T09:00:00Z"),
-      author: currentUser,
+      ownerId: userId || "currentUserId",
       posts: [
         {
           postId: "1",
@@ -202,7 +142,7 @@ export default function Forum() {
         "Share and collaborate on web development projects and get feedback.",
       postCount: 8,
       createdAt: new Date("2025-06-18T14:30:00Z"),
-      author: currentUser,
+      ownerId: userId || "currentUserId",
       posts: [],
     },
   ]);
@@ -220,10 +160,9 @@ export default function Forum() {
     setMyPosts(myPosts.filter((post) => post.postId !== postId));
   };
 
-  const handleEditGroup = (groupId: string) => {
-    // TODO: Implement edit group functionality
-    console.log("Edit group:", groupId);
-    setEditingGroup(groupId);
+  const handleEditGroup = (group: Group) => {
+    setEditingGroup(group);
+    setShowEditGroup(true);
   };
 
   const handleDeleteGroup = (groupId: string) => {
@@ -233,7 +172,18 @@ export default function Forum() {
   };
 
   const handleCreateClick = () => {
-    setShowCreatePost(true);
+    if (showCreateGroup || showCreatePost) {
+      setShowCreatePost(false);
+      setShowCreateGroup(false);
+      return;
+    }
+    const currentPath = location.pathname;
+    if (currentPath.startsWith("/forum/group/")) {
+      setShowCreatePost(true);
+    } else {
+      setShowCreateGroup(true);
+    }
+    return;
   };
 
   const handleLike = (postId: string) => {
@@ -265,15 +215,17 @@ export default function Forum() {
   );
 
   return (
-    <div className="min-h-screen p-4 w-full">
-      <div className="mx-auto space-y-6 sticky h-full">
-        <ForumHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onCreateClick={handleCreateClick}
-        />
+    <div className="min-h-screen pl-4 pr-4 w-full overflow-y-auto">
+      <div className="mx-auto space-y-6">
+        <div className="mx-auto space-y-6 pt-4 pl-4 pr-4 sticky top-0 z-10 bg-white">
+          <ForumHeader
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onCreateClick={handleCreateClick}
+          />
 
-        <hr className="border-t border-gray-300" />
+          <hr className="border-t border-gray-300" />
+        </div>
 
         {showCreatePost ? (
           <CreatePostForm
@@ -283,12 +235,22 @@ export default function Forum() {
             setPostTitle={setPostTitle}
             postContent={postContent}
             setPostContent={setPostContent}
-            groups={groups.map((group) => group.groupName)}
+            groups={[]}
             selectedGroup={selectedGroup}
             setSelectedGroup={setSelectedGroup}
           />
+        ) : showCreateGroup ? (
+          <CreateGroupForm onCancel={() => setShowCreateGroup(false)} />
+        ) : showEditGroup ? (
+          <EditGroupForm
+            group={editingGroup}
+            onCancel={() => {
+              setShowEditGroup(false);
+              setEditingGroup(null);
+            }}
+          />
         ) : (
-          <div className="bg-white rounded-lg shadow-sm p-3 h-full overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-sm p-3 h-full">
             {/* Navigation Tabs */}
             <div className="w-full mb-6">
               <div className="flex border-b border-gray-200">
@@ -338,15 +300,12 @@ export default function Forum() {
 
               <Outlet
                 context={{
-                  activeTab,
-                  setActiveTab,
                   selectedPostId,
                   setSelectedPostId,
                   selectedGroupId,
                   setSelectedGroupId,
                   currentUser,
                   posts,
-                  groups,
                   myPosts,
                   myGroups,
                   handleLike,

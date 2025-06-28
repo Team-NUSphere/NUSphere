@@ -18,8 +18,11 @@ export const handleGetGroupList = async (
       const { groups } = await searchGroup(
         "",
         parseInt(typeof params.page === "string" ? params.page : "1"),
-        20,
+        10,
       );
+      groups.forEach((group) => {
+        console.log(group.toJSON());
+      });
       res.json(groups);
     }
   } catch (error) {
@@ -31,7 +34,7 @@ export const handleGetGroupList = async (
 const searchGroup = async (searchValue: string, page = 1, pageSize = 10) => {
   const offset = (page - 1) * pageSize;
   const { count, rows } = await ForumGroup.findAndCountAll({
-    attributes: ["groupId", "groupName"],
+    attributes: ["groupId", "groupName", "description", "postCount", "ownerId"],
     limit: pageSize,
     offset: offset,
     order: [["groupName", "ASC"]],
@@ -111,5 +114,78 @@ const searchGroupPosts = async (groupId: string, page = 1, pageSize = 10) => {
 };
 
 // Create
+export const handleCreateGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const data = req.body as { description: string; name: string };
+  try {
+    const group = await req.user?.createOwnedGroup({
+      description: data.description,
+      groupName: data.name,
+      ownerId: req.user.uid,
+      ownerType: "User",
+    });
+    console.log(group?.toJSON());
+    res.json(group);
+  } catch (error) {
+    next(error);
+  }
+};
 
-//
+// Update
+export const handleUpdateGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const groupId = req.params.groupId;
+  const data = req.body as { description: string; name: string };
+  try {
+    const groups = await req.user?.getOwnedGroups({
+      where: {
+        groupId: groupId,
+      },
+    });
+    if (!groups || groups.length === 0)
+      throw new Error(
+        `User ${req.user?.uid ?? ""} does not own this group ${groupId}, cannot update group`,
+      );
+    const group = groups[0];
+    const updated = await group.update({
+      description: data.description,
+      groupName: data.name,
+    });
+
+    console.log(updated.toJSON());
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete
+export const handleDeleteGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const groupId = req.params.groupId;
+  try {
+    const groups = await req.user?.getOwnedGroups({
+      where: {
+        groupId: groupId,
+      },
+    });
+    if (!groups || groups.length === 0)
+      throw new Error(
+        `User ${req.user?.uid ?? ""} does not own this group ${groupId}, cannot update group`,
+      );
+    const group = groups[0];
+    await group.destroy();
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};

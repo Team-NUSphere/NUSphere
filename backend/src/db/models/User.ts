@@ -13,6 +13,7 @@ import {
 
 import Comment from "./Comment.js";
 import Enrollment from "./Enrollment.js";
+import ForumGroup from "./ForumGroup.js";
 import Module from "./Module.js";
 import Post from "./Post.js";
 import UserEvent from "./UserEvents.js";
@@ -21,11 +22,14 @@ import UserTimetable from "./UserTimetable.js";
 interface User extends HasOneMixin<UserTimetable, string, "Timetable"> {}
 interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
 interface User extends HasManyMixin<Comment, string, "Comment", "Comments"> {}
+interface User
+  extends HasManyMixin<ForumGroup, string, "OwnedGroup", "OwnedGroups"> {}
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
 
   declare Timetable?: NonAttribute<UserTimetable>;
+  declare OwnedGroups?: NonAttribute<ForumGroup[]>;
 
   async getUserTimetable() {
     let userTimetable = await this.getTimetable({
@@ -59,6 +63,12 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
     User.hasMany(Post, { as: "Posts", foreignKey: "uid" });
     User.hasMany(Comment, { as: "Comments", foreignKey: "uid" });
+    User.hasMany(ForumGroup, {
+      as: "OwnedGroups",
+      foreignKey: "ownerId",
+      onDelete: "CASCADE",
+      scope: { ownerType: "User" },
+    });
   }
 
   static initModel(sequelize: Sequelize) {

@@ -30,6 +30,7 @@ export default function useModuleSearch(query: string, pageNumber: number) {
       signal: signal,
     })
       .then((res) => {
+        if (!res) return;
         setModuleList((prevList) => {
           return [...new Set([...prevList, ...res.data])];
         });

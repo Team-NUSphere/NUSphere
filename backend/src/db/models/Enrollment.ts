@@ -105,7 +105,7 @@ class Enrollment extends Model<
         },
         timetableId: {
           allowNull: false,
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           unique: "tt_unique_constraint",
         },
       },

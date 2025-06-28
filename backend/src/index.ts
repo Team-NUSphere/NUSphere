@@ -3,6 +3,7 @@ import db from "#db/index.js";
 import firebaseApp from "#firebase-admin.js";
 import authMiddleware from "#middlewares/authHandler.js";
 import errorHandler from "#middlewares/errorHandler.js";
+import forumRouter from "#routes/forum.js";
 import loginRouter from "#routes/login.js";
 import moduleRouter from "#routes/module.js";
 import registerRouter from "#routes/register.js";
@@ -38,6 +39,7 @@ app.use("/login", loginRouter);
 app.use("/modules", moduleRouter);
 app.use("/userTimetable", userTimetableRouter);
 app.use("/room", roomRouter);
+app.use("/forum", forumRouter);
 
 // 404 catch all
 app.all("*name", (req, res, next) => {

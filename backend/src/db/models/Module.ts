@@ -5,6 +5,7 @@
 import {
   BelongsToManyMixin,
   HasManyMixin,
+  HasOneMixin,
 } from "#db/types/associationtypes.js";
 import {
   Department,
@@ -24,17 +25,20 @@ import {
 
 import Class from "./Class.js";
 import Enrollment from "./Enrollment.js";
+import ForumGroup from "./ForumGroup.js";
 import User from "./User.js";
 import UserTimetable from "./UserTimetable.js";
 
 interface ModuleCreationAttributes extends InferCreationAttributes<Module> {
   Classes?: InferCreationAttributes<Class>[];
+  ModuleGroup?: InferCreationAttributes<ForumGroup>;
 }
 
 interface Module extends HasManyMixin<Class, number, "Class", "Classes"> {}
 interface Module
   extends HasManyMixin<Enrollment, string, "Enrollment", "Enrollments"> {}
 interface Module extends BelongsToManyMixin<User, string, "User", "Users"> {}
+interface Module extends HasOneMixin<ForumGroup, string, "ModuleGroup"> {}
 
 class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
   declare department: Department;
@@ -50,6 +54,7 @@ class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
   declare Classes?: NonAttribute<Class[]>;
   declare UserTimetables?: NonAttribute<UserTimetable[]>;
   declare Enrollments?: NonAttribute<Enrollment[]>;
+  declare ModuleGruop?: NonAttribute<ForumGroup>;
 
   static associate() {
     Module.hasMany(Class, { as: "Classes", foreignKey: "moduleId" });
@@ -60,6 +65,14 @@ class Module extends Model<InferAttributes<Module>, ModuleCreationAttributes> {
       through: Enrollment,
     });
     Module.hasMany(Enrollment, { as: "Enrollments", foreignKey: "moduleId" });
+    Module.hasOne(ForumGroup, {
+      as: "ModuleGroup",
+      foreignKey: "ownerId",
+      onDelete: "CASCADE",
+      scope: {
+        ownerType: "Module",
+      },
+    });
   }
 
   static initModel(sequelize: Sequelize) {

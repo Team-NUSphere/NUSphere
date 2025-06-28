@@ -2,7 +2,7 @@ import handleAuthentication from "#controllers/authController.js";
 import { Router } from "express";
 
 const router = Router();
-const authenticatedRoutes = ["/userTimetable", "/room"];
+const authenticatedRoutes = ["/userTimetable", "/room", "/forum"];
 
 authenticatedRoutes.forEach((route) => {
   router.use(route, handleAuthentication);

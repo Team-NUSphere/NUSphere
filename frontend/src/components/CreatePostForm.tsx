@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa"
+import { useState, useEffect, useRef } from "react";
+import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa";
+import { createGroup } from "../functions/forumApi";
 
 interface CreatePostFormProps {
-  onCancel: () => void
-  onSubmit: () => void
-  postTitle: string
-  setPostTitle: (title: string) => void
-  postContent: string
-  setPostContent: (content: string) => void
-  groups: string[]
-  selectedGroup: string
-  setSelectedGroup: (group: string) => void
+  onCancel: () => void;
+  onSubmit: () => void;
+  postTitle: string;
+  setPostTitle: (title: string) => void;
+  postContent: string;
+  setPostContent: (content: string) => void;
+  groups: string[];
+  selectedGroup: string;
+  setSelectedGroup: (group: string) => void;
 }
 
 export default function CreatePostForm({
@@ -26,33 +27,38 @@ export default function CreatePostForm({
   selectedGroup,
   setSelectedGroup,
 }: CreatePostFormProps) {
-  const [search, setSearch] = useState("")
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [createType, setCreateType] = useState<"post" | "group">("post")
+  const [search, setSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [createType, setCreateType] = useState<"post" | "group">("post");
 
   // Group creation states
-  const [groupName, setGroupName] = useState("")
-  const [groupDescription, setGroupDescription] = useState("")
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
 
-  const filteredGroups = groups.filter((group) => group.toLowerCase().includes(search.toLowerCase()))
+  const filteredGroups = groups.filter((group) =>
+    group.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
       }
-    }
+    };
 
     if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [showDropdown])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleCreatePost = () => {
     // TODO: Implement post creation logic
@@ -60,34 +66,31 @@ export default function CreatePostForm({
       title: postTitle,
       content: postContent,
       group: selectedGroup,
-    })
-    onSubmit()
-  }
+    });
+    onSubmit();
+  };
 
-  const handleCreateGroup = () => {
-    // TODO: Implement group creation logic
-    console.log("Creating group:", {
-      name: groupName,
-      description: groupDescription,
-    })
-    onSubmit()
-  }
+  const handleCreateGroup = async () => {
+    await createGroup(groupName, groupDescription);
+    onCancel();
+    onSubmit();
+  };
 
   const handleSubmit = () => {
     if (createType === "post") {
-      handleCreatePost()
+      handleCreatePost();
     } else {
-      handleCreateGroup()
+      handleCreateGroup();
     }
-  }
+  };
 
   const isFormValid = () => {
     if (createType === "post") {
-      return postTitle.trim() && postContent.trim() && selectedGroup
+      return postTitle.trim() && postContent.trim() && selectedGroup;
     } else {
-      return groupName.trim() && groupDescription.trim()
+      return groupName.trim() && groupDescription.trim();
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
@@ -100,7 +103,9 @@ export default function CreatePostForm({
           <button
             onClick={() => setCreateType("post")}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium text-sm transition-all ${
-              createType === "post" ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-800"
+              createType === "post"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
             }`}
           >
             <FaEdit className="w-4 h-4" />
@@ -109,7 +114,9 @@ export default function CreatePostForm({
           <button
             onClick={() => setCreateType("group")}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium text-sm transition-all ${
-              createType === "group" ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-800"
+              createType === "group"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
             }`}
           >
             <FaUsers className="w-4 h-4" />
@@ -145,9 +152,9 @@ export default function CreatePostForm({
                         key={group}
                         className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
                         onClick={() => {
-                          setSelectedGroup(group)
-                          setSearch("")
-                          setShowDropdown(false)
+                          setSelectedGroup(group);
+                          setSearch("");
+                          setShowDropdown(false);
                         }}
                       >
                         <div className="flex items-center gap-2">
@@ -157,7 +164,9 @@ export default function CreatePostForm({
                       </div>
                     ))}
                     {filteredGroups.length === 0 && (
-                      <div className="px-4 py-3 text-gray-500 text-center">No groups found</div>
+                      <div className="px-4 py-3 text-gray-500 text-center">
+                        No groups found
+                      </div>
                     )}
                   </div>
                 )}
@@ -229,7 +238,10 @@ export default function CreatePostForm({
                 <FaUsers className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Creating a new group</p>
-                  <p>You'll become the group administrator and can manage posts, members, and group settings.</p>
+                  <p>
+                    You'll become the group administrator and can manage posts,
+                    members, and group settings.
+                  </p>
                 </div>
               </div>
             </div>
@@ -249,12 +261,14 @@ export default function CreatePostForm({
           onClick={handleSubmit}
           disabled={!isFormValid()}
           className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
-            isFormValid() ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            isFormValid()
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
           {createType === "post" ? "Create Post" : "Create Group"}
         </button>
       </div>
     </div>
-  )
+  );
 }
