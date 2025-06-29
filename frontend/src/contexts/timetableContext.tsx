@@ -71,7 +71,7 @@ interface TimetableContextType {
   getModuleClasses: (
     moduleCode: string,
     lessonType: string
-  ) => Promise<(reason?: any) => void>;
+  ) => Promise<UserClassType[]>;
 }
 
 const TimetableContext = createContext<TimetableContextType | undefined>(
@@ -155,30 +155,31 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     return controller.abort;
   }
 
-  async function getModuleClasses(moduleCode: string, lessonType: string) {
-    if (!userIdToken) return () => {};
+  async function getModuleClasses(
+    moduleCode: string,
+    lessonType: string
+  ): Promise<UserClassType[]> {
+    if (!userIdToken) return [];
     const controller = new AbortController();
     const signal = controller.signal;
-    await axiosApi({
-      method: "GET",
-      url: `/userTimetable/modules/${moduleCode}/classes/${lessonType}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      signal: signal,
-    })
-      .then((res) => {
-        res.data;
-      })
-      .catch((e) => {
-        if (axios.isCancel(e)) {
-          console.log("Request cancelled: " + e.message);
-        } else {
-          console.error(e);
-        }
-    });
-
-    return () => controller.abort();
+    try {
+      const data = await axiosApi({
+        method: "GET",
+        url: `/userTimetable/modules/${moduleCode}/classes/${lessonType}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: signal,
+      });
+      return data.data as UserClassType[];
+    } catch (e) {
+      if (axios.isCancel(e)) {
+        console.log("Request cancelled: " + e.message);
+      } else {
+        console.error(e);
+      }
+      return [];
+    }
   }
 
   // removeModule -> send del req -> backend send status code
