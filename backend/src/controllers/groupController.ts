@@ -553,3 +553,152 @@ export const handleUpdateReply = async (
     next(error);
   }
 };
+
+// My posts and groups
+export const handleGetMyGroupList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
+  const params = req.query;
+  try {
+    if (typeof params.q == "string" && typeof params.page == "string") {
+      const { groups } = await searchMyGroups(
+        req.user.uid,
+        params.q,
+        parseInt(params.page),
+        10,
+      );
+      res.json(groups);
+    } else {
+      const { groups } = await searchMyGroups(
+        req.user.uid,
+        "",
+        parseInt(typeof params.page === "string" ? params.page : "1"),
+        10,
+      );
+      groups.forEach((group) => {
+        console.log(group.toJSON());
+      });
+      res.json(groups);
+    }
+  } catch (error) {
+    next(error);
+  }
+  return;
+};
+
+const searchMyGroups = async (
+  uid: string,
+  searchValue: string,
+  page = 1,
+  pageSize = 10,
+) => {
+  const offset = (page - 1) * pageSize;
+  const { count, rows } = await ForumGroup.findAndCountAll({
+    attributes: ["groupId", "groupName", "description", "postCount", "ownerId"],
+    limit: pageSize,
+    offset: offset,
+    order: [["groupName", "ASC"]],
+    where: {
+      groupName: { [Op.iLike]: `%${searchValue}%` },
+      ownerId: uid,
+      ownerType: "User",
+    },
+  });
+  return {
+    currentPage: page,
+    groups: rows,
+    totalCount: count,
+    totalPages: Math.ceil(count / pageSize),
+  };
+};
+
+export const handleGetMyPostList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
+  const params = req.query;
+  try {
+    if (typeof params.q == "string" && typeof params.page === "string") {
+      const page = parseInt(params.page);
+      const { posts } = await searchMyPost(req.user.uid, params.q, page, 10);
+      const formattedPosts = await Promise.all(
+        posts.map(async (post) => {
+          await post.getGroupName();
+          return {
+            createdAt: post.createdAt,
+            details: post.details,
+            groupId: post.groupId,
+            groupName: post.groupName,
+            likes: post.likes,
+            postId: post.postId,
+            replies: post.replies,
+            title: post.title,
+            uid: post.uid,
+            views: post.views,
+          };
+        }),
+      );
+      res.json(formattedPosts);
+    } else {
+      const { posts } = await searchMyPost(
+        req.user.uid,
+        "",
+        parseInt(typeof params.page === "string" ? params.page : "1"),
+        10,
+      );
+      const formattedPosts = await Promise.all(
+        posts.map((post) => post.getGroupName()),
+      );
+      res.json(formattedPosts);
+    }
+  } catch (error) {
+    next(error);
+  }
+  return;
+};
+
+const searchMyPost = async (
+  uid: string,
+  query: string,
+  page = 1,
+  pageSize = 10,
+) => {
+  const offset = (page - 1) * pageSize;
+  const { count, rows } = await Post.findAndCountAll({
+    attributes: [
+      "postId",
+      "title",
+      "details",
+      "groupId",
+      "uid",
+      "likes",
+      "createdAt",
+      "views",
+      "replies",
+    ],
+    limit: pageSize,
+    offset: offset,
+    order: [["createdAt", "DESC"]],
+    where: {
+      title: { [Op.iLike]: `%${query}%` },
+      uid: uid,
+    },
+  });
+  return {
+    currentPage: page,
+    posts: rows,
+    totalCount: count,
+    totalPages: Math.ceil(count / pageSize),
+  };
+};

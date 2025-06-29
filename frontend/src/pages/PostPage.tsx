@@ -1,132 +1,77 @@
-import { useState, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
+import { useState, useEffect, useRef } from "react";
+import { add, formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import CommentItem from "../components/CommentItem";
-import { Link, useOutletContext, useParams } from "react-router-dom";
-
-interface User {
-  userId: string;
-  username: string;
-}
-
-interface Post {
-  postId: string;
-  title: string;
-  details: string;
-  timestamp: Date;
-  groupName: string;
-  likes: number;
-  author: User;
-  views: number;
-  isLiked: boolean;
-}
-
-interface Comment {
-  commentId: string;
-  comment: string;
-  timestamp: Date;
-  parentId: string;
-  parentType: "ParentComment" | "ParentPost";
-  uid: string;
-  author: User;
-  likes: number;
-  isLiked: boolean;
-  replies?: Comment[];
-}
+import {
+  Link,
+  useLocation,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
+import type { User, Post, Reply } from "../types";
+import {
+  addCommentReplies,
+  addCommentReply,
+  fetchCommentByCommentId,
+  fetchCommentByPostId,
+  replyToComment,
+  replyToPost,
+} from "../functions/forumApi";
 
 interface PostPageProps {
   currentUser: User;
 }
 
 export default function PostPage() {
-  const postId = useParams();
-  if (!postId) return null;
+  const postId = useParams().postId;
+  const oriPost = useLocation().state.post as Post | undefined;
+  if (!postId || !oriPost) return null;
+
+  const [pageNumber, setPageNumber] = useState(1);
+  const {
+    commentList,
+    loading,
+    error,
+    hasMore,
+    deleteCommentFromList,
+    addCommentToList,
+    setCommentList,
+  } = fetchCommentByPostId(postId, pageNumber);
+
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const observerTarget = observerRef.current;
+    if (!observerTarget) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !loading && hasMore) {
+          setPageNumber((prev) => prev + 1);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1,
+      }
+    );
+    observer.observe(observerTarget);
+    return () => {
+      if (observerTarget) {
+        observer.unobserve(observerTarget);
+      }
+      observer.disconnect();
+    };
+  }, [hasMore, loading]);
 
   const { currentUser } = useOutletContext<PostPageProps>();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock data - replace with actual data from your backend
-  const [post] = useState<Post>({
-    postId: "1",
-    title: "Need help with assignment 1",
-    details:
-      "I'm struggling with the first part of the assignment. Can someone explain the concept of recursion? I've been trying to understand it for hours but I'm still confused about how the function calls itself and when it stops. Any help would be appreciated!",
-    author: { userId: "1", username: "StudentUser" },
-    timestamp: new Date("2025-06-23T14:45:00Z"),
-    groupName: "CS1101",
-    likes: 20,
-    views: 150,
-    isLiked: false,
-  });
-
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      commentId: "1",
-      comment:
-        "Recursion is a method where the solution to a problem depends on solutions to smaller instances of the same problem. Think of it like Russian dolls - each doll contains a smaller version of itself.",
-      timestamp: new Date("2025-06-23T15:30:00Z"),
-      parentId: "1",
-      parentType: "ParentPost",
-      uid: "2",
-      author: { userId: "2", username: "TutorUser" },
-      likes: 15,
-      isLiked: false,
-      replies: [
-        {
-          commentId: "2",
-          comment:
-            "That's a great analogy! Can you provide a simple code example?",
-          timestamp: new Date("2025-06-23T16:00:00Z"),
-          parentId: "1",
-          parentType: "ParentComment",
-          uid: "3",
-          author: { userId: "3", username: "CuriousStudent" },
-          likes: 5,
-          isLiked: false,
-          replies: [
-            {
-              commentId: "3",
-              comment:
-                "Here's a simple factorial example: function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }",
-              timestamp: new Date("2025-06-23T16:15:00Z"),
-              parentId: "2",
-              parentType: "ParentComment",
-              uid: "2",
-              author: { userId: "2", username: "TutorUser" },
-              likes: 8,
-              isLiked: false,
-            },
-          ],
-        },
-        {
-          commentId: "4",
-          comment: "This helped me understand it better too, thanks!",
-          timestamp: new Date("2025-06-23T17:00:00Z"),
-          parentId: "1",
-          parentType: "ParentComment",
-          uid: "4",
-          author: { userId: "4", username: "AnotherStudent" },
-          likes: 3,
-          isLiked: false,
-        },
-      ],
-    },
-    {
-      commentId: "5",
-      comment:
-        "I recommend watching some YouTube videos on recursion. Visual explanations really help!",
-      timestamp: new Date("2025-06-23T18:00:00Z"),
-      parentId: "1",
-      parentType: "ParentPost",
-      uid: "5",
-      author: { userId: "5", username: "HelpfulPeer" },
-      likes: 7,
-      isLiked: false,
-    },
-  ]);
+  const [post] = useState<Post>(oriPost);
 
   const fetchPostData = async () => {
     // TODO: Fetch post data from backend
@@ -146,104 +91,35 @@ export default function PostPage() {
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
-
     setIsSubmitting(true);
-
-    // TODO: Implement submit comment functionality
-    console.log("Submit comment:", {
-      comment: newComment,
-      parentId: postId,
-      parentType: "ParentPost",
-      uid: currentUser.userId,
-    });
-
-    // Mock adding comment to state
-    const mockComment: Comment = {
-      commentId: Date.now().toString(),
-      comment: newComment,
-      timestamp: new Date(),
-      parentId: postId,
-      parentType: "ParentPost",
-      uid: currentUser.userId,
-      author: currentUser,
-      likes: 0,
-      isLiked: false,
-    };
-
-    setComments([...comments, mockComment]);
-    setNewComment("");
-    setIsSubmitting(false);
+    try {
+      const newReply = await replyToPost(postId, newComment);
+      addCommentToList(newReply);
+      post.replies += 1; // Update replies count in the post
+      setNewComment("");
+      setIsSubmitting(false);
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+      setIsSubmitting(false);
+    }
   };
 
-  const handleLikeComment = (commentId: string) => {
-    // TODO: Implement like comment functionality
-    console.log("Like comment:", commentId);
+  const handleLikeComment = (commentId: string) => {};
 
-    // Mock update comment likes
-    const updateCommentLikes = (commentsList: Comment[]): Comment[] => {
-      return commentsList.map((comment) => {
-        if (comment.commentId === commentId) {
-          return {
-            ...comment,
-            likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
-            isLiked: !comment.isLiked,
-          };
-        }
-        if (comment.replies) {
-          return {
-            ...comment,
-            replies: updateCommentLikes(comment.replies),
-          };
-        }
-        return comment;
-      });
-    };
-
-    setComments(updateCommentLikes(comments));
+  const handleReplyToComment = async (
+    parentCommentId: string,
+    replyText: string
+  ) => {
+    const newComment = await replyToComment(parentCommentId, replyText);
+    setCommentList((prev) =>
+      addCommentReply(prev, parentCommentId, newComment)
+    );
   };
 
-  const handleReplyToComment = (parentCommentId: string, replyText: string) => {
-    // TODO: Implement reply to comment functionality
-    console.log("Reply to comment:", { parentCommentId, replyText });
-
-    // Mock adding reply
-    const mockReply: Comment = {
-      commentId: Date.now().toString(),
-      comment: replyText,
-      timestamp: new Date(),
-      parentId: parentCommentId,
-      parentType: "ParentComment",
-      uid: currentUser.userId,
-      author: currentUser,
-      likes: 0,
-      isLiked: false,
-    };
-
-    const addReplyToComment = (commentsList: Comment[]): Comment[] => {
-      return commentsList.map((comment) => {
-        if (comment.commentId === parentCommentId) {
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), mockReply],
-          };
-        }
-        if (comment.replies) {
-          return {
-            ...comment,
-            replies: addReplyToComment(comment.replies),
-          };
-        }
-        return comment;
-      });
-    };
-
-    setComments(addReplyToComment(comments));
+  const expandCommentComments = async (commentId: string) => {
+    const comments = await fetchCommentByCommentId(commentId);
+    setCommentList((prev) => addCommentReplies(prev, commentId, comments));
   };
-
-  useEffect(() => {
-    fetchPostData();
-    fetchComments();
-  }, [postId]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -271,15 +147,13 @@ export default function PostPage() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-600">
-                  {post.author.username.charAt(0).toUpperCase()}
+                  {post.uid.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">
-                  {post.author.username}
-                </p>
+                <p className="font-medium text-gray-900">{post.uid}</p>
                 <p className="text-sm text-gray-500">
-                  {formatDistanceToNow(post.timestamp, { addSuffix: true })}
+                  {formatDistanceToNow(post.createdAt, { addSuffix: true })}
                 </p>
               </div>
             </div>
@@ -306,7 +180,7 @@ export default function PostPage() {
 
               <div className="flex items-center gap-2 text-gray-500">
                 <FaRegComment className="w-4 h-4" />
-                <span className="text-sm">{comments.length} comments</span>
+                <span className="text-sm">{post.replies} comments</span>
               </div>
 
               <div className="flex items-center gap-2 text-gray-500">
@@ -348,7 +222,7 @@ export default function PostPage() {
 
           {/* Comments */}
           <div className="space-y-4">
-            {comments.map((comment) => (
+            {commentList.map((comment) => (
               <CommentItem
                 key={comment.commentId}
                 comment={comment}
@@ -356,8 +230,22 @@ export default function PostPage() {
                 onLike={handleLikeComment}
                 onReply={handleReplyToComment}
                 depth={0}
+                expandCommentComments={expandCommentComments}
               />
             ))}
+            {hasMore && (
+              <div
+                ref={observerRef}
+                className="col-span-2 text-center mt-4 h-12"
+              >
+                {loading ? (
+                  <p>Loading more comments...</p>
+                ) : (
+                  <p>Scroll to load more</p>
+                )}
+              </div>
+            )}
+            <div>{error && "...Error loading comments..."}</div>
           </div>
         </div>
       </div>

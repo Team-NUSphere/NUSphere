@@ -12,11 +12,17 @@ interface GroupListProps {
   setSelectedGroup: (group: { groupId: string; groupName: string }) => void;
 }
 
-export default function GroupList({ groups = [] }: { groups?: Group[] }) {
+export default function GroupList({
+  groups = [],
+  handleDeleteMyGroup,
+}: {
+  groups?: Group[];
+  handleDeleteMyGroup?: (groupId: string) => void;
+}) {
   const { currentUser, handleEditGroup, searchQuery, setSelectedGroup } =
     useOutletContext<GroupListProps>();
 
-  if (groups && groups.length !== 0) {
+  if (groups && handleDeleteMyGroup) {
     return (
       <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 mt-4 h-min">
         {groups.map((group) => (
@@ -24,6 +30,12 @@ export default function GroupList({ groups = [] }: { groups?: Group[] }) {
             key={group.groupId}
             className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
             to={`/forum/group/${group.groupId}`}
+            onClick={() => {
+              setSelectedGroup({
+                groupId: group.groupId,
+                groupName: group.groupName,
+              });
+            }}
           >
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -36,28 +48,26 @@ export default function GroupList({ groups = [] }: { groups?: Group[] }) {
                 </span>
               </div>
             </div>
-            {/* {group.owner.userId === currentUser.userId && (
-              <div className="px-6 pb-4 flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditGroup?.(group.groupId);
-                  }}
-                  className="text-blue-600 hover:underline text-sm"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteGroup?.(group.groupId);
-                  }}
-                  className="text-red-600 hover:underline text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            )} */}
+            <div className="px-6 pb-4 flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleEditGroup?.(group);
+                }}
+                className="text-blue-600 hover:underline text-sm"
+              >
+                Edit
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteMyGroup(group.groupId);
+                }}
+                className="text-red-600 hover:underline text-sm"
+              >
+                Delete
+              </button>
+            </div>
           </Link>
         ))}
       </div>

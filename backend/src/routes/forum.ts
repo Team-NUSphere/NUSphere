@@ -8,6 +8,8 @@ import {
   handleGetCommentComments,
   handleGetGroupList,
   handleGetGroupPostList,
+  handleGetMyGroupList,
+  handleGetMyPostList,
   handleGetPostComments,
   handleReplyToComment,
   handleReplyToPost,
@@ -41,5 +43,8 @@ router
   .post(handleReplyToComment)
   .put(handleUpdateReply)
   .delete(handleDeleteReply);
+
+router.get("/myPosts", handleGetMyPostList);
+router.get("/myGroups", handleGetMyGroupList);
 
 export default router;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ForumHeader from "../components/ForumHeader";
 import CreatePostForm from "../components/CreatePostForm";
-import type { Post, Group, User, Reply } from "../types";
+import type { Post, Group, User } from "../types";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { getAuth } from "../contexts/authContext";
 import CreateGroupForm from "../components/CreateGroupForm";

@@ -33,6 +33,7 @@ export function fetchAllPosts(query: string = "", pageNumber: number = 1) {
       signal: signal,
     })
       .then((res) => {
+        if (!res || !res.data) return;
         const postList = res.data as Post[];
         setPostList((prev) => [...new Set([...prev, ...res.data])]);
         setHasMore(postList.length > 0);
@@ -126,14 +127,6 @@ export function fetchPostsByGroupId(
   }
 
   return { postList, loading, error, hasMore, groupName, deletePostFromList };
-}
-
-export async function fetchPostById(postId: string): Promise<Post> {
-  const res = await axiosApi({
-    method: "GET",
-    url: `/forum/posts/${postId}`,
-  });
-  return res.data;
 }
 
 export async function createPost(
@@ -269,14 +262,114 @@ export async function deleteGroup(groupId: string): Promise<void> {
 
 /** ------------------------ REPLIES ------------------------ **/
 
-export async function addReplyToPost(
+export function fetchCommentByPostId(postId: string, page: number = 1) {
+  const [commentList, setCommentList] = useState<Reply[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: `/forum/post/${postId}`,
+      params: {
+        page: page,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        if (!res || !res.data) return;
+        setCommentList((prev) => [...new Set([...prev, ...res.data])]);
+        setHasMore(res.data.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [page]);
+
+  function deleteCommentFromList(replyId: string) {
+    setCommentList((prev) => prev.filter((post) => post.commentId !== replyId));
+  }
+
+  function addCommentToList(newReply: Reply) {
+    setCommentList((prev) => [...new Set([newReply, ...prev])]);
+  }
+
+  return {
+    commentList,
+    loading,
+    error,
+    hasMore,
+    deleteCommentFromList,
+    addCommentToList,
+    setCommentList,
+  };
+}
+
+export async function fetchCommentByCommentId(
+  commentId: string
+): Promise<Reply[]> {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/forum/comment/${commentId}`,
+  });
+  return res.data;
+}
+
+export async function replyToPost(
   postId: string,
   content: string
 ): Promise<Reply> {
-  const res = await axios.post(`${backend}/posts/${postId}/replies`, {
-    content,
+  const res = await axiosApi({
+    method: "POST",
+    url: `/forum/post/${postId}`,
+    data: {
+      content: content,
+    },
   });
   return res.data;
+}
+
+export async function replyToComment(commentId: string, content: string) {
+  const res = await axiosApi({
+    method: "POST",
+    url: `/forum/comment/${commentId}`,
+    data: {
+      content: content,
+    },
+  });
+  return res.data;
+}
+
+export async function updateReply(commentId: string, content: string) {
+  const res = await axiosApi({
+    method: "PUT",
+    url: `/forum/comment/${commentId}`,
+    data: {
+      content: content,
+    },
+  });
+  return res.data;
+}
+
+export async function deleteReply(commentId: string): Promise<void> {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/comment/${commentId}`,
+  });
 }
 
 export async function likeReply(
@@ -286,21 +379,183 @@ export async function likeReply(
   await axios.post(`${backend}/posts/${postId}/replies/${replyId}/like`);
 }
 
-export async function deleteReply(
-  postId: string,
-  replyId: string
-): Promise<void> {
-  await axios.delete(`${backend}/posts/${postId}/replies/${replyId}`);
-}
-
 /** ------------------------ MY POSTS / GROUPS ------------------------ **/
 
-export async function fetchMyPosts(): Promise<Post[]> {
-  const res = await axios.get(`${backend}/me/posts`);
-  return res.data;
+export function fetchMyPosts(query: string = "", pageNumber: number = 1) {
+  const [myPostList, setMyPostList] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMyPostList([]);
+  }, [query]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: "/forum/myPosts",
+      params: {
+        q: query,
+        page: pageNumber,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        if (!res || !res.data) return;
+        const postList = res.data as Post[];
+        setMyPostList((prev) => [...new Set([...prev, ...res.data])]);
+        setHasMore(postList.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [pageNumber, query]);
+
+  function deletePostFromList(postId: string) {
+    setMyPostList((prev) => prev.filter((post) => post.postId !== postId));
+  }
+
+  return { myPostList, loading, error, hasMore, deletePostFromList };
 }
 
-export async function fetchMyGroups(): Promise<Group[]> {
-  const res = await axios.get(`${backend}/me/groups`);
-  return res.data;
+export function fetchMyGroups(query: string = "", pageNumber: number = 1) {
+  const [myGroupList, setMyGroupList] = useState<Group[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+
+  useEffect(() => {
+    setMyGroupList([]);
+  }, [query]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    axiosApi({
+      method: "GET",
+      url: "/forum/myGroups",
+      params: {
+        q: query,
+        page: pageNumber,
+      },
+      signal: signal,
+    })
+      .then((res) => {
+        if (!res || !res.data) return;
+        setMyGroupList((prev) => [...new Set([...prev, ...res.data])]);
+        setHasMore(res.data.length > 0);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (axios.isCancel(e)) {
+          console.log("Request cancelled: " + e.message);
+        }
+        console.error(e);
+        setError(true);
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [query, pageNumber]);
+
+  const deleteGroupFromList = (groupId: string) => {
+    setMyGroupList((prev) => prev.filter((g) => g.groupId !== groupId));
+  };
+
+  return {
+    myGroupList,
+    loading,
+    error,
+    hasMore,
+    deleteGroupFromList,
+  };
+}
+
+/** ------------------------ FRONTEND COMMENT FORMATTING ------------------------ **/
+export function addCommentReply(
+  comments: Reply[],
+  targetId: string,
+  newReply: Reply
+): Reply[] {
+  return updateNestedComments(comments, targetId, (comment) => {
+    return {
+      ...comment,
+      Replies: [...comment.Replies, newReply],
+    };
+  });
+}
+
+export function addCommentReplies(
+  comments: Reply[],
+  targetId: string,
+  newReplies: Reply[]
+): Reply[] {
+  return updateNestedComments(comments, targetId, (comment) => {
+    return {
+      ...comment,
+      Replies: [...comment.Replies, ...newReplies],
+    };
+  });
+}
+
+export function editComment(
+  comments: Reply[],
+  targetId: string,
+  content: string
+): Reply[] {
+  return updateNestedComments(comments, targetId, (comment) => {
+    return {
+      ...comment,
+      comment: content,
+    };
+  });
+}
+
+export function deleteCommentReply(
+  comments: Reply[],
+  parentId: string,
+  targetId: string
+): Reply[] {
+  return updateNestedComments(comments, parentId, (comment) => {
+    return {
+      ...comment,
+      Replies: comment.Replies.filter((reply) => reply.commentId !== targetId),
+    };
+  });
+}
+
+export function updateNestedComments(
+  commentList: Reply[],
+  targetId: string,
+  updateFn: (comment: Reply) => Reply
+): Reply[] {
+  return commentList.map((comment) => {
+    if (comment.commentId === targetId) {
+      return updateFn(comment);
+    } else if (comment.Replies.length > 0) {
+      return {
+        ...comment,
+        Replies: updateNestedComments(comment.Replies, targetId, updateFn),
+      };
+    } else {
+      return comment;
+    }
+  });
 }

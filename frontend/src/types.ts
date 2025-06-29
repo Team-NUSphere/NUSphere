@@ -4,17 +4,15 @@ export interface User {
 }
 
 export interface Reply {
-  replyId: string;
-  author: User;
-  content: string;
-  timestamp: Date;
+  commentId: string;
+  uid: string;
+  comment: string;
+  createdAt: Date;
   likes: number;
   isLiked: boolean;
-  replies: ReplyRecord;
-}
-
-export interface ReplyRecord {
-  [replyId: string]: Reply;
+  Replies: Reply[];
+  parentId: string;
+  replies: number;
 }
 
 export interface Post {
@@ -29,10 +27,6 @@ export interface Post {
   views: number;
   isLiked: boolean;
   replies: number;
-}
-
-export interface PostRecord {
-  [postId: string]: Post;
 }
 
 export interface Group {

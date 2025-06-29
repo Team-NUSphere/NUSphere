@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import type { User, Post } from "../types";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 
 interface PostCardProps {
   post: Post;
@@ -17,23 +17,31 @@ export default function PostCard({
   onLike,
   handleDeletePost,
 }: PostCardProps) {
+  const navigate = useNavigate();
   const { currentUser, handleEditPost } = useOutletContext<{
     currentUser: User;
     handleEditPost?: (post: Post) => void;
   }>();
 
   return (
-    <Link to={`/forum/post/${post.postId}`} className="no-underline">
+    <Link
+      to={`/forum/post/${post.postId}`}
+      state={{ post: post }}
+      className="no-underline"
+    >
       <div className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
         <div className="p-6">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Link
+              <button
                 className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full transition-colors hover:bg-blue-200"
-                to={`/forum/group/${post.groupName}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/forum/group/${post.groupId}`);
+                }}
               >
                 {post.groupName}
-              </Link>
+              </button>
               <span className="text-sm text-gray-500">
                 {post.uid} •{" "}
                 {formatDistanceToNow(post.createdAt, {
