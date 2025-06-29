@@ -33,7 +33,7 @@ export default function DayColumn({
     "HH:mm:ss",
     baseDate
   );
-  
+
   const alternativeClasses = selectedClass
     ? findAlternativeClasses(allModuleClasses, classes, selectedClass)
     : [];
@@ -50,7 +50,7 @@ export default function DayColumn({
 
   return (
     <li
-      className="flex flex-col flex-shrink-0"
+      className="flex flex-col flex-grow"
       style={{ minWidth: `${minColumnWidth}px` }}
     >
       {/* Day header */}
