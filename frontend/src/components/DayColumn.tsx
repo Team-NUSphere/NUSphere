@@ -2,17 +2,24 @@ import clsx from "clsx";
 import DayClass from "./DayClass";
 import { differenceInMinutes, parse } from "date-fns";
 import type { UserClassType } from "../contexts/timetableContext";
+import detectOverlaps from "../functions/timetable_utils";
 
 export default function DayColumn({
-  classes,
   dayName,
   numOfHours,
   startHour,
+  selectedClass,
+  onClassClick,
+  onAlternativeClassClick,
+  allClassesToShow,
 }: {
-  classes: UserClassType[];
   dayName: string;
   numOfHours: number;
   startHour: number;
+  selectedClass?: UserClassType;
+  allClassesToShow: UserClassType[];
+  onClassClick?: (userClass: UserClassType) => void;
+  onAlternativeClassClick?: (alternativeClass: UserClassType) => void;
 }) {
   const numOfMinutes: number = numOfHours * 60;
   const baseDate = new Date();
@@ -22,8 +29,19 @@ export default function DayColumn({
     baseDate
   );
 
+  const processedClasses = detectOverlaps(allClassesToShow, startHour);
+
+  const maxOverlaps = Math.max(
+    1,
+    ...processedClasses.map((cls) => cls.totalColumns)
+  );
+  const minColumnWidth = Math.max(120, maxOverlaps * 80);
+
   return (
-    <li className="flex flex-col flex-grow-1 flex-shrink-0 basis-auto">
+    <li
+      className="flex flex-col flex-grow"
+      style={{ minWidth: `${minColumnWidth}px` }}
+    >
       {/* Day header */}
       <div className="h-10 p-2 text-center sticky top-0 bg-white/70 rounded-lg z-100">
         {dayName}
@@ -42,7 +60,7 @@ export default function DayColumn({
         }}
       >
         <div className="relative h-full">
-          {classes.map((lesson) => {
+          {processedClasses.map((lesson) => {
             const startTime = parse(lesson.startTime, "HH:mm:ss", baseDate);
             const endTime = parse(lesson.endTime, "HH:mm:ss", baseDate);
             const topPercentage =
@@ -51,6 +69,13 @@ export default function DayColumn({
               (differenceInMinutes(endTime, startTime) * 100) / numOfMinutes;
             const zIndex = Math.floor(topPercentage);
 
+            const widthPercentage = 100 / lesson.totalColumns;
+            const leftPercentage = (lesson.column * 100) / lesson.totalColumns;
+
+            const isUserClass = lesson.chosen || false;
+            const isAlternative = !isUserClass;
+            const isSelected = selectedClass === lesson;
+
             return (
               <DayClass
                 key={lesson.classId}
@@ -58,8 +83,22 @@ export default function DayColumn({
                 style={{
                   top: `${topPercentage}%`,
                   height: `${heightPercentage}%`,
+                  left: `${leftPercentage}%`,
+                  width: `${widthPercentage}%`,
                   zIndex: zIndex,
                 }}
+                onClick={() => {
+                  if (isUserClass && onClassClick) {
+                    onClassClick(lesson);
+                  }
+                }}
+                onAlternativeClick={() => {
+                  if (isAlternative && onAlternativeClassClick) {
+                    onAlternativeClassClick(lesson);
+                  }
+                }}
+                isSelected={isSelected}
+                isAlternative={isAlternative}
               />
             );
           })}

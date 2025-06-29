@@ -42,6 +42,7 @@ export type UserClassType = {
   endDate?: string;
   weekInterval?: number;
   moduleId: string;
+  chosen?: boolean;
 };
 
 export function getTimetableContext(): TimetableContextType {
@@ -68,6 +69,10 @@ interface TimetableContextType {
   modifyEvent: (event: UserEventType) => Promise<(reason?: any) => void>;
   addEvent: (event: UserEventType) => Promise<(reason?: any) => void>;
   deleteEvent: (eventId: string) => Promise<(reason?: any) => void>;
+  getModuleClasses: (
+    moduleCode: string,
+    lessonType: string
+  ) => Promise<UserClassType[]>;
 }
 
 const TimetableContext = createContext<TimetableContextType | undefined>(
@@ -151,6 +156,33 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     return controller.abort;
   }
 
+  async function getModuleClasses(
+    moduleCode: string,
+    lessonType: string
+  ): Promise<UserClassType[]> {
+    if (!userIdToken) return [];
+    const controller = new AbortController();
+    const signal = controller.signal;
+    try {
+      const data = await axiosApi({
+        method: "GET",
+        url: `/userTimetable/modules/${moduleCode}/classes/${lessonType}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: signal,
+      });
+      return data.data as UserClassType[];
+    } catch (e) {
+      if (axios.isCancel(e)) {
+        console.log("Request cancelled: " + e.message);
+      } else {
+        console.error(e);
+      }
+      return [];
+    }
+  }
+
   // removeModule -> send del req -> backend send status code
   async function removeModule(moduleCode: string) {
     if (!userIdToken) return () => {};
@@ -191,15 +223,17 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     lessonType: string,
     classNo: string
   ) {
+    console.log(
+      `Changing class for module ${moduleCode}, lessonType ${lessonType}, classNo ${classNo}`
+    );
     if (!userIdToken) return () => {};
     setUserClasses((prev) =>
       prev.filter(
         (lesson) =>
-          lesson.moduleId === moduleCode &&
-          lesson.lessonType === lessonType &&
-          lesson.classNo === classNo
+          !(lesson.moduleId === moduleCode && lesson.lessonType === lessonType)
       )
     );
+    console.log(userClasses);
     const controller = new AbortController();
     const signal = controller.signal;
     axiosApi({
@@ -215,10 +249,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
       signal: signal,
     })
       .then((res) => {
-        setUserClasses((prev) => ({
-          ...prev,
-          ...res.data,
-        }));
+        setUserClasses((prev) => [...prev, ...(res.data as UserClassType[])]);
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -228,7 +259,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         }
       });
 
-    return controller.abort;
+    return () => controller.abort();
   }
 
   // function getEvents -> get req, backend return list of Events
@@ -372,6 +403,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         modifyEvent: modifyEvent,
         addEvent: addEvent,
         deleteEvent: deleteEvent,
+        getModuleClasses: getModuleClasses,
       }}
     >
       {children}

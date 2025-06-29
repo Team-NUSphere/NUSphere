@@ -296,3 +296,30 @@ export const handleGetAllUserModules = async (
     next(error);
   }
 };
+
+export const handleGetClasses = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    res.sendStatus(500);
+    return;
+  }
+  try {
+    const moduleCode = req.params.moduleCode;
+    const lessonType = req.params.lessonType;
+    if (moduleCode && lessonType) {
+      const module = await Module.findByPk(moduleCode);
+      if (!module) {
+        throw new Error(`Module with code ${moduleCode} not found`);
+      }
+      const classes = await module.getClasses({ where: { lessonType: lessonType } });
+      res.json(classes);
+    } else {
+      throw new Error("Module code or lesson type is missing");
+    }
+  } catch (error) {
+    next(error);
+  }
+}
