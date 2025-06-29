@@ -27,6 +27,7 @@ class Comment extends Model<
 > {
   declare commentId: CreationOptional<string>;
   declare comment: string;
+  declare replies: CreationOptional<number>;
   // declare likes: number;
 
   declare parentId: string;
@@ -88,6 +89,10 @@ class Comment extends Model<
           allowNull: false,
           type: DataTypes.STRING,
         },
+        replies: {
+          defaultValue: 0,
+          type: DataTypes.INTEGER,
+        },
         uid: {
           allowNull: false,
           type: DataTypes.STRING,
@@ -119,6 +124,15 @@ class Comment extends Model<
         delete instance.ParentPost;
         delete instance.ParentComment;
       }
+    });
+    Comment.afterDestroy(async (comment, options) => {
+      await Comment.destroy({
+        transaction: options.transaction,
+        where: {
+          parentId: comment.commentId,
+          parentType: "ParentComment",
+        },
+      });
     });
   }
 }

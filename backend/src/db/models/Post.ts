@@ -43,6 +43,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare User?: NonAttribute<User>;
   declare Replies?: NonAttribute<Comment[]>;
   declare groupName?: NonAttribute<string>;
+  declare createdAt: NonAttribute<Date>;
 
   async getGroupName() {
     this.groupName = (await this.getForumGroup()).groupName;
@@ -54,8 +55,8 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
     Post.belongsTo(User, { as: "User", foreignKey: "uid" });
     Post.hasMany(Comment, {
       as: "Replies",
+      constraints: false,
       foreignKey: "parentId",
-      onDelete: "CASCADE",
       scope: { parentType: "ParentPost" },
     });
   }
@@ -100,6 +101,16 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
         sequelize,
       },
     );
+
+    Post.afterDestroy(async (post, options) => {
+      await Comment.destroy({
+        transaction: options.transaction,
+        where: {
+          parentId: post.postId,
+          parentType: "ParentPost",
+        },
+      });
+    });
   }
 }
 

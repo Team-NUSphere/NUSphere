@@ -1,3 +1,4 @@
+import Comment from "#db/models/Comment.js";
 import ForumGroup from "#db/models/ForumGroup.js";
 import Post from "#db/models/Post.js";
 import { NextFunction, Request, Response } from "express";
@@ -9,6 +10,7 @@ export const handleGetGroupList = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  console.log("getting group list");
   const params = req.query;
   try {
     if (typeof params.q == "string" && typeof params.page == "string") {
@@ -146,10 +148,22 @@ export const handleGetAllPosts = async (
       const page = parseInt(params.page);
       const { posts } = await searchAllPosts(params.q, page, 10);
       const formattedPosts = await Promise.all(
-        posts.map((post) => post.getGroupName()),
+        posts.map(async (post) => {
+          await post.getGroupName();
+          return {
+            createdAt: post.createdAt,
+            details: post.details,
+            groupId: post.groupId,
+            groupName: post.groupName,
+            likes: post.likes,
+            postId: post.postId,
+            replies: post.replies,
+            title: post.title,
+            uid: post.uid,
+            views: post.views,
+          };
+        }),
       );
-      console.log(posts);
-      console.log(formattedPosts);
       res.json(formattedPosts);
     } else {
       const { posts } = await searchAllPosts(
@@ -354,6 +368,187 @@ export const handleDeletePost = async (
     await post.destroy();
     await group.decrement("postCount");
     res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Comments
+export const handleGetPostComments = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const postId = req.params.postId;
+  const params = req.query;
+  try {
+    if (typeof params.page == "string") {
+      const post = await Post.findByPk(postId);
+      if (!post) {
+        res.status(404).send("Post Not Found");
+        return;
+      }
+      const comments = await searchPostComments(
+        post,
+        parseInt(params.page),
+        10,
+      );
+
+      res.json(
+        comments.map((comment) => ({ ...comment.toJSON(), Replies: [] })),
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+  return;
+};
+
+const searchPostComments = async (post: Post, page = 1, pageSize = 10) => {
+  const offset = (page - 1) * pageSize;
+  const comments = await post.getReplies({
+    attributes: [
+      "commentId",
+      "comment",
+      "parentId",
+      "parentType",
+      "uid",
+      "createdAt",
+      "replies",
+    ],
+    limit: pageSize,
+    offset: offset,
+    order: [["createdAt", "DESC"]],
+  });
+  return comments;
+};
+
+export const handleGetCommentComments = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const commentId = req.params.commentId;
+  try {
+    const parentComment = await Comment.findByPk(commentId);
+    if (!parentComment) {
+      res.status(404).send("Comment Not Found");
+      return;
+    }
+    const comments = await parentComment.getReplies();
+    res.json(comments.map((comment) => ({ ...comment.toJSON(), Replies: [] })));
+  } catch (error) {
+    next(error);
+  }
+  return;
+};
+
+export const handleReplyToComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const commentId = req.params.commentId;
+  const data = req.body as { content: string };
+  try {
+    const comment = await Comment.findByPk(commentId);
+    if (!comment) {
+      res.status(404).send("Comment Not Found");
+      return;
+    }
+    if (!req.user) {
+      res.status(401).send("User Not Found");
+      return;
+    }
+    const childComment = await comment.createReply({
+      comment: data.content,
+      parentId: comment.commentId,
+      parentType: "ParentComment",
+      uid: req.user.uid,
+    });
+    await comment.increment("replies");
+    res.json({ ...childComment.toJSON(), Replies: [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleReplyToPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const postId = req.params.postId;
+  const data = req.body as { content: string };
+  try {
+    const post = await Post.findByPk(postId);
+    if (!post) {
+      res.status(404).send("Post Not Found");
+      return;
+    }
+    if (!req.user) {
+      res.status(401).send("User Not Found");
+      return;
+    }
+    const comment = await post.createReply({
+      comment: data.content,
+      parentId: post.postId,
+      parentType: "ParentPost",
+      uid: req.user.uid,
+    });
+    await post.increment("replies");
+    res.json({ ...comment.toJSON(), Replies: [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleDeleteReply = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const commentId = req.params.commentId;
+  try {
+    const comments = await req.user?.getComments({
+      where: {
+        commentId: commentId,
+      },
+    });
+    if (!comments || comments.length === 0) {
+      res.status(404).send("Comment not found");
+      return;
+    }
+    const comment = comments[0];
+    await comment.destroy();
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleUpdateReply = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const commentId = req.params.commentId;
+  const data = req.body as { content: string };
+  try {
+    const comments = await req.user?.getComments({
+      where: {
+        commentId: commentId,
+      },
+    });
+    if (!comments || comments.length === 0) {
+      res.status(404).send("Comment not found");
+      return;
+    }
+    const comment = comments[0];
+    const updated = await comment.update({
+      comment: data.content,
+    });
+    res.json(updated);
   } catch (error) {
     next(error);
   }
