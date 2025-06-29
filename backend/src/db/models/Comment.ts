@@ -19,7 +19,7 @@ import User from "./User.js";
 interface Comment extends BelongsToMixin<Post, string, "ParentPost"> {}
 interface Comment extends BelongsToMixin<Comment, string, "ParentComment"> {}
 interface Comment extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
-interface Comment extends BelongsToMixin<User, string, "User"> {}
+interface Comment extends BelongsToMixin<User, string, "Author"> {}
 
 class Comment extends Model<
   InferAttributes<Comment>,
@@ -27,6 +27,7 @@ class Comment extends Model<
 > {
   declare commentId: CreationOptional<string>;
   declare comment: string;
+  declare replies: CreationOptional<number>;
   // declare likes: number;
 
   declare parentId: string;
@@ -38,6 +39,7 @@ class Comment extends Model<
   declare ParentComment?: NonAttribute<Comment>;
   declare ParentPost?: NonAttribute<Post>;
   declare Replies?: NonAttribute<Comment[]>;
+  declare Author?: NonAttribute<User>;
 
   getParent(options?: BelongsToGetAssociationMixinOptions) {
     const mixinMethodName =
@@ -63,7 +65,7 @@ class Comment extends Model<
       foreignKey: "parentId",
       scope: { parentType: "ParentPost" },
     });
-    Comment.belongsTo(User, { as: "User", foreignKey: "uid" });
+    Comment.belongsTo(User, { as: "Author", foreignKey: "uid" });
   }
 
   static initModel(sequelize: Sequelize) {
@@ -76,6 +78,7 @@ class Comment extends Model<
         commentId: {
           allowNull: false,
           defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,
           type: DataTypes.UUID,
         },
         parentId: {
@@ -85,6 +88,10 @@ class Comment extends Model<
         parentType: {
           allowNull: false,
           type: DataTypes.STRING,
+        },
+        replies: {
+          defaultValue: 0,
+          type: DataTypes.INTEGER,
         },
         uid: {
           allowNull: false,
@@ -115,10 +122,17 @@ class Comment extends Model<
         }
         // To prevent mistakes:
         delete instance.ParentPost;
-        // delete instance.dataValues.;
         delete instance.ParentComment;
-        // delete instance.dataValues.video;
       }
+    });
+    Comment.afterDestroy(async (comment, options) => {
+      await Comment.destroy({
+        transaction: options.transaction,
+        where: {
+          parentId: comment.commentId,
+          parentType: "ParentComment",
+        },
+      });
     });
   }
 }

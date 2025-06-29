@@ -58,7 +58,6 @@ const db: DB = {
 await sequelize.sync();
 
 Object.keys(db).forEach((modelName) => {
-  console.log("associating");
   db[modelName].associate();
 });
 

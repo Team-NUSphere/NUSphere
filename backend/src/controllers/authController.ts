@@ -15,11 +15,11 @@ const handleAuthentication = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  console.log("in auth controller");
   const authHeader: string | undefined = req.headers.authorization;
 
   // userToken is contained in header Bearer
   if (!authHeader?.startsWith("Bearer ")) {
+    console.log("No bearer token");
     res.sendStatus(401);
     return;
   }

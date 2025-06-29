@@ -14,7 +14,7 @@ import {
 
 import UserTimetable from "./UserTimetable.js";
 
-export interface UserModelType {
+export interface UserEventType {
   day: string;
   description?: string;
   endTime: string;
@@ -26,7 +26,7 @@ export interface UserModelType {
 }
 
 interface UserEvent
-  extends BelongsToMixin<UserTimetable, number, "UserTimetable"> {}
+  extends BelongsToMixin<UserTimetable, string, "UserTimetable"> {}
 
 class UserEvent extends Model<
   InferAttributes<UserEvent>,

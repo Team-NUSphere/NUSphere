@@ -1,7 +1,7 @@
 import Class from "#db/models/Class.js";
 import Module from "#db/models/Module.js";
 import User from "#db/models/User.js";
-import UserEvent, { UserModelType } from "#db/models/UserEvents.js";
+import UserEvent, { UserEventType } from "#db/models/UserEvents.js";
 import {
   broadcastToRoom,
   eventsToSocketEvents,
@@ -87,7 +87,7 @@ export const handleCreateNewEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserModelType = req.body as null | UserModelType;
+    const event: null | UserEventType = req.body as null | UserEventType;
     if (!event) throw new Error("No event found in request body");
     const userEvent = await userTimetable.makeNewEvent(event);
     res.status(200);
@@ -115,7 +115,7 @@ export const handleUpdateEvent = async (
   }
   try {
     const userTimetable = await req.user.getUserTimetable();
-    const event: null | UserModelType = req.body as null | UserModelType;
+    const event: null | UserEventType = req.body as null | UserEventType;
     if (!event) throw new Error("No event found in request body");
     const userEvent = await userTimetable.editOrMakeEvent(event);
     res.status(200);

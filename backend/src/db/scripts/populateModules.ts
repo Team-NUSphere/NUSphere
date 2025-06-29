@@ -1,5 +1,6 @@
 import { sequelize } from "#db/index.js";
 import Class from "#db/models/Class.js";
+import ForumGroup from "#db/models/ForumGroup.js";
 import Module from "#db/models/Module.js";
 import { InferCreationAttributes } from "sequelize";
 
@@ -57,6 +58,14 @@ async function populateModuleTable() {
       },
     );
 
+    const ModuleGroupFormatted: InferCreationAttributes<ForumGroup> = {
+      description: description,
+      groupName: `${moduleCode}: ${title}`,
+      ownerId: moduleCode,
+      ownerType: "Module",
+      postCount: 0,
+    };
+
     await Module.create(
       {
         Classes: timetableFormatted,
@@ -67,6 +76,7 @@ async function populateModuleTable() {
         gradingBasis: gradingBasisDescription,
         lessonTypes: [...lessonTypeSet],
         moduleCredit: parseFloat(moduleCredit),
+        ModuleGroup: ModuleGroupFormatted,
         moduleId: moduleCode,
         title: title,
       },
@@ -75,6 +85,10 @@ async function populateModuleTable() {
           {
             as: "Classes",
             model: Class,
+          },
+          {
+            as: "ModuleGroup",
+            model: ForumGroup,
           },
         ],
       },

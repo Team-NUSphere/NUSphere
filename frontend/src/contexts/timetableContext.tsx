@@ -6,7 +6,6 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import { backend } from "../constants";
 import axios from "axios";
 import axiosApi from "../functions/axiosApi";
 
