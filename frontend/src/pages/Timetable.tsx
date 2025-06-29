@@ -1,20 +1,57 @@
 import DayColumn from "../components/DayColumn";
 import { format } from "date-fns";
-import { type UserClassType } from "../contexts/timetableContext";
+import type {
+  UserClassType
+} from "../contexts/timetableContext";
+import { useState, useEffect } from "react";
+import { getTimetableContext } from "../contexts/timetableContext";
 
 export default function Timetable({
   startHour = 0,
   numOfHours = 24,
   classes = [],
+  //allModuleClasses = [],
 }: {
   startHour: number;
   numOfHours: number;
   classes?: UserClassType[];
+  //allModuleClasses?: UserClassType[];
 }) {
   const daysOfWeek = ["MON", "TUE", "WED", "THU", "FRI"];
   const hours = Array.from({ length: numOfHours }, (_, i) => i + startHour);
+
+  const [selectedClass, setSelectedClass] = useState<UserClassType | null>(
+    null
+  );
+
+  const { changeClass } = getTimetableContext();
+
+
+
+  const handleClassClick = (userClass: UserClassType) => {
+    if (selectedClass && selectedClass.classId === userClass.classId) {
+      setSelectedClass(null);
+    } else {
+      setSelectedClass(userClass);
+    }
+  };
+
+  const handleAlternativeClassClick = (alternativeClass: UserClassType) => {
+    console.log(`Switching to alternative class`, alternativeClass);
+    changeClass(alternativeClass.moduleId, alternativeClass.lessonType, alternativeClass.classNo);
+    setSelectedClass(null);
+  };
+
+  useEffect(() => {
+    if (selectedClass) {
+      console.log("Selected class changed to:", selectedClass);
+    }
+  }, [selectedClass]);
+
   return (
-    <div className="overflow-y-auto w-full h-full">
+    <div
+      className="overflow-y-auto w-full h-full overflow-x-auto"
+    >
       <div className="flex flex-row w-full h-min">
         {/* Time column */}
         <div
@@ -40,6 +77,10 @@ export default function Timetable({
                 (event: UserClassType) =>
                   event.day.slice(0, 3).toUpperCase() === day
               )}
+              selectedClass={selectedClass ?? undefined}
+              //allModuleClasses={allModuleClasses}
+              onClassClick={handleClassClick}
+              onAlternativeClassClick={handleAlternativeClassClick}
             ></DayColumn>
           ))}
         </ol>

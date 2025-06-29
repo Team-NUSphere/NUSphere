@@ -7,6 +7,7 @@ import {
   handleRegisterModule,
   handleUpdateClasses,
   handleUpdateEvent,
+  handleGetClasses,
 } from "#controllers/userTimetableController.js";
 import { Router } from "express";
 
@@ -25,5 +26,7 @@ router
   .delete(handleDeleteModule);
 
 router.get("/modules", handleGetAllUserModules);
+
+router.get("/modules/:moduleCode/classes/:lessonType", handleGetClasses);
 
 export default router;
