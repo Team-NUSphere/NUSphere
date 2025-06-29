@@ -120,6 +120,9 @@ export default function Forum() {
                   to="/forum/post"
                   draggable={false}
                   replace={true}
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
                   className={({ isActive }) =>
                     `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
                       isActive
@@ -134,6 +137,9 @@ export default function Forum() {
                   to="/forum/group"
                   draggable={false}
                   replace={true}
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
                   className={({ isActive }) =>
                     `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
                       isActive
@@ -148,6 +154,9 @@ export default function Forum() {
                   to="/forum/mine"
                   draggable={false}
                   replace={true}
+                  onClick={() => {
+                    setSearchQuery("");
+                  }}
                   className={({ isActive }) =>
                     `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
                       isActive
