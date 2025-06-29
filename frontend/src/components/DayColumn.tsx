@@ -15,12 +15,14 @@ export default function DayColumn({
   selectedClass,
   onClassClick,
   onAlternativeClassClick,
+  allModuleClasses,
 }: {
   classes: UserClassType[];
   dayName: string;
   numOfHours: number;
   startHour: number;
   selectedClass?: UserClassType;
+  allModuleClasses: UserClassType[];
   onClassClick?: (userClass: UserClassType) => void;
   onAlternativeClassClick?: (alternativeClass: UserClassType) => void;
 }) {
@@ -31,18 +33,9 @@ export default function DayColumn({
     "HH:mm:ss",
     baseDate
   );
-
-  const { getModuleClasses, moduleClasses } = getTimetableContext();
-  
-  useEffect(() => {
-    if (selectedClass) {
-      getModuleClasses(selectedClass.moduleId, selectedClass.lessonType);
-      console.log(moduleClasses);
-    }
-  }, [selectedClass, getModuleClasses]);
   
   const alternativeClasses = selectedClass
-    ? findAlternativeClasses(moduleClasses, classes, selectedClass)
+    ? findAlternativeClasses(allModuleClasses, classes, selectedClass)
     : [];
 
   const allClassesToShow = [...classes, ...alternativeClasses];

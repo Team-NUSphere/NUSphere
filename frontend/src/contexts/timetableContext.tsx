@@ -56,7 +56,6 @@ interface TimetableContextType {
   userClasses: UserClassType[];
   userEvents: UserEventsType;
   userModules: UserModulesType;
-  moduleClasses: UserClassType[];
   getModules: () => (reason?: any) => void;
   registerModule: (mod: modInfo) => Promise<(reason?: any) => void>;
   removeModule: (moduleCode: string) => Promise<(reason?: any) => void>;
@@ -69,7 +68,10 @@ interface TimetableContextType {
   modifyEvent: (event: UserEventType) => Promise<(reason?: any) => void>;
   addEvent: (event: UserEventType) => Promise<(reason?: any) => void>;
   deleteEvent: (eventId: string) => Promise<(reason?: any) => void>;
-  getModuleClasses: (moduleCode: string, lessonType: string) => (reason?: any) => void;
+  getModuleClasses: (
+    moduleCode: string,
+    lessonType: string
+  ) => Promise<(reason?: any) => void>;
 }
 
 const TimetableContext = createContext<TimetableContextType | undefined>(
@@ -84,7 +86,6 @@ interface TimetableProviderProps {
 export function TimetableProvider({ children }: TimetableProviderProps) {
   const { userIdToken, isAuthenticated } = getAuth();
   const [userClasses, setUserClasses] = useState<UserClassType[]>([]);
-  const [ moduleClasses, setModuleClasses ] = useState<UserClassType[]>([]);
   const [userEvents, setUserEvents] = useState<UserEventsType>({});
   const [userModules, setUserModules] = useState<UserModulesType>({});
 
@@ -154,11 +155,11 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     return controller.abort;
   }
 
-  function getModuleClasses(moduleCode: string, lessonType: string) {
+  async function getModuleClasses(moduleCode: string, lessonType: string) {
     if (!userIdToken) return () => {};
     const controller = new AbortController();
     const signal = controller.signal;
-    axiosApi({
+    await axiosApi({
       method: "GET",
       url: `/userTimetable/modules/${moduleCode}/classes/${lessonType}`,
       headers: {
@@ -167,7 +168,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
       signal: signal,
     })
       .then((res) => {
-        setModuleClasses(res.data);
+        res.data;
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -393,7 +394,6 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         userClasses: userClasses,
         userEvents: userEvents,
         userModules: userModules,
-        moduleClasses: moduleClasses,
         getModules: getModules,
         registerModule: registerModule,
         removeModule: removeModule,

@@ -1,8 +1,6 @@
 import DayColumn from "../components/DayColumn";
 import { format } from "date-fns";
-import type {
-  UserClassType
-} from "../contexts/timetableContext";
+import type { UserClassType } from "../contexts/timetableContext";
 import { useState, useEffect } from "react";
 import { getTimetableContext } from "../contexts/timetableContext";
 
@@ -10,12 +8,11 @@ export default function Timetable({
   startHour = 0,
   numOfHours = 24,
   classes = [],
-  //allModuleClasses = [],
-}: {
+}: 
+{
   startHour: number;
   numOfHours: number;
   classes?: UserClassType[];
-  //allModuleClasses?: UserClassType[];
 }) {
   const daysOfWeek = ["MON", "TUE", "WED", "THU", "FRI"];
   const hours = Array.from({ length: numOfHours }, (_, i) => i + startHour);
@@ -24,9 +21,25 @@ export default function Timetable({
     null
   );
 
-  const { changeClass } = getTimetableContext();
+  const { changeClass, getModuleClasses } = getTimetableContext();
 
+  const [allModuleClasses, setAllModuleClasses] = useState<UserClassType[]>([]);
+  useEffect(() => {
+    const fetchModuleClasses = async () => {
+      if (selectedClass) {
+        const result = await getModuleClasses(
+          selectedClass.moduleId,
+          selectedClass.lessonType
+        ).catch(() => []);
+        console.log("selected"+result)
+        setAllModuleClasses(result as UserClassType[]);
+      } else {
+        setAllModuleClasses([]);
+      }
+    };
 
+    fetchModuleClasses();
+  }, [selectedClass]);
 
   const handleClassClick = (userClass: UserClassType) => {
     if (selectedClass && selectedClass.classId === userClass.classId) {
@@ -38,7 +51,11 @@ export default function Timetable({
 
   const handleAlternativeClassClick = (alternativeClass: UserClassType) => {
     console.log(`Switching to alternative class`, alternativeClass);
-    changeClass(alternativeClass.moduleId, alternativeClass.lessonType, alternativeClass.classNo);
+    changeClass(
+      alternativeClass.moduleId,
+      alternativeClass.lessonType,
+      alternativeClass.classNo
+    );
     setSelectedClass(null);
   };
 
@@ -49,9 +66,7 @@ export default function Timetable({
   }, [selectedClass]);
 
   return (
-    <div
-      className="overflow-y-auto w-full h-full overflow-x-auto"
-    >
+    <div className="overflow-y-auto w-full h-full overflow-x-auto">
       <div className="flex flex-row w-full h-min">
         {/* Time column */}
         <div
@@ -78,7 +93,7 @@ export default function Timetable({
                   event.day.slice(0, 3).toUpperCase() === day
               )}
               selectedClass={selectedClass ?? undefined}
-              //allModuleClasses={allModuleClasses}
+              allModuleClasses={allModuleClasses}
               onClassClick={handleClassClick}
               onAlternativeClassClick={handleAlternativeClassClick}
             ></DayColumn>
