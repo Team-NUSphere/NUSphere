@@ -42,6 +42,7 @@ export type UserClassType = {
   endDate?: string;
   weekInterval?: number;
   moduleId: string;
+  chosen?: boolean;
 };
 
 export function getTimetableContext(): TimetableContextType {
@@ -222,6 +223,9 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     lessonType: string,
     classNo: string
   ) {
+    console.log(
+      `Changing class for module ${moduleCode}, lessonType ${lessonType}, classNo ${classNo}`
+    );
     if (!userIdToken) return () => {};
     setUserClasses((prev) =>
       prev.filter(
@@ -230,6 +234,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
           lesson.lessonType === lessonType)
       )
     );
+    console.log(userClasses);
     const controller = new AbortController();
     const signal = controller.signal;
     axiosApi({
@@ -247,8 +252,8 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
       .then((res) => {
         setUserClasses((prev) => ([
           ...prev,
-          ...res.data as UserClassType[],
-        ]));
+          ...res.data,
+        }));
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
@@ -258,7 +263,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
         }
       });
 
-    return controller.abort;
+    return () => controller.abort();
   }
 
   // function getEvents -> get req, backend return list of Events

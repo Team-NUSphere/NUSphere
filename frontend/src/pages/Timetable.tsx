@@ -3,16 +3,18 @@ import { format } from "date-fns";
 import type { UserClassType } from "../contexts/timetableContext";
 import { useState, useEffect } from "react";
 import { getTimetableContext } from "../contexts/timetableContext";
+import detectOverlaps, {
+  findAlternativeClasses,
+} from "../functions/timetable_utils";
 
 export default function Timetable({
   startHour = 0,
   numOfHours = 24,
   classes = [],
-}: 
-{
+}: {
   startHour: number;
   numOfHours: number;
-  classes?: UserClassType[];
+  classes: UserClassType[];
 }) {
   const daysOfWeek = ["MON", "TUE", "WED", "THU", "FRI"];
   const hours = Array.from({ length: numOfHours }, (_, i) => i + startHour);
@@ -23,22 +25,54 @@ export default function Timetable({
 
   const { changeClass, getModuleClasses } = getTimetableContext();
 
-  const [allModuleClasses, setAllModuleClasses] = useState<UserClassType[]>([]);
+  const [alternativeClasses, setAlternativeClasses] = useState<UserClassType[]>(
+    []
+  );
+  const [allClassesToShow, setAllClassesToShow] = useState<UserClassType[]>([
+    ...classes.map((cls) => ({ ...cls, chosen: true })),
+    ...alternativeClasses.map((cls) => ({
+      ...cls,
+      chosen: false,
+    })),
+  ]);
+
+  useEffect(() => {
+    console.log("Classes:", classes);
+    setAllClassesToShow([
+      ...classes.map((cls) => ({ ...cls, chosen: true })),
+      ...alternativeClasses.map((cls) => ({
+        ...cls,
+        chosen: false,
+      })),
+    ]);
+  }, [classes, alternativeClasses]);
+
   useEffect(() => {
     const fetchModuleClasses = async () => {
       if (selectedClass) {
-        const result = await getModuleClasses(
-          selectedClass.moduleId,
-          selectedClass.lessonType
-        ).catch(() => []);
-        console.log(result)
-        setAllModuleClasses(result as UserClassType[]);
+        try {
+          const result = await getModuleClasses(
+            selectedClass.moduleId,
+            selectedClass.lessonType
+          );
+          console.log("Fetched module classes:", result);
+          setAlternativeClasses(
+            findAlternativeClasses(
+              result as UserClassType[],
+              classes,
+              selectedClass
+            )
+          );
+        } catch (error) {
+          console.error("Error fetching module classes:", error);
+          setAlternativeClasses([]);
+        }
       } else {
-        setAllModuleClasses([]);
+        setAlternativeClasses([]);
+        setAllClassesToShow(classes);
       }
     };
-
-    fetchModuleClasses();
+    (async () => await fetchModuleClasses())();
   }, [selectedClass]);
 
   const handleClassClick = (userClass: UserClassType) => {
@@ -49,9 +83,11 @@ export default function Timetable({
     }
   };
 
-  const handleAlternativeClassClick = (alternativeClass: UserClassType) => {
+  const handleAlternativeClassClick = async (
+    alternativeClass: UserClassType
+  ) => {
     console.log(`Switching to alternative class`, alternativeClass);
-    changeClass(
+    await changeClass(
       alternativeClass.moduleId,
       alternativeClass.lessonType,
       alternativeClass.classNo
@@ -82,12 +118,11 @@ export default function Timetable({
               dayName={day}
               numOfHours={numOfHours}
               startHour={startHour}
-              classes={classes.filter(
+              allClassesToShow={allClassesToShow.filter(
                 (event: UserClassType) =>
                   event.day.slice(0, 3).toUpperCase() === day
               )}
               selectedClass={selectedClass ?? undefined}
-              allModuleClasses={allModuleClasses}
               onClassClick={handleClassClick}
               onAlternativeClassClick={handleAlternativeClassClick}
             ></DayColumn>

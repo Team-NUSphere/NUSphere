@@ -3,26 +3,21 @@ import DayClass from "./DayClass";
 import { differenceInMinutes, parse } from "date-fns";
 import type { UserClassType } from "../contexts/timetableContext";
 import detectOverlaps from "../functions/timetable_utils";
-import { findAlternativeClasses } from "../functions/timetable_utils";
-import { getTimetableContext } from "../contexts/timetableContext";
-import { useEffect } from "react";
 
 export default function DayColumn({
-  classes,
   dayName,
   numOfHours,
   startHour,
   selectedClass,
   onClassClick,
   onAlternativeClassClick,
-  allModuleClasses,
+  allClassesToShow,
 }: {
-  classes: UserClassType[];
   dayName: string;
   numOfHours: number;
   startHour: number;
   selectedClass?: UserClassType;
-  allModuleClasses: UserClassType[];
+  allClassesToShow: UserClassType[];
   onClassClick?: (userClass: UserClassType) => void;
   onAlternativeClassClick?: (alternativeClass: UserClassType) => void;
 }) {
@@ -33,12 +28,6 @@ export default function DayColumn({
     "HH:mm:ss",
     baseDate
   );
-
-  const alternativeClasses = selectedClass
-    ? findAlternativeClasses(allModuleClasses, classes, selectedClass)
-    : [];
-
-  const allClassesToShow = [...classes, ...alternativeClasses.filter(cls => cls.day.slice(0, 3).toUpperCase() === dayName)];
 
   const processedClasses = detectOverlaps(allClassesToShow, startHour);
 
@@ -83,9 +72,7 @@ export default function DayColumn({
             const widthPercentage = 100 / lesson.totalColumns;
             const leftPercentage = (lesson.column * 100) / lesson.totalColumns;
 
-            const isUserClass = classes.some(
-              (cls) => cls.classId === lesson.classId
-            );
+            const isUserClass = lesson.chosen || false;
             const isAlternative = !isUserClass;
             const isSelected = selectedClass === lesson;
 
