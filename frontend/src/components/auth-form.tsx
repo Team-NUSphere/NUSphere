@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { SocialLoginButtons } from "./social-login-buttons";
-import "../output.css";
 import { auth } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -19,7 +18,7 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/timetable";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

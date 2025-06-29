@@ -5,8 +5,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { onAuthStateChanged, type User, type Unsubscribe } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  type User,
+  type Unsubscribe,
+  onIdTokenChanged,
+} from "firebase/auth";
 import { auth } from "../firebase";
+import { backend } from "../constants";
+import axiosApi from "../functions/axiosApi";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -22,12 +29,14 @@ interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
   isLoadingAuth: boolean;
+  userIdToken: string | undefined;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>({
   currentUser: null,
   isAuthenticated: false,
   isLoadingAuth: true,
+  userIdToken: undefined,
 });
 
 // AuthProvider definition
@@ -38,18 +47,78 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
+  const [userIdToken, setUserIdToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setIsLoadingAuth(true);
     const unsubscribe: Unsubscribe = onAuthStateChanged(
       auth,
-      (user: User | null) => {
+      async (user: User | null) => {
         setCurrentUser(user);
         setIsLoadingAuth(false);
+        if (user) setUserIdToken(await user?.getIdToken());
       }
     );
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    setIsLoadingAuth(true);
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      setCurrentUser(user);
+      if (user) {
+        setUserIdToken(await user.getIdToken());
+      } else {
+        setUserIdToken(undefined);
+      }
+      setIsLoadingAuth(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const interceptor = axiosApi.interceptors.request.use(
+      (config) => {
+        if (userIdToken) {
+          config.headers.Authorization = `Bearer ${userIdToken}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      axiosApi.interceptors.request.eject(interceptor);
+    };
+  }, [userIdToken]);
+
+  useEffect(() => {
+    const interceptor = axiosApi.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          try {
+            console.log("Refreshing token...");
+            const newAccessToken = await auth.currentUser?.getIdToken();
+            if (newAccessToken) {
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              setUserIdToken(newAccessToken);
+              return axiosApi(originalRequest);
+            }
+          } catch (refreshError) {
+            console.error("Failed to refresh token:", refreshError);
+            return Promise.reject(error);
+          }
+        }
+      }
+    );
+    return () => {
+      axiosApi.interceptors.response.eject(interceptor);
+    };
+  }, [userIdToken]);
 
   return (
     <AuthContext.Provider
@@ -57,6 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         currentUser,
         isAuthenticated: !!currentUser,
         isLoadingAuth,
+        userIdToken,
       }}
     >
       {children}
@@ -78,9 +148,8 @@ export async function authenticateWithBackend(request: string) {
     console.error("Firebase auth unsuccessful");
   }
   try {
-    const backend =
-      process.env.VITE_BACKENDURL ??
-      "https://nusphere-2d33b7b9d756.herokuapp.com";
+    console.log("authenticating with backend");
+    console.log(backend);
     const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
@@ -94,6 +163,6 @@ export async function authenticateWithBackend(request: string) {
       console.error("Backend authentication failed");
     }
   } catch (networkError) {
-    console.error("Network failure");
+    console.error("Network failure: " + networkError);
   }
 }

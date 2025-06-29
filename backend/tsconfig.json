@@ -7,6 +7,6 @@
   "paths": {
     "#*": ["./src/*"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "src/db/config/config.cts"],
   "exclude": ["dist"]
 }

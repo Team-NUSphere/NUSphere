@@ -10,7 +10,7 @@ const PublicRoutes: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/timetable" replace />;
   }
 
   return <Outlet />;
