@@ -1,6 +1,5 @@
 import type {
   UserClassType,
-  UserModulesType,
 } from "../contexts/timetableContext";
 import { differenceInMinutes, parse } from "date-fns";
 

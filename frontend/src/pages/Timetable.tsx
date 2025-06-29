@@ -59,12 +59,6 @@ export default function Timetable({
     setSelectedClass(null);
   };
 
-  useEffect(() => {
-    if (selectedClass) {
-      console.log("Selected class changed to:", selectedClass);
-    }
-  }, [selectedClass]);
-
   return (
     <div className="overflow-y-auto w-full h-full overflow-x-auto">
       <div className="flex flex-row w-full h-min">
