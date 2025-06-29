@@ -230,8 +230,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
     setUserClasses((prev) =>
       prev.filter(
         (lesson) =>
-          !(lesson.moduleId === moduleCode &&
-          lesson.lessonType === lessonType)
+          !(lesson.moduleId === moduleCode && lesson.lessonType === lessonType)
       )
     );
     console.log(userClasses);
@@ -250,10 +249,7 @@ export function TimetableProvider({ children }: TimetableProviderProps) {
       signal: signal,
     })
       .then((res) => {
-        setUserClasses((prev) => ([
-          ...prev,
-          ...res.data,
-        }));
+        setUserClasses((prev) => [...prev, ...(res.data as UserClassType[])]);
       })
       .catch((e) => {
         if (axios.isCancel(e)) {
