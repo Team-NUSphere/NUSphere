@@ -31,7 +31,7 @@ export default function Timetable({
           selectedClass.moduleId,
           selectedClass.lessonType
         ).catch(() => []);
-        console.log("selected"+result)
+        console.log(result)
         setAllModuleClasses(result as UserClassType[]);
       } else {
         setAllModuleClasses([]);

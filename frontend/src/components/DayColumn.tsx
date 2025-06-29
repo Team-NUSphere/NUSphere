@@ -38,7 +38,7 @@ export default function DayColumn({
     ? findAlternativeClasses(allModuleClasses, classes, selectedClass)
     : [];
 
-  const allClassesToShow = [...classes, ...alternativeClasses];
+  const allClassesToShow = [...classes, ...alternativeClasses.filter(cls => cls.day.slice(0, 3).toUpperCase() === dayName)];
 
   const processedClasses = detectOverlaps(allClassesToShow, startHour);
 
