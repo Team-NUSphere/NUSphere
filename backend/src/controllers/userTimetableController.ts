@@ -223,6 +223,7 @@ export const handleUpdateClasses = async (
         type: "update",
         userId: req.user.uid,
       });
+      return;
     }
 
     throw new Error("Wrong format of query parameters in handleUpdateClass");
@@ -314,7 +315,9 @@ export const handleGetClasses = async (
       if (!module) {
         throw new Error(`Module with code ${moduleCode} not found`);
       }
-      const classes = await module.getClasses({ where: { lessonType: lessonType } });
+      const classes = await module.getClasses({
+        where: { lessonType: lessonType },
+      });
       res.json(classes);
     } else {
       throw new Error("Module code or lesson type is missing");
@@ -322,4 +325,4 @@ export const handleGetClasses = async (
   } catch (error) {
     next(error);
   }
-}
+};
