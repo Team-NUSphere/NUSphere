@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { HasManyMixin, HasOneMixin } from "#db/types/associationtypes.js";
+import {
+  BelongsToManyMixin,
+  HasManyMixin,
+  HasOneMixin,
+} from "#db/types/associationtypes.js";
 import {
   DataTypes,
   InferAttributes,
@@ -16,6 +20,7 @@ import Enrollment from "./Enrollment.js";
 import ForumGroup from "./ForumGroup.js";
 import Module from "./Module.js";
 import Post from "./Post.js";
+import PostLikes from "./PostLikes.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
 
@@ -24,6 +29,10 @@ interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
 interface User extends HasManyMixin<Comment, string, "Comment", "Comments"> {}
 interface User
   extends HasManyMixin<ForumGroup, string, "OwnedGroup", "OwnedGroups"> {}
+interface User
+  extends HasManyMixin<PostLikes, string, "PostLike", "PostLikes"> {}
+interface User
+  extends BelongsToManyMixin<Post, string, "LikedPost", "LikedPosts"> {}
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
@@ -32,6 +41,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
   declare Comments?: NonAttribute<Comment[]>;
   declare Posts?: NonAttribute<Post[]>;
+  declare PostLikes?: NonAttribute<PostLikes[]>;
+  declare LikedPosts?: NonAttribute<Post[]>;
 
   async getUserTimetable() {
     let userTimetable = await this.getTimetable({
@@ -70,6 +81,16 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       foreignKey: "ownerId",
       onDelete: "CASCADE",
       scope: { ownerType: "User" },
+    });
+    User.hasMany(PostLikes, {
+      as: "PostLikes",
+      foreignKey: "uid",
+    });
+    User.belongsToMany(Post, {
+      as: "LikedPosts",
+      foreignKey: "uid",
+      otherKey: "postId",
+      through: PostLikes,
     });
   }
 

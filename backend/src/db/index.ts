@@ -12,6 +12,7 @@ import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
 import { DB } from "./types/dbtypes.js";
+import PostLikes from "./models/PostLikes.js";
 
 type NodeEnv = "development" | "production" | "test";
 const env: NodeEnv = (process.env.NODE_ENV ?? "development") as NodeEnv;
@@ -42,6 +43,7 @@ Enrollment.initModel(sequelize);
 Post.initModel(sequelize);
 ForumGroup.initModel(sequelize);
 Comment.initModel(sequelize);
+PostLikes.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
@@ -50,6 +52,7 @@ const db: DB = {
   ForumGroup: ForumGroup,
   Module: Module,
   Post: Post,
+  PostLikes: PostLikes,
   User: User,
   UserEvent: UserEvent,
   UserTimetable: UserTimetable,

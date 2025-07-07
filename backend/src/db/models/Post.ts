@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { BelongsToMixin, HasManyMixin } from "#db/types/associationtypes.js";
+import {
+  BelongsToManyMixin,
+  BelongsToMixin,
+  HasManyMixin,
+} from "#db/types/associationtypes.js";
 import {
   CreationOptional,
   DataTypes,
@@ -14,6 +18,7 @@ import {
 
 import Comment from "./Comment.js";
 import ForumGroup from "./ForumGroup.js";
+import PostLikes from "./PostLikes.js";
 import User from "./User.js";
 
 export interface PostType {
@@ -27,6 +32,10 @@ export interface PostType {
 interface Post extends BelongsToMixin<ForumGroup, string, "ForumGroup"> {}
 interface Post extends BelongsToMixin<User, string, "User"> {}
 interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
+interface Post
+  extends HasManyMixin<PostLikes, string, "PostLike", "PostLikes"> {}
+interface Post
+  extends BelongsToManyMixin<User, string, "LikeUser", "LikeUsers"> {}
 
 class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare postId: CreationOptional<string>;
@@ -44,6 +53,8 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare Replies?: NonAttribute<Comment[]>;
   declare groupName?: NonAttribute<string>;
   declare createdAt: NonAttribute<Date>;
+  declare PostLikes?: NonAttribute<PostLikes[]>;
+  declare LikeUsers?: NonAttribute<User[]>;
 
   async getGroupName() {
     this.groupName = (await this.getForumGroup()).groupName;
@@ -58,6 +69,16 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
       constraints: false,
       foreignKey: "parentId",
       scope: { parentType: "ParentPost" },
+    });
+    Post.hasMany(PostLikes, {
+      as: "PostLikes",
+      foreignKey: "postId",
+    });
+    Post.belongsToMany(User, {
+      as: "LikeUsers",
+      foreignKey: "postId",
+      otherKey: "uid",
+      through: PostLikes,
     });
   }
 
