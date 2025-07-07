@@ -9,6 +9,7 @@ import {
   InferCreationAttributes,
   Model,
   NonAttribute,
+  Op,
   Sequelize,
 } from "sequelize";
 
@@ -29,6 +30,28 @@ class PostLikes extends Model<
 
   declare User?: NonAttribute<User>;
   declare Post?: NonAttribute<Post>;
+
+  static async addNewLike(uid: string, postId: string) {
+    return await PostLikes.findOrCreate({
+      defaults: {
+        postId: postId,
+        uid: uid,
+      },
+      where: {
+        [Op.and]: [{ postId: postId }, { uid: uid }],
+      },
+    });
+  }
+
+  static async unlike(uid: string, postId: string) {
+    const postLike = await PostLikes.findOne({
+      where: {
+        [Op.and]: [{ postId: postId }, { uid: uid }],
+      },
+    });
+    if (!postLike) return;
+    await postLike.destroy();
+  }
 
   static associate() {
     PostLikes.belongsTo(User, {

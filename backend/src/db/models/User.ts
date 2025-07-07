@@ -30,7 +30,7 @@ interface User extends HasManyMixin<Comment, string, "Comment", "Comments"> {}
 interface User
   extends HasManyMixin<ForumGroup, string, "OwnedGroup", "OwnedGroups"> {}
 interface User
-  extends HasManyMixin<PostLikes, string, "PostLike", "PostLikes"> {}
+  extends HasManyMixin<PostLikes, string, "UserPostLike", "UserPostLikes"> {}
 interface User
   extends BelongsToManyMixin<Post, string, "LikedPost", "LikedPosts"> {}
 
@@ -41,7 +41,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
   declare Comments?: NonAttribute<Comment[]>;
   declare Posts?: NonAttribute<Post[]>;
-  declare PostLikes?: NonAttribute<PostLikes[]>;
+  declare UserPostLikes?: NonAttribute<PostLikes[]>;
   declare LikedPosts?: NonAttribute<Post[]>;
 
   async getUserTimetable() {
@@ -72,6 +72,27 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     return userTimetable;
   }
 
+  async likeNewPost(postId: string) {
+    const post = await Post.findByPk(postId);
+    if (!post) return null;
+
+    const [, added] = await PostLikes.addNewLike(this.uid, post.postId);
+    if (!added) return null;
+    this.LikedPosts = await this.getLikedPosts();
+    this.UserPostLikes = await this.getUserPostLikes();
+    return post;
+  }
+
+  async unlikePost(postId: string) {
+    const post = await Post.findByPk(postId);
+    if (!post) return null;
+
+    await PostLikes.unlike(this.uid, postId);
+    this.LikedPosts = await this.getLikedPosts();
+    this.UserPostLikes = await this.getUserPostLikes();
+    return post;
+  }
+
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
     User.hasMany(Post, { as: "Posts", foreignKey: "uid" });
@@ -83,7 +104,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       scope: { ownerType: "User" },
     });
     User.hasMany(PostLikes, {
-      as: "PostLikes",
+      as: "UserPostLikes",
       foreignKey: "uid",
     });
     User.belongsToMany(Post, {

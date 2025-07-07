@@ -168,7 +168,17 @@ export async function deletePost(postId: string): Promise<void> {
 }
 
 export async function likePost(postId: string): Promise<void> {
-  await axios.post(`${backend}/posts/${postId}/like`);
+  await axiosApi({
+    method: "POST",
+    url: `/forum/likePost/${postId}`,
+  });
+}
+
+export async function unlikePost(postId: string): Promise<void> {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/likePost/${postId}`,
+  });
 }
 
 /** ------------------------ GROUPS ------------------------ **/

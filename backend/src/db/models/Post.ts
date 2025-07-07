@@ -33,7 +33,7 @@ interface Post extends BelongsToMixin<ForumGroup, string, "ForumGroup"> {}
 interface Post extends BelongsToMixin<User, string, "User"> {}
 interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
 interface Post
-  extends HasManyMixin<PostLikes, string, "PostLike", "PostLikes"> {}
+  extends HasManyMixin<PostLikes, string, "PostPostLike", "PostPostLikes"> {}
 interface Post
   extends BelongsToManyMixin<User, string, "LikeUser", "LikeUsers"> {}
 
@@ -53,8 +53,9 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare Replies?: NonAttribute<Comment[]>;
   declare groupName?: NonAttribute<string>;
   declare createdAt: NonAttribute<Date>;
-  declare PostLikes?: NonAttribute<PostLikes[]>;
-  declare LikeUsers?: NonAttribute<User[]>;
+  declare PostPostLikes?: NonAttribute<PostLikes[]>;
+  declare Likers?: NonAttribute<User[]>;
+  declare isLiked?: boolean;
 
   async getGroupName() {
     this.groupName = (await this.getForumGroup()).groupName;
@@ -71,11 +72,11 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
       scope: { parentType: "ParentPost" },
     });
     Post.hasMany(PostLikes, {
-      as: "PostLikes",
+      as: "PostPostLikes",
       foreignKey: "postId",
     });
     Post.belongsToMany(User, {
-      as: "LikeUsers",
+      as: "Likers",
       foreignKey: "postId",
       otherKey: "uid",
       through: PostLikes,
@@ -90,6 +91,15 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
         },
         groupId: {
           type: DataTypes.UUID,
+        },
+        isLiked: {
+          get() {
+            return this.getDataValue("isLiked");
+          },
+          set(value: boolean) {
+            this.setDataValue("isLiked", value);
+          },
+          type: DataTypes.VIRTUAL,
         },
         likes: {
           allowNull: false,

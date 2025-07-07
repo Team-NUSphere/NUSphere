@@ -238,7 +238,7 @@ export const handleDeleteModule = async (
   next: NextFunction,
 ): Promise<void> => {
   if (!req.user) {
-    res.sendStatus(500);
+    res.status(401).send("No User Found");
     return;
   }
   const userTimetable = await req.user.getUserTimetable();
