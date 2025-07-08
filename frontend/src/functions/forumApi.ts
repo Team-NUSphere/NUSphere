@@ -382,11 +382,18 @@ export async function deleteReply(commentId: string): Promise<void> {
   });
 }
 
-export async function likeReply(
-  postId: string,
-  replyId: string
-): Promise<void> {
-  await axios.post(`${backend}/posts/${postId}/replies/${replyId}/like`);
+export async function likeReply(commentId: string): Promise<void> {
+  await axiosApi({
+    method: "POST",
+    url: `/forum/likeComment/${commentId}`,
+  });
+}
+
+export async function unlikeReply(commentId: string): Promise<void> {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/likeComment/${commentId}`,
+  });
 }
 
 /** ------------------------ MY POSTS / GROUPS ------------------------ **/
@@ -535,6 +542,25 @@ export function editComment(
       ...comment,
       comment: content,
     };
+  });
+}
+
+export function likeAndUnlikeComment(
+  comments: Reply[],
+  targetId: string
+): Reply[] {
+  return updateNestedComments(comments, targetId, (comment) => {
+    return comment.isLiked
+      ? {
+          ...comment,
+          isLiked: false,
+          likes: comment.likes > 0 ? comment.likes - 1 : 0,
+        }
+      : {
+          ...comment,
+          isLiked: true,
+          likes: comment.likes + 1,
+        };
   });
 }
 

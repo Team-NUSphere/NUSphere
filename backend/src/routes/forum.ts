@@ -11,9 +11,11 @@ import {
   handleGetMyGroupList,
   handleGetMyPostList,
   handleGetPostComments,
+  handleLikeComment,
   handleLikePost,
   handleReplyToComment,
   handleReplyToPost,
+  handleUnlikeComment,
   handleUnlikePost,
   handleUpdateGroup,
   handleUpdatePost,
@@ -47,6 +49,11 @@ router
   .delete(handleDeleteReply);
 
 router.route("/likePost/:postId").post(handleLikePost).delete(handleUnlikePost);
+
+router
+  .route("/likeComment/:commentId")
+  .post(handleLikeComment)
+  .delete(handleUnlikeComment);
 
 router.get("/myPosts", handleGetMyPostList);
 router.get("/myGroups", handleGetMyGroupList);

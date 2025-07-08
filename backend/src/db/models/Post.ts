@@ -34,8 +34,7 @@ interface Post extends BelongsToMixin<User, string, "User"> {}
 interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
 interface Post
   extends HasManyMixin<PostLikes, string, "PostPostLike", "PostPostLikes"> {}
-interface Post
-  extends BelongsToManyMixin<User, string, "LikeUser", "LikeUsers"> {}
+interface Post extends BelongsToManyMixin<User, string, "Liker", "Likers"> {}
 
 class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare postId: CreationOptional<string>;

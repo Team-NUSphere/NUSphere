@@ -4,15 +4,16 @@ import { Options, Sequelize } from "sequelize";
 import * as dbConfig from "./config/config.cjs";
 import Class from "./models/Class.js";
 import Comment from "./models/Comment.js";
+import CommentLikes from "./models/CommentLikes.js";
 import Enrollment from "./models/Enrollment.js";
 import ForumGroup from "./models/ForumGroup.js";
 import Module from "./models/Module.js";
 import Post from "./models/Post.js";
+import PostLikes from "./models/PostLikes.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
 import { DB } from "./types/dbtypes.js";
-import PostLikes from "./models/PostLikes.js";
 
 type NodeEnv = "development" | "production" | "test";
 const env: NodeEnv = (process.env.NODE_ENV ?? "development") as NodeEnv;
@@ -44,10 +45,12 @@ Post.initModel(sequelize);
 ForumGroup.initModel(sequelize);
 Comment.initModel(sequelize);
 PostLikes.initModel(sequelize);
+CommentLikes.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
   Comment: Comment,
+  CommentLikes: CommentLikes,
   Enrollment: Enrollment,
   ForumGroup: ForumGroup,
   Module: Module,

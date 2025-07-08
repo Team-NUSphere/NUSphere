@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { add, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
@@ -10,16 +10,19 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import type { User, Post, Reply } from "../types";
+import type { User, Post } from "../types";
 import {
   addCommentReplies,
   addCommentReply,
   fetchCommentByCommentId,
   fetchCommentByPostId,
+  likeAndUnlikeComment,
   likePost,
+  likeReply,
   replyToComment,
   replyToPost,
   unlikePost,
+  unlikeReply,
 } from "../functions/forumApi";
 
 interface PostPageProps {
@@ -41,7 +44,6 @@ export default function PostPage() {
     loading,
     error,
     hasMore,
-    deleteCommentFromList,
     addCommentToList,
     setCommentList,
   } = fetchCommentByPostId(postId, pageNumber);
@@ -110,7 +112,14 @@ export default function PostPage() {
     }
   };
 
-  const handleLikeComment = (commentId: string) => {};
+  const handleLikeComment = (commentId: string, like: boolean) => {
+    if (like) {
+      likeReply(commentId);
+    } else {
+      unlikeReply(commentId);
+    }
+    setCommentList((prev) => likeAndUnlikeComment(prev, commentId));
+  };
 
   const handleReplyToComment = async (
     parentCommentId: string,

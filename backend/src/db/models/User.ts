@@ -16,6 +16,7 @@ import {
 } from "sequelize";
 
 import Comment from "./Comment.js";
+import CommentLikes from "./CommentLikes.js";
 import Enrollment from "./Enrollment.js";
 import ForumGroup from "./ForumGroup.js";
 import Module from "./Module.js";
@@ -33,6 +34,20 @@ interface User
   extends HasManyMixin<PostLikes, string, "UserPostLike", "UserPostLikes"> {}
 interface User
   extends BelongsToManyMixin<Post, string, "LikedPost", "LikedPosts"> {}
+interface User
+  extends HasManyMixin<
+    CommentLikes,
+    string,
+    "UserCommentLike",
+    "UserCommentLikes"
+  > {}
+interface User
+  extends BelongsToManyMixin<
+    Comment,
+    string,
+    "LikedComment",
+    "LikedComments"
+  > {}
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
@@ -43,6 +58,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare Posts?: NonAttribute<Post[]>;
   declare UserPostLikes?: NonAttribute<PostLikes[]>;
   declare LikedPosts?: NonAttribute<Post[]>;
+  declare UserCommentLikes?: NonAttribute<CommentLikes[]>;
+  declare LikedComments?: NonAttribute<Comment[]>;
 
   async getUserTimetable() {
     let userTimetable = await this.getTimetable({
@@ -93,6 +110,30 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     return post;
   }
 
+  async likeNewComment(commentId: string) {
+    const comment = await Comment.findByPk(commentId);
+    if (!comment) return null;
+
+    const [, added] = await CommentLikes.addNewLike(
+      this.uid,
+      comment.commentId,
+    );
+    if (!added) return null;
+    this.LikedComments = await this.getLikedComments();
+    this.UserCommentLikes = await this.getUserCommentLikes();
+    return comment;
+  }
+
+  async unlikeComment(commentId: string) {
+    const comment = await Comment.findByPk(commentId);
+    if (!comment) return null;
+
+    await CommentLikes.unlike(this.uid, commentId);
+    this.LikedComments = await this.getLikedComments();
+    this.UserCommentLikes = await this.getUserCommentLikes();
+    return comment;
+  }
+
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
     User.hasMany(Post, { as: "Posts", foreignKey: "uid" });
@@ -112,6 +153,16 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       foreignKey: "uid",
       otherKey: "postId",
       through: PostLikes,
+    });
+    User.hasMany(CommentLikes, {
+      as: "UserCommentLikes",
+      foreignKey: "uid",
+    });
+    User.belongsToMany(Comment, {
+      as: "LikedComments",
+      foreignKey: "uid",
+      otherKey: "commentId",
+      through: CommentLikes,
     });
   }
 

@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { BelongsToMixin, HasManyMixin } from "#db/types/associationtypes.js";
+import {
+  BelongsToManyMixin,
+  BelongsToMixin,
+  HasManyMixin,
+} from "#db/types/associationtypes.js";
 import {
   BelongsToGetAssociationMixinOptions,
   CreationOptional,
@@ -13,6 +17,7 @@ import {
   Sequelize,
 } from "sequelize";
 
+import CommentLikes from "./CommentLikes.js";
 import Post from "./Post.js";
 import User from "./User.js";
 
@@ -20,6 +25,15 @@ interface Comment extends BelongsToMixin<Post, string, "ParentPost"> {}
 interface Comment extends BelongsToMixin<Comment, string, "ParentComment"> {}
 interface Comment extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
 interface Comment extends BelongsToMixin<User, string, "Author"> {}
+interface Comment
+  extends HasManyMixin<
+    CommentLikes,
+    string,
+    "CommentCommentLike",
+    "CommentCommentLikes"
+  > {}
+interface Comment
+  extends BelongsToManyMixin<User, string, "CommentLiker", "CommentLikers"> {}
 
 class Comment extends Model<
   InferAttributes<Comment>,
@@ -28,7 +42,7 @@ class Comment extends Model<
   declare commentId: CreationOptional<string>;
   declare comment: string;
   declare replies: CreationOptional<number>;
-  // declare likes: number;
+  declare likes: CreationOptional<number>;
 
   declare parentId: string;
   declare parentType: "ParentComment" | "ParentPost";
@@ -40,6 +54,9 @@ class Comment extends Model<
   declare ParentPost?: NonAttribute<Post>;
   declare Replies?: NonAttribute<Comment[]>;
   declare Author?: NonAttribute<User>;
+  declare CommentCommentLikes?: NonAttribute<CommentLikes[]>;
+  declare CommentLikers?: NonAttribute<User[]>;
+  declare isLiked?: boolean;
 
   getParent(options?: BelongsToGetAssociationMixinOptions) {
     const mixinMethodName =
@@ -66,6 +83,16 @@ class Comment extends Model<
       scope: { parentType: "ParentPost" },
     });
     Comment.belongsTo(User, { as: "Author", foreignKey: "uid" });
+    Comment.hasMany(CommentLikes, {
+      as: "CommentCommentLikes",
+      foreignKey: "commentId",
+    });
+    Comment.belongsToMany(User, {
+      as: "CommentLikers",
+      foreignKey: "commentId",
+      otherKey: "uid",
+      through: CommentLikes,
+    });
   }
 
   static initModel(sequelize: Sequelize) {
@@ -80,6 +107,19 @@ class Comment extends Model<
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
           type: DataTypes.UUID,
+        },
+        isLiked: {
+          get() {
+            return this.getDataValue("isLiked");
+          },
+          set(value: boolean) {
+            this.setDataValue("isLiked", value);
+          },
+          type: DataTypes.VIRTUAL,
+        },
+        likes: {
+          defaultValue: 0,
+          type: DataTypes.INTEGER,
         },
         parentId: {
           allowNull: false,

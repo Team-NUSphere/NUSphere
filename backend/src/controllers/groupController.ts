@@ -1,4 +1,5 @@
 import Comment from "#db/models/Comment.js";
+import CommentLikes from "#db/models/CommentLikes.js";
 import ForumGroup from "#db/models/ForumGroup.js";
 import Post from "#db/models/Post.js";
 import PostLikes from "#db/models/PostLikes.js";
@@ -432,6 +433,10 @@ export const handleGetPostComments = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
   const postId = req.params.postId;
   const params = req.query;
   try {
@@ -442,6 +447,7 @@ export const handleGetPostComments = async (
         return;
       }
       const comments = await searchPostComments(
+        req.user.uid,
         post,
         parseInt(params.page),
         10,
@@ -457,7 +463,12 @@ export const handleGetPostComments = async (
   return;
 };
 
-const searchPostComments = async (post: Post, page = 1, pageSize = 10) => {
+const searchPostComments = async (
+  uid: string,
+  post: Post,
+  page = 1,
+  pageSize = 10,
+) => {
   const offset = (page - 1) * pageSize;
   const comments = await post.getReplies({
     attributes: [
@@ -468,11 +479,26 @@ const searchPostComments = async (post: Post, page = 1, pageSize = 10) => {
       "uid",
       "createdAt",
       "replies",
+      "likes",
     ],
     limit: pageSize,
     offset: offset,
     order: [["createdAt", "DESC"]],
   });
+
+  const commentIds = comments.map((comment) => comment.commentId);
+  const likedCommentIds = await CommentLikes.findAll({
+    attributes: ["commentId"],
+    where: {
+      commentId: commentIds,
+      uid,
+    },
+  });
+
+  const likedSet = new Set(likedCommentIds.map((like) => like.commentId));
+  for (const comment of comments) {
+    comment.isLiked = likedSet.has(comment.commentId);
+  }
   return comments;
 };
 
@@ -481,6 +507,10 @@ export const handleGetCommentComments = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
   const commentId = req.params.commentId;
   try {
     const parentComment = await Comment.findByPk(commentId);
@@ -488,7 +518,21 @@ export const handleGetCommentComments = async (
       res.status(404).send("Comment Not Found");
       return;
     }
+    const uid = req.user.uid;
     const comments = await parentComment.getReplies();
+    const commentIds = comments.map((comment) => comment.commentId);
+    const likedCommentIds = await CommentLikes.findAll({
+      attributes: ["commentId"],
+      where: {
+        commentId: commentIds,
+        uid,
+      },
+    });
+
+    const likedSet = new Set(likedCommentIds.map((like) => like.commentId));
+    for (const comment of comments) {
+      comment.isLiked = likedSet.has(comment.commentId);
+    }
     res.json(comments.map((comment) => ({ ...comment.toJSON(), Replies: [] })));
   } catch (error) {
     next(error);
@@ -693,6 +737,7 @@ export const handleGetMyPostList = async (
             details: post.details,
             groupId: post.groupId,
             groupName: post.groupName,
+            isLiked: post.isLiked,
             likes: post.likes,
             postId: post.postId,
             replies: post.replies,
@@ -748,6 +793,21 @@ const searchMyPost = async (
       uid: uid,
     },
   });
+
+  const postIds = rows.map((post) => post.postId);
+  const likedPostIds = await PostLikes.findAll({
+    attributes: ["postId"],
+    where: {
+      postId: postIds,
+      uid,
+    },
+  });
+
+  const likedSet = new Set(likedPostIds.map((like) => like.postId));
+  for (const post of rows) {
+    post.isLiked = likedSet.has(post.postId);
+  }
+
   return {
     currentPage: page,
     posts: rows,
@@ -795,14 +855,40 @@ export const handleUnlikePost = async (
   }
 };
 
-// export const handleLikeComment = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ): Promise<void> => {};
+export const handleLikeComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
+  try {
+    const commentId: string = req.params.commentId;
+    const comment = await req.user.likeNewComment(commentId);
+    await comment?.increment("likes");
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};
 
-// export const handleUnlikeComment = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ): Promise<void> => {};
+export const handleUnlikeComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    res.status(401).send("No User Found");
+    return;
+  }
+  try {
+    const commentId: string = req.params.commentId;
+    const comment = await req.user.unlikeComment(commentId);
+    await comment?.decrement("likes");
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+};
