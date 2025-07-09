@@ -2,7 +2,7 @@ import {
   handleGetGroup,
   handleGetGroupList,
   handleGetGroupPostList,
-} from "#controllers/groupController.js";
+} from "#controllers/forumController.js";
 import { Router } from "express";
 
 const router = Router();

@@ -15,9 +15,11 @@ import {
 
 import Module from "./Module.js";
 import Post, { PostType } from "./Post.js";
+import Tags from "./Tags.js";
 import User from "./User.js";
 
 interface ForumGroup extends HasManyMixin<Post, string, "Post", "Posts"> {}
+interface ForumGroup extends HasManyMixin<Tags, string, "Tag", "Tags"> {}
 interface ForumGroup extends BelongsToMixin<User, string, "User"> {}
 interface ForumGroup extends BelongsToMixin<Module, string, "Module"> {}
 
@@ -36,6 +38,7 @@ class ForumGroup extends Model<
   declare Owner?: NonAttribute<Module | User>;
   declare UserOwner?: NonAttribute<User>;
   declare ModuleOwner?: NonAttribute<Module>;
+  declare Tags?: NonAttribute<Tags[]>;
 
   getOwner(options?: BelongsToGetAssociationMixinOptions) {
     const mixinMethodName = this.ownerType === "User" ? "getUser" : "getModule";
@@ -60,6 +63,12 @@ class ForumGroup extends Model<
       as: "ModuleOwner",
       foreignKey: "ownerId",
       scope: { ownerType: "Module" },
+    });
+    ForumGroup.hasMany(Tags, {
+      as: "Tags",
+      foreignKey: "groupId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
   }
 

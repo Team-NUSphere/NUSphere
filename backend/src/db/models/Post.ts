@@ -19,6 +19,8 @@ import {
 import Comment from "./Comment.js";
 import ForumGroup from "./ForumGroup.js";
 import PostLikes from "./PostLikes.js";
+import PostTag from "./PostTag.js";
+import Tags from "./Tags.js";
 import User from "./User.js";
 
 export interface PostType {
@@ -35,6 +37,9 @@ interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
 interface Post
   extends HasManyMixin<PostLikes, string, "PostPostLike", "PostPostLikes"> {}
 interface Post extends BelongsToManyMixin<User, string, "Liker", "Likers"> {}
+interface Post
+  extends HasManyMixin<PostTag, string, "PostPostTag", "PostPostTags"> {}
+interface Post extends BelongsToManyMixin<Tags, string, "Tag", "Tags"> {}
 
 class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare postId: CreationOptional<string>;
@@ -55,6 +60,8 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare PostPostLikes?: NonAttribute<PostLikes[]>;
   declare Likers?: NonAttribute<User[]>;
   declare isLiked?: boolean;
+  declare PostPostTags?: NonAttribute<PostTag[]>;
+  declare Tags?: NonAttribute<Tags[]>;
 
   async getGroupName() {
     this.groupName = (await this.getForumGroup()).groupName;
@@ -79,6 +86,16 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
       foreignKey: "postId",
       otherKey: "uid",
       through: PostLikes,
+    });
+    Post.hasMany(PostTag, {
+      as: "PostPostTags",
+      foreignKey: "postId",
+    });
+    Post.belongsToMany(Tags, {
+      as: "Tags",
+      foreignKey: "postId",
+      otherKey: "tagId",
+      through: PostTag,
     });
   }
 

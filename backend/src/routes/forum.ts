@@ -20,11 +20,12 @@ import {
   handleUpdateGroup,
   handleUpdatePost,
   handleUpdateReply,
-} from "#controllers/groupController.js";
+} from "#controllers/forumController.js";
 import express from "express";
 
 const router = express.Router();
 
+// Posts
 router.get("/posts", handleGetAllPosts);
 router
   .route("/post/:postId")
@@ -33,6 +34,9 @@ router
   .put(handleUpdatePost)
   .delete(handleDeletePost);
 
+router.route("/likePost/:postId").post(handleLikePost).delete(handleUnlikePost);
+
+// Groups
 router.route("/groups").get(handleGetGroupList).post(handleCreateGroup);
 router
   .route("/group/:groupId")
@@ -41,6 +45,7 @@ router
   .put(handleUpdateGroup)
   .delete(handleDeleteGroup);
 
+//Comments
 router
   .route("/comment/:commentId")
   .get(handleGetCommentComments)
@@ -48,14 +53,16 @@ router
   .put(handleUpdateReply)
   .delete(handleDeleteReply);
 
-router.route("/likePost/:postId").post(handleLikePost).delete(handleUnlikePost);
-
 router
   .route("/likeComment/:commentId")
   .post(handleLikeComment)
   .delete(handleUnlikeComment);
 
+// My Posts and Groups
 router.get("/myPosts", handleGetMyPostList);
 router.get("/myGroups", handleGetMyGroupList);
+
+// Tags
+router.route("/tag");
 
 export default router;
