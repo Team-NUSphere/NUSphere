@@ -32,7 +32,7 @@ export default function EditPostForm({ onCancel, post }: CreatePostFormProps) {
     };
 
     if (availableTags.length === 0) fetchTags();
-  }, [post.postId, post.groupId, availableTags]);
+  }, [post.postId, post.groupId]);
 
   useEffect(() => {
     const fetchTags = async () => {

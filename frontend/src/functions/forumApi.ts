@@ -2,6 +2,7 @@ import axios from "axios";
 import type { Post, Group, Reply } from "../types";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
+import qs from "qs";
 
 /** ------------------------ POSTS ------------------------ **/
 
@@ -59,7 +60,8 @@ export function fetchAllPosts(query: string = "", pageNumber: number = 1) {
 export function fetchPostsByGroupId(
   groupId: string,
   query: string = "",
-  pageNumber: number = 1
+  pageNumber: number = 1,
+  selectedTags: string[] = []
 ) {
   const [postList, setPostList] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -69,7 +71,7 @@ export function fetchPostsByGroupId(
 
   useEffect(() => {
     setPostList([]);
-  }, [query]);
+  }, [query, selectedTags]);
 
   useEffect(() => {
     setLoading(true);
@@ -84,10 +86,14 @@ export function fetchPostsByGroupId(
       params: {
         page: pageNumber,
         q: query,
+        tags: selectedTags,
       },
+      paramsSerializer: (params) =>
+        qs.stringify(params, { arrayFormat: "repeat" }),
       signal: signal,
     })
       .then((res) => {
+        if (!res.data) return;
         const postList = res.data.posts?.map(
           (post: {
             postId: string;
@@ -119,7 +125,7 @@ export function fetchPostsByGroupId(
         setLoading(false);
       });
     return () => controller.abort();
-  }, [pageNumber, query]);
+  }, [pageNumber, query, selectedTags]);
 
   function deletePostFromList(postId: string) {
     setPostList((prev) => prev.filter((post) => post.postId !== postId));

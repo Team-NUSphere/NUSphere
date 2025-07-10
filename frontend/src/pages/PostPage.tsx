@@ -25,7 +25,6 @@ import {
   unlikePost,
   unlikeReply,
 } from "../functions/forumApi";
-import { FaTags } from "react-icons/fa6";
 
 interface PostPageProps {
   currentUser: User;

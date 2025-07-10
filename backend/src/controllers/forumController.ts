@@ -3,8 +3,9 @@ import CommentLikes from "#db/models/CommentLikes.js";
 import ForumGroup from "#db/models/ForumGroup.js";
 import Post from "#db/models/Post.js";
 import PostLikes from "#db/models/PostLikes.js";
+import Tags from "#db/models/Tags.js";
 import { NextFunction, Request, Response } from "express";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 
 // Read
 export const handleGetGroupList = async (
@@ -83,6 +84,8 @@ export const handleGetGroupPostList = async (
   const groupId = req.params.groupId;
   try {
     if (typeof params.q == "string" && typeof params.page === "string") {
+      let tags = req.query.tags as string | string[];
+      if (typeof tags === "string") tags = [tags];
       const page = parseInt(params.page);
       const group: ForumGroup | null = await ForumGroup.findByPk(groupId);
       if (!group) {
@@ -95,6 +98,7 @@ export const handleGetGroupPostList = async (
         params.q,
         page,
         10,
+        tags,
       );
       res.json({
         groupName: group.groupName,
@@ -115,8 +119,64 @@ const searchGroupPosts = async (
   query: string,
   page = 1,
   pageSize = 10,
+  tagNames?: string[],
 ) => {
   const offset = (page - 1) * pageSize;
+  const postWhere: {
+    groupId: string;
+    title?: {
+      [Op.iLike]: string;
+    };
+  } = { groupId };
+  if (query) {
+    postWhere.title = {
+      [Op.iLike]: `%${query}%`,
+    };
+  }
+
+  // if no tags are selected
+  if (!tagNames || tagNames.length === 0) {
+    const { count, rows } = await Post.findAndCountAll({
+      attributes: [
+        "postId",
+        "title",
+        "details",
+        "groupId",
+        "uid",
+        "likes",
+        "createdAt",
+        "views",
+        "replies",
+      ],
+      limit: pageSize,
+      offset: offset,
+      order: [["createdAt", "DESC"]],
+      where: postWhere,
+    });
+
+    const postIds = rows.map((post) => post.postId);
+    const likedPostIds = await PostLikes.findAll({
+      attributes: ["postId"],
+      where: {
+        postId: postIds,
+        uid,
+      },
+    });
+
+    const likedSet = new Set(likedPostIds.map((like) => like.postId));
+    for (const post of rows) {
+      post.isLiked = likedSet.has(post.postId);
+    }
+
+    return {
+      currentPage: page,
+      posts: rows,
+      totalCount: count,
+      totalPages: Math.ceil(count / pageSize),
+    };
+  }
+
+  // tags are selected, require join table
   const { count, rows } = await Post.findAndCountAll({
     attributes: [
       "postId",
@@ -129,17 +189,26 @@ const searchGroupPosts = async (
       "views",
       "replies",
     ],
+    group: ["Post.postId"],
+    having: Sequelize.literal(
+      `COUNT(DISTINCT "Tags"."tagId") = ${tagNames.length.toString()}`,
+    ),
+    include: [
+      {
+        as: "Tags",
+        attributes: [],
+        model: Tags,
+        through: { attributes: [] },
+        where: {
+          name: { [Op.in]: tagNames },
+        },
+      },
+    ],
     limit: pageSize,
     offset: offset,
     order: [["createdAt", "DESC"]],
-    where: {
-      [Op.and]: {
-        groupId: groupId,
-        title: {
-          [Op.iLike]: `%${query}%`,
-        },
-      },
-    },
+    subQuery: false,
+    where: postWhere,
   });
 
   const postIds = rows.map((post) => post.postId);
@@ -159,8 +228,8 @@ const searchGroupPosts = async (
   return {
     currentPage: page,
     posts: rows,
-    totalCount: count,
-    totalPages: Math.ceil(count / pageSize),
+    totalCount: count.length,
+    totalPages: Math.ceil(count.length / pageSize),
   };
 };
 
@@ -684,7 +753,6 @@ export const handleGetMyGroupList = async (
         ...group.toJSON(),
         tags: tags[idx].map((tag) => tag.name),
       }));
-      console.log(formatted);
       res.json(formatted);
     } else {
       const { groups } = await searchMyGroups(

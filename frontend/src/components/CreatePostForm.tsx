@@ -42,7 +42,7 @@ export default function CreatePostForm({
     };
 
     if (availableTags.length === 0) fetchTags();
-  }, [selectedGroup.groupId, availableTags]);
+  }, [selectedGroup.groupId]);
 
   // Group creation states
   const [groupName, setGroupName] = useState("");
