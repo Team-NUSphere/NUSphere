@@ -5,15 +5,17 @@ import { FaRegThumbsUp, FaRegComment } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import type { User, Post } from "../types";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { likePost, unlikePost } from "../functions/forumApi";
+import { useState } from "react";
 
 interface PostCardProps {
-  post: Post;
+  postProp: Post;
   onLike: (postId: string) => void;
   handleDeletePost: (postId: string) => void;
 }
 
 export default function PostCard({
-  post,
+  postProp,
   onLike,
   handleDeletePost,
 }: PostCardProps) {
@@ -22,6 +24,27 @@ export default function PostCard({
     currentUser: User;
     handleEditPost?: (post: Post) => void;
   }>();
+
+  if (!postProp) return null;
+  const [post, setPost] = useState<Post>({ ...postProp });
+
+  const handleLikeClick = () => {
+    if (post.isLiked) {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes > 0 ? prev.likes - 1 : 0,
+        isLiked: false,
+      }));
+      unlikePost(post.postId);
+    } else {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes + 1,
+        isLiked: true,
+      }));
+      likePost(post.postId);
+    }
+  };
 
   return (
     <Link
@@ -60,8 +83,8 @@ export default function PostCard({
           <div className="flex items-center gap-4">
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                onLike(post.postId);
+                e.preventDefault();
+                handleLikeClick();
               }}
               className={`flex items-center gap-2 px-2 py-1 text-sm rounded-md hover:bg-gray-50 ${
                 post.isLiked ? "text-blue-600" : "text-gray-500"

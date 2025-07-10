@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { BelongsToMixin, HasManyMixin } from "#db/types/associationtypes.js";
+import {
+  BelongsToManyMixin,
+  BelongsToMixin,
+  HasManyMixin,
+} from "#db/types/associationtypes.js";
 import {
   CreationOptional,
   DataTypes,
@@ -14,6 +18,7 @@ import {
 
 import Comment from "./Comment.js";
 import ForumGroup from "./ForumGroup.js";
+import PostLikes from "./PostLikes.js";
 import User from "./User.js";
 
 export interface PostType {
@@ -27,6 +32,9 @@ export interface PostType {
 interface Post extends BelongsToMixin<ForumGroup, string, "ForumGroup"> {}
 interface Post extends BelongsToMixin<User, string, "User"> {}
 interface Post extends HasManyMixin<Comment, string, "Reply", "Replies"> {}
+interface Post
+  extends HasManyMixin<PostLikes, string, "PostPostLike", "PostPostLikes"> {}
+interface Post extends BelongsToManyMixin<User, string, "Liker", "Likers"> {}
 
 class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare postId: CreationOptional<string>;
@@ -44,6 +52,9 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare Replies?: NonAttribute<Comment[]>;
   declare groupName?: NonAttribute<string>;
   declare createdAt: NonAttribute<Date>;
+  declare PostPostLikes?: NonAttribute<PostLikes[]>;
+  declare Likers?: NonAttribute<User[]>;
+  declare isLiked?: boolean;
 
   async getGroupName() {
     this.groupName = (await this.getForumGroup()).groupName;
@@ -59,6 +70,16 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
       foreignKey: "parentId",
       scope: { parentType: "ParentPost" },
     });
+    Post.hasMany(PostLikes, {
+      as: "PostPostLikes",
+      foreignKey: "postId",
+    });
+    Post.belongsToMany(User, {
+      as: "Likers",
+      foreignKey: "postId",
+      otherKey: "uid",
+      through: PostLikes,
+    });
   }
 
   static initModel(sequelize: Sequelize) {
@@ -69,6 +90,15 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
         },
         groupId: {
           type: DataTypes.UUID,
+        },
+        isLiked: {
+          get() {
+            return this.getDataValue("isLiked");
+          },
+          set(value: boolean) {
+            this.setDataValue("isLiked", value);
+          },
+          type: DataTypes.VIRTUAL,
         },
         likes: {
           allowNull: false,

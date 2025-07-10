@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { add, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
@@ -10,14 +10,19 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import type { User, Post, Reply } from "../types";
+import type { User, Post } from "../types";
 import {
   addCommentReplies,
   addCommentReply,
   fetchCommentByCommentId,
   fetchCommentByPostId,
+  likeAndUnlikeComment,
+  likePost,
+  likeReply,
   replyToComment,
   replyToPost,
+  unlikePost,
+  unlikeReply,
 } from "../functions/forumApi";
 
 interface PostPageProps {
@@ -26,16 +31,19 @@ interface PostPageProps {
 
 export default function PostPage() {
   const postId = useParams().postId;
-  const oriPost = useLocation().state.post as Post | undefined;
-  if (!postId || !oriPost) return null;
+  const postProp = useLocation().state.post as Post | undefined;
 
+  if (!postId || !postProp) {
+    return <div className="text-center text-red-500">Post not found</div>;
+  }
+
+  const [post, setPost] = useState<Post>(postProp);
   const [pageNumber, setPageNumber] = useState(1);
   const {
     commentList,
     loading,
     error,
     hasMore,
-    deleteCommentFromList,
     addCommentToList,
     setCommentList,
   } = fetchCommentByPostId(postId, pageNumber);
@@ -71,22 +79,22 @@ export default function PostPage() {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [post] = useState<Post>(oriPost);
-
-  const fetchPostData = async () => {
-    // TODO: Fetch post data from backend
-    console.log("Fetching post data for postId:", postId);
-  };
-
-  const fetchComments = async () => {
-    // TODO: Fetch comments from backend
-    console.log("Fetching comments for post:", postId);
-  };
-
-  // Handler functions with TODO comments
-  const handleLikePost = () => {
-    // TODO: Implement like post functionality
-    console.log("Like post:", postId);
+  const handleLikeClick = () => {
+    if (post.isLiked) {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes > 0 ? prev.likes - 1 : 0,
+        isLiked: false,
+      }));
+      unlikePost(post.postId);
+    } else {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes + 1,
+        isLiked: true,
+      }));
+      likePost(post.postId);
+    }
   };
 
   const handleSubmitComment = async () => {
@@ -104,7 +112,14 @@ export default function PostPage() {
     }
   };
 
-  const handleLikeComment = (commentId: string) => {};
+  const handleLikeComment = (commentId: string, like: boolean) => {
+    if (like) {
+      likeReply(commentId);
+    } else {
+      unlikeReply(commentId);
+    }
+    setCommentList((prev) => likeAndUnlikeComment(prev, commentId));
+  };
 
   const handleReplyToComment = async (
     parentCommentId: string,
@@ -167,7 +182,10 @@ export default function PostPage() {
 
             <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
               <button
-                onClick={handleLikePost}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLikeClick();
+                }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors ${
                   post.isLiked ? "text-blue-600" : "text-gray-500"
                 }`}

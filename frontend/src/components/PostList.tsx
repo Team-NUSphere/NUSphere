@@ -25,7 +25,7 @@ export default function PostList({
       {posts.map((post) => (
         <PostCard
           key={post.postId}
-          post={post}
+          postProp={post}
           onLike={handleLike}
           handleDeletePost={handleDeletePost}
         />
