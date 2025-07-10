@@ -28,7 +28,7 @@ class ForumGroup extends Model<
   InferCreationAttributes<ForumGroup>
 > {
   declare description: CreationOptional<string>;
-  declare groupId?: CreationOptional<string>;
+  declare groupId: CreationOptional<string>;
   declare groupName: string;
   declare postCount?: CreationOptional<number>;
 
@@ -46,6 +46,23 @@ class ForumGroup extends Model<
   }
 
   declare Posts?: NonAttribute<Post[]>;
+
+  async updateGroup(description: string, groupName: string, tags: string[]) {
+    const updated = await this.update({
+      description: description,
+      groupName: groupName,
+    });
+    const oriTags = await this.getTags();
+    const originalSet = new Set(oriTags.map((tag) => tag.name));
+    const newSet = new Set(tags);
+    const removed = oriTags.filter((tag) => !newSet.has(tag.name));
+    const added = tags.filter((tag) => !originalSet.has(tag));
+    await Promise.all(removed.map((tag) => tag.destroy()));
+    await Promise.all(
+      added.map((tag) => this.createTag({ groupId: this.groupId, name: tag })),
+    );
+    return updated;
+  }
 
   static associate() {
     ForumGroup.hasMany(Post, {

@@ -37,6 +37,7 @@ export interface Group {
   createdAt: Date;
   ownerId: string;
   posts: Post[]; //not useful for now, it would be better to segregate what we can seperate
+  tags?: string[];
 }
 
 export interface Module {

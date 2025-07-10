@@ -12,7 +12,6 @@ export const handleGetGroupList = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  console.log("getting group list");
   const params = req.query;
   try {
     if (typeof params.q == "string" && typeof params.page == "string") {
@@ -279,7 +278,11 @@ export const handleCreateGroup = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const data = req.body as { description: string; name: string };
+  const data = req.body as {
+    description: string;
+    name: string;
+    tags: string[];
+  };
   try {
     const group = await req.user?.createOwnedGroup({
       description: data.description,
@@ -287,6 +290,11 @@ export const handleCreateGroup = async (
       ownerId: req.user.uid,
       ownerType: "User",
     });
+    await Promise.all(
+      data.tags.map((tag) =>
+        group?.createTag({ groupId: group.groupId, name: tag }),
+      ),
+    );
     res.json(group);
   } catch (error) {
     next(error);
@@ -323,7 +331,11 @@ export const handleUpdateGroup = async (
   next: NextFunction,
 ): Promise<void> => {
   const groupId = req.params.groupId;
-  const data = req.body as { description: string; name: string };
+  const data = req.body as {
+    description: string;
+    name: string;
+    tags: string[];
+  };
   try {
     const groups = await req.user?.getOwnedGroups({
       where: {
@@ -335,11 +347,11 @@ export const handleUpdateGroup = async (
         `User ${req.user?.uid ?? ""} does not own this group ${groupId}, cannot update group`,
       );
     const group = groups[0];
-    const updated = await group.update({
-      description: data.description,
-      groupName: data.name,
-    });
-
+    const updated = await group.updateGroup(
+      data.description,
+      data.name,
+      data.tags,
+    );
     res.json(updated);
   } catch (error) {
     next(error);
@@ -661,6 +673,7 @@ export const handleGetMyGroupList = async (
     res.status(401).send("No User Found");
     return;
   }
+  console.log("in my group");
   const params = req.query;
   try {
     if (typeof params.q == "string" && typeof params.page == "string") {
@@ -670,7 +683,13 @@ export const handleGetMyGroupList = async (
         parseInt(params.page),
         10,
       );
-      res.json(groups);
+      const tags = await Promise.all(groups.map((group) => group.getTags()));
+      const formatted = groups.map((group, idx) => ({
+        ...group.toJSON(),
+        tags: tags[idx].map((tag) => tag.name),
+      }));
+      console.log(formatted);
+      res.json(formatted);
     } else {
       const { groups } = await searchMyGroups(
         req.user.uid,
@@ -678,9 +697,6 @@ export const handleGetMyGroupList = async (
         parseInt(typeof params.page === "string" ? params.page : "1"),
         10,
       );
-      groups.forEach((group) => {
-        console.log(group.toJSON());
-      });
       res.json(groups);
     }
   } catch (error) {

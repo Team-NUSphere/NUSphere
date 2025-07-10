@@ -21,6 +21,14 @@ import {
   handleUpdatePost,
   handleUpdateReply,
 } from "#controllers/forumController.js";
+import {
+  handleAddTagToPost,
+  handleChangeTagName,
+  handleCreateNewTag,
+  handleDeleteTag,
+  handleDeleteTagFromPost,
+  handleGetGroupTagList,
+} from "#controllers/tagController.js";
 import express from "express";
 
 const router = express.Router();
@@ -63,6 +71,18 @@ router.get("/myPosts", handleGetMyPostList);
 router.get("/myGroups", handleGetMyGroupList);
 
 // Tags
-router.route("/tag");
+// Manage group tags
+router
+  .route("/tag/:groupId")
+  .get(handleGetGroupTagList)
+  .post(handleCreateNewTag)
+  .put(handleChangeTagName)
+  .delete(handleDeleteTag);
+
+// Manage post tags
+router
+  .route("/postTags/:postId")
+  .post(handleAddTagToPost)
+  .delete(handleDeleteTagFromPost);
 
 export default router;

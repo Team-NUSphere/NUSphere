@@ -235,7 +235,8 @@ export function fetchAllGroups(query: string = "", pageNumber: number = 1) {
 
 export async function createGroup(
   groupName: string,
-  description: string
+  description: string,
+  tags: string[]
 ): Promise<Group> {
   const res = await axiosApi({
     method: "POST",
@@ -243,6 +244,7 @@ export async function createGroup(
     data: {
       name: groupName,
       description: description,
+      tags: tags,
     },
   });
   return res.data;
@@ -250,7 +252,7 @@ export async function createGroup(
 
 export async function updateGroup(
   groupId: string,
-  updates: Partial<Pick<Group, "groupName" | "description">>
+  updates: Partial<Pick<Group, "groupName" | "description" | "tags">>
 ): Promise<Group> {
   const res = await axiosApi({
     method: "PUT",
@@ -258,6 +260,7 @@ export async function updateGroup(
     data: {
       name: updates.groupName,
       description: updates.description,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -503,6 +506,17 @@ export function fetchMyGroups(query: string = "", pageNumber: number = 1) {
     hasMore,
     deleteGroupFromList,
   };
+}
+
+/** ------------------------ MY POSTS / GROUPS ------------------------ **/
+
+export async function getGroupTagList(groupId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/tag/${groupId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
 }
 
 /** ------------------------ FRONTEND COMMENT FORMATTING ------------------------ **/
