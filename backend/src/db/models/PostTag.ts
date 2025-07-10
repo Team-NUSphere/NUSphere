@@ -9,6 +9,7 @@ import {
   InferCreationAttributes,
   Model,
   NonAttribute,
+  Op,
   Sequelize,
 } from "sequelize";
 
@@ -29,6 +30,18 @@ class PostTag extends Model<
 
   declare Tag?: NonAttribute<Tags>;
   declare Post?: NonAttribute<Post>;
+
+  static async addNewTag(tagId: string, postId: string) {
+    return await PostTag.findOrCreate({
+      defaults: {
+        postId: postId,
+        tagId: tagId,
+      },
+      where: {
+        [Op.and]: [{ postId: postId }, { tagId: tagId }],
+      },
+    });
+  }
 
   static associate() {
     PostTag.belongsTo(Tags, {

@@ -306,7 +306,7 @@ export const handleCreateNewPost = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const data = req.body as { details: string; title: string };
+  const data = req.body as { details: string; tags: string[]; title: string };
   const groupId = req.params.groupId;
   try {
     const group = await ForumGroup.findByPk(groupId);
@@ -316,6 +316,7 @@ export const handleCreateNewPost = async (
       title: data.title,
       uid: req.user?.uid,
     });
+    await Promise.all(data.tags.map((tag) => post.addNewTag(tag)));
     await group.increment("postCount");
     res.json(post);
   } catch (error) {
@@ -364,7 +365,7 @@ export const handleUpdatePost = async (
   next: NextFunction,
 ): Promise<void> => {
   const postId = req.params.postId;
-  const data = req.body as { details: string; title: string };
+  const data = req.body as { details: string; tags: string[]; title: string };
   try {
     const posts = await req.user?.getPosts({
       where: {
@@ -376,12 +377,7 @@ export const handleUpdatePost = async (
         `User ${req.user?.uid ?? ""} does not own this post ${postId}, cannot update post`,
       );
     const post = posts[0];
-    const updated = await post.update({
-      details: data.details,
-      title: data.title,
-    });
-
-    console.log(updated.toJSON());
+    const updated = await post.updatePost(data.details, data.title, data.tags);
     res.json(updated);
   } catch (error) {
     next(error);

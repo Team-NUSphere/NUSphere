@@ -27,6 +27,7 @@ export interface Post {
   views: number;
   isLiked: boolean;
   replies: number;
+  tags: string[];
 }
 
 export interface Group {

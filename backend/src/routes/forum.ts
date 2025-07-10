@@ -28,6 +28,7 @@ import {
   handleDeleteTag,
   handleDeleteTagFromPost,
   handleGetGroupTagList,
+  handleGetPostTagList,
 } from "#controllers/tagController.js";
 import express from "express";
 
@@ -82,6 +83,7 @@ router
 // Manage post tags
 router
   .route("/postTags/:postId")
+  .get(handleGetPostTagList)
   .post(handleAddTagToPost)
   .delete(handleDeleteTagFromPost);
 

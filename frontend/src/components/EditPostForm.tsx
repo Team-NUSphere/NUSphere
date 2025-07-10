@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa";
-import { createGroup, createPost, updatePost } from "../functions/forumApi";
+import { useEffect, useState } from "react";
+import {
+  getGroupTagList,
+  getPostTagList,
+  updatePost,
+} from "../functions/forumApi";
 import type { Post } from "../types";
+import PostTagInput from "./PostTagInput";
 
 interface CreatePostFormProps {
   onCancel: () => void;
@@ -14,6 +18,36 @@ export default function EditPostForm({ onCancel, post }: CreatePostFormProps) {
   if (!post) return null;
   const [postTitle, setPostTitle] = useState(post?.title || "");
   const [postContent, setPostContent] = useState(post?.details || "");
+  const [selectedTags, setSelectedTags] = useState<string[]>(post.tags || []);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const groupTags = await getGroupTagList(post.groupId);
+        setAvailableTags(groupTags);
+      } catch (error) {
+        console.error("Failed to fetch group tags:", error);
+      }
+    };
+
+    if (availableTags.length === 0) fetchTags();
+  }, [post.postId, post.groupId, availableTags]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await getPostTagList(post.postId);
+        setSelectedTags(fetchedTags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    if (selectedTags.length === 0) {
+      fetchTags();
+    }
+  }, [post.postId, post.groupId]);
 
   const isFormValid = () => {
     return postTitle.trim() && postContent.trim();
@@ -23,6 +57,7 @@ export default function EditPostForm({ onCancel, post }: CreatePostFormProps) {
     await updatePost(post.postId, {
       title: postTitle,
       details: postContent,
+      tags: selectedTags,
     });
     onCancel();
   };
@@ -77,6 +112,19 @@ export default function EditPostForm({ onCancel, post }: CreatePostFormProps) {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
           />
         </div>
+
+        {/* Post tags */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Post Tags <span className="text-red-500">*</span>
+          </label>
+          <PostTagInput
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onChange={setSelectedTags}
+          />
+        </div>
+
         {/* Action buttons */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
           <button

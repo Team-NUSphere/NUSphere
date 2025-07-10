@@ -68,6 +68,36 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
     return this;
   }
 
+  async addNewTag(tag: string) {
+    const tagObj = await Tags.findOne({
+      where: {
+        groupId: this.groupId,
+        name: tag,
+      },
+    });
+    if (!tagObj) {
+      return;
+    }
+    const tagId = tagObj.tagId;
+    const [, success] = await PostTag.addNewTag(tagId, this.postId);
+    return success;
+  }
+
+  async updatePost(details: string, title: string, tags: string[]) {
+    const updated = await this.update({
+      details: details,
+      title: title,
+    });
+    const oriTags = await this.getTags();
+    const originalSet = new Set(oriTags.map((tag) => tag.name));
+    const newSet = new Set(tags);
+    const removed = oriTags.filter((tag) => !newSet.has(tag.name));
+    const added = tags.filter((tag) => !originalSet.has(tag));
+    await this.removeTags(removed);
+    await Promise.all(added.map((tag) => this.addNewTag(tag)));
+    return updated;
+  }
+
   static associate() {
     Post.belongsTo(ForumGroup, { as: "ForumGroup", foreignKey: "groupId" });
     Post.belongsTo(User, { as: "User", foreignKey: "uid" });

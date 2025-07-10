@@ -1,6 +1,5 @@
 import axios from "axios";
 import type { Post, Group, Reply } from "../types";
-import { backend } from "../constants";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
 
@@ -132,7 +131,8 @@ export function fetchPostsByGroupId(
 export async function createPost(
   title: string,
   details: string,
-  groupId: string
+  groupId: string,
+  tags: string[]
 ): Promise<number> {
   const res = await axiosApi({
     method: "POST",
@@ -140,6 +140,7 @@ export async function createPost(
     data: {
       title: title,
       details: details,
+      tags: tags,
     },
   });
   return res.status;
@@ -147,7 +148,7 @@ export async function createPost(
 
 export async function updatePost(
   postId: string,
-  updates: Partial<Pick<Post, "title" | "details">>
+  updates: Partial<Pick<Post, "title" | "details" | "tags">>
 ): Promise<Post> {
   const res = await axiosApi({
     method: "PUT",
@@ -155,6 +156,7 @@ export async function updatePost(
     data: {
       title: updates.title,
       details: updates.details,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -508,12 +510,21 @@ export function fetchMyGroups(query: string = "", pageNumber: number = 1) {
   };
 }
 
-/** ------------------------ MY POSTS / GROUPS ------------------------ **/
+/** ------------------------ TAGS ------------------------ **/
 
 export async function getGroupTagList(groupId: string) {
   const data = await axiosApi({
     method: "GET",
     url: `/forum/tag/${groupId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
+}
+
+export async function getPostTagList(postId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/postTags/${postId}`,
   });
   const tags = data.data as string[];
   return tags;
