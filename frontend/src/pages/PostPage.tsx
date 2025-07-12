@@ -161,6 +161,7 @@ export default function PostPage() {
           <Link
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             to="/forum/post"
+            draggable={false}
           >
             <FaArrowLeft className="w-4 h-4 text-gray-600" />
           </Link>
