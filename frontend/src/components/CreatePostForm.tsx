@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa";
-import { createGroup, createPost } from "../functions/forumApi";
+import {
+  createGroup,
+  createPost,
+  getGroupTagList,
+} from "../functions/forumApi";
+import GroupTagInput from "./GroupTagInput";
+import PostTagInput from "./PostTagInput";
 
 interface CreatePostFormProps {
   onCancel: () => void;
@@ -22,19 +28,35 @@ export default function CreatePostForm({
 
   const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
+  const [postTags, setPostTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const groupTags = await getGroupTagList(selectedGroup.groupId);
+        setAvailableTags(groupTags);
+      } catch (error) {
+        console.error("Failed to fetch group tags:", error);
+      }
+    };
+
+    if (availableTags.length === 0) fetchTags();
+  }, [selectedGroup.groupId]);
 
   // Group creation states
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   const handleCreatePost = async () => {
-    await createPost(postTitle, postContent, selectedGroup.groupId);
+    await createPost(postTitle, postContent, selectedGroup.groupId, postTags);
     onCancel();
     onSubmit();
   };
 
   const handleCreateGroup = async () => {
-    await createGroup(groupName, groupDescription);
+    await createGroup(groupName, groupDescription, tags);
     onCancel();
     onSubmit();
   };
@@ -134,6 +156,18 @@ export default function CreatePostForm({
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
               />
             </div>
+
+            {/* Post tags */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Post Tags <span className="text-red-500">*</span>
+              </label>
+              <PostTagInput
+                availableTags={availableTags}
+                selectedTags={postTags}
+                onChange={setPostTags}
+              />
+            </div>
           </>
         ) : (
           // Group Creation Form
@@ -164,6 +198,14 @@ export default function CreatePostForm({
                 rows={6}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
               />
+            </div>
+
+            {/* Group tags */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Group Tags <span className="text-red-500">*</span>
+              </label>
+              <GroupTagInput value={tags} onChange={setTags} />
             </div>
 
             {/* Group creation info */}

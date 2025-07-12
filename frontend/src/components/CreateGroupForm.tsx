@@ -1,8 +1,7 @@
-"use client";
-
 import { useState } from "react";
 import { FaUsers } from "react-icons/fa";
 import { createGroup } from "../functions/forumApi";
+import GroupTagInput from "./GroupTagInput";
 
 interface CreatePostFormProps {
   onCancel: () => void;
@@ -12,8 +11,10 @@ export default function CreatePostForm({ onCancel }: CreatePostFormProps) {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
 
+  const [tags, setTags] = useState<string[]>([]);
+
   const handleCreateGroup = async () => {
-    await createGroup(groupName, groupDescription);
+    await createGroup(groupName, groupDescription, tags);
     onCancel();
   };
 
@@ -61,6 +62,14 @@ export default function CreatePostForm({ onCancel }: CreatePostFormProps) {
           rows={6}
           className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
         />
+      </div>
+
+      {/* Group tags */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Group Tags <span className="text-red-500">*</span>
+        </label>
+        <GroupTagInput value={tags} onChange={setTags} />
       </div>
 
       {/* Group creation info */}

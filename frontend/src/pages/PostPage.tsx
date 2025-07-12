@@ -16,6 +16,7 @@ import {
   addCommentReply,
   fetchCommentByCommentId,
   fetchCommentByPostId,
+  getPostTagList,
   likeAndUnlikeComment,
   likePost,
   likeReply,
@@ -38,6 +39,22 @@ export default function PostPage() {
   }
 
   const [post, setPost] = useState<Post>(postProp);
+  const [tags, setTags] = useState<string[]>(postProp.tags || []);
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await getPostTagList(postId);
+        setTags(fetchedTags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    if (tags.length === 0) {
+      fetchTags();
+    }
+  }, [postId, tags]);
+
   const [pageNumber, setPageNumber] = useState(1);
   const {
     commentList,
@@ -144,6 +161,7 @@ export default function PostPage() {
           <Link
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             to="/forum/post"
+            draggable={false}
           >
             <FaArrowLeft className="w-4 h-4 text-gray-600" />
           </Link>
@@ -172,6 +190,18 @@ export default function PostPage() {
                 </p>
               </div>
             </div>
+
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 outline-none resize-none transition-colors">
+                {tags.map((tag) => {
+                  return (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800 hover:bg-gray-200">
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
 
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-3">

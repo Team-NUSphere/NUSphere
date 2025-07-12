@@ -74,7 +74,7 @@ class CommentLikes extends Model<
         commentId: {
           allowNull: false,
           type: DataTypes.UUID,
-          unique: "tt_unique_constraint",
+          unique: "commentLike_tt_unique_constraint",
         },
         id: {
           allowNull: false,
@@ -86,7 +86,7 @@ class CommentLikes extends Model<
         uid: {
           allowNull: false,
           type: DataTypes.STRING,
-          unique: "tt_unique_constraint",
+          unique: "commentLike_tt_unique_constraint",
         },
       },
       {
