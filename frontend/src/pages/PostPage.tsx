@@ -61,7 +61,7 @@ export default function PostPage() {
     if (tags.length === 0) {
       fetchTags();
     }
-  }, [postId, tags]);
+  }, [postId]);
 
   const [pageNumber, setPageNumber] = useState(1);
   const {
