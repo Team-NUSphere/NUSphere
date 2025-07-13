@@ -7,7 +7,6 @@ backend/node_modules/
 frontend/build/
 backend/build/
 frontend/dist/
-backend/dist/
 
 #Logs
 logs/

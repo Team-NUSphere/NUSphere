@@ -13,8 +13,8 @@
     "format:check": "prettier --check .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "getMods": "tsx --watch src/db/scripts/populateModules.ts",
-    "build:migrations": "npx tsc --outDir dist/db/migrations --rootDir src/db/migrations src/db/migrations/*.ts",
-    "db:migrate": "npm run build:migrations && sequelize-cli db:migrate"
+    "migration:create": "node src/db/scripts/createMigration.cjs",
+    "db:migrate": "npx sequelize db:migrate"
   },
   "imports": {
     "#*": "./src/*"

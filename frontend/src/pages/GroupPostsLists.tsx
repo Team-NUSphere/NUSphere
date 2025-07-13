@@ -2,7 +2,13 @@ import { Link, useOutletContext, useParams } from "react-router-dom";
 import PostList from "../components/PostList";
 import { useEffect, useRef, useState } from "react";
 import useDebounce from "../functions/useDebounce";
-import { deletePost, fetchPostsByGroupId, getGroupTagList, fetchCommentByPostId, useSummaryGeneration  } from "../functions/forumApi";
+import {
+  deletePost,
+  fetchPostsByGroupId,
+  getGroupTagList,
+  fetchCommentByPostId,
+  useSummaryGeneration,
+} from "../functions/forumApi";
 
 export default function GroupPostsLists() {
   const { searchQuery } = useOutletContext<{
@@ -133,45 +139,21 @@ export default function GroupPostsLists() {
 
   return (
     <div>
-      <Link
-        to="/forum/group"
-        draggable={false}
-        className="mb-4 text-blue-600 hover:underline text-sm"
-      >
-        ← Back to Groups
-      </Link>
-      <h3 className="text-lg font-semibold mb-2">
-        {groupName || "Group"} Posts
-      </h3>
-      {/* Overall Group Summary Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mb-8">
-        <h2 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      <div className="flex justify-between items-center">
+        <div>
+          <button
+            onClick={() => window.history.back()}
+            draggable={false}
+            className="mb-4 text-blue-600 hover:underline text-sm"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          Group Discussion Summary
-        </h2>
-
-        {summaryLoading && (
-          <div className="flex items-center text-gray-600">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span>Analyzing all posts and discussions...</span>
-          </div>
-        )}
-
-        {summaryError && (
-          <div className="text-red-600 bg-red-50 p-4 rounded-md border border-red-200">
-            <div className="flex items-center">
+            ← Back to Groups
+          </button>
+          <h3 className="text-lg font-semibold mb-2">
+            {groupName || "Group"} Posts
+          </h3>
+          {/* Overall Group Summary Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mb-8">
+            <h2 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
                 fill="none"
@@ -182,43 +164,77 @@ export default function GroupPostsLists() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <strong>Error:</strong> {summaryError}
-            </div>
-          </div>
-        )}
+              Group Discussion Summary
+            </h2>
 
-        {summary && !summaryLoading && (
-          <div className="prose max-w-none">
-            <div className="bg-white p-4 rounded-md border border-blue-100">
-              <p className="text-gray-700 leading-relaxed text-base">
-                {summary}
-              </p>
-            </div>
-            <div className="mt-3 text-sm text-gray-500">
-              Summary generated from {postList.length} posts and their
-              discussions
-            </div>
-          </div>
-        )}
+            {summaryLoading && (
+              <div className="flex items-center text-gray-600">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                <span>Analyzing all posts and discussions...</span>
+              </div>
+            )}
 
-        {!summary &&
-          !summaryLoading &&
-          !summaryError &&
-          postList.length > 0 && (
-            <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
-              Comprehensive summary will appear here once all posts are
-              analyzed...
-            </div>
-          )}
+            {summaryError && (
+              <div className="text-red-600 bg-red-50 p-4 rounded-md border border-red-200">
+                <div className="flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <strong>Error:</strong> {summaryError}
+                </div>
+              </div>
+            )}
 
-        {postList.length === 0 && !loading && (
-          <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
-            No posts found in this group to summarize.
+            {summary && !summaryLoading && (
+              <div className="prose max-w-none">
+                <div className="bg-white p-4 rounded-md border border-blue-100">
+                  <p className="text-gray-700 leading-relaxed text-base">
+                    {summary}
+                  </p>
+                </div>
+                <div className="mt-3 text-sm text-gray-500">
+                  Summary generated from {postList.length} posts and their
+                  discussions
+                </div>
+              </div>
+            )}
+
+            {!summary &&
+              !summaryLoading &&
+              !summaryError &&
+              postList.length > 0 && (
+                <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
+                  Comprehensive summary will appear here once all posts are
+                  analyzed...
+                </div>
+              )}
+
+            {postList.length === 0 && !loading && (
+              <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
+                No posts found in this group to summarize.
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        <Link
+          to={`/forum/group/${groupId}/resources`}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Resources
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 outline-none resize-none transition-colors">

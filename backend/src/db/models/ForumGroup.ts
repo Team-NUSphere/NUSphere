@@ -13,6 +13,7 @@ import {
   Sequelize,
 } from "sequelize";
 
+import ForumResourceCluster from "./ForumResourceCluster.js";
 import Module from "./Module.js";
 import Post, { PostType } from "./Post.js";
 import Tags from "./Tags.js";
@@ -22,6 +23,13 @@ interface ForumGroup extends HasManyMixin<Post, string, "Post", "Posts"> {}
 interface ForumGroup extends HasManyMixin<Tags, string, "Tag", "Tags"> {}
 interface ForumGroup extends BelongsToMixin<User, string, "User"> {}
 interface ForumGroup extends BelongsToMixin<Module, string, "Module"> {}
+interface ForumGroup
+  extends HasManyMixin<
+    ForumResourceCluster,
+    string,
+    "ResourceCluster",
+    "ResourceClusters"
+  > {}
 
 class ForumGroup extends Model<
   InferAttributes<ForumGroup>,
@@ -39,6 +47,7 @@ class ForumGroup extends Model<
   declare UserOwner?: NonAttribute<User>;
   declare ModuleOwner?: NonAttribute<Module>;
   declare Tags?: NonAttribute<Tags[]>;
+  declare ResourceClusters?: NonAttribute<ForumResourceCluster[]>;
 
   getOwner(options?: BelongsToGetAssociationMixinOptions) {
     const mixinMethodName = this.ownerType === "User" ? "getUser" : "getModule";
@@ -86,6 +95,10 @@ class ForumGroup extends Model<
       foreignKey: "groupId",
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
+    });
+    ForumGroup.hasMany(ForumResourceCluster, {
+      as: "ResourceClusters",
+      foreignKey: "groupId",
     });
   }
 
