@@ -1,8 +1,8 @@
 import axios from "axios";
-import type { Post, Group, Reply } from "../types";
+import type { Post, Group, Reply, ResourceClusterType } from "../types";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
-import qs from "qs";
+import qs, { stringify } from "qs";
 
 /** ------------------------ POSTS ------------------------ **/
 
@@ -534,6 +534,110 @@ export async function getPostTagList(postId: string) {
   });
   const tags = data.data as string[];
   return tags;
+}
+
+/** ------------------------ RESOURCES ------------------------ **/
+
+export async function getGroupResourceList(groupId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/resources/${groupId}`,
+  });
+  const groupResources = data.data as {
+    groupId: string;
+    groupName: string;
+    ownerId: string;
+    ResourceClusters: ResourceClusterType[];
+  };
+  return groupResources;
+}
+
+export function createGroupResourceCluster(
+  groupId: string,
+  name: string,
+  description: string = ""
+) {
+  return axiosApi({
+    method: "POST",
+    url: `/forum/resources/${groupId}`,
+    data: {
+      name: name,
+      description: description,
+    },
+  });
+}
+
+export async function editGroupResourceCluster(
+  groupId: string,
+  clusterId: string,
+  name: string,
+  description: string = ""
+) {
+  const data = await axiosApi({
+    method: "PUT",
+    url: `/forum/resources/${groupId}/${clusterId}`,
+    data: {
+      name: name,
+      description: description,
+    },
+  });
+  return data;
+}
+
+export async function deleteGroupResourceCluster(
+  groupId: string,
+  clusterId: string
+) {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/resources/${groupId}/${clusterId}`,
+  });
+}
+
+export function createGroupResource(
+  clusterId: string,
+  title: string,
+  link: string = "",
+  description: string = ""
+) {
+  return axiosApi({
+    method: "POST",
+    url: `/forum/resource/${clusterId}`,
+    data: {
+      title: title,
+      link: link,
+      description: description,
+    },
+  });
+}
+
+export async function editClusterResource(
+  clusterId: string,
+  resourceId: string,
+  name: string,
+  link: string,
+  description: string = ""
+) {
+  const data = await axiosApi({
+    method: "PUT",
+    url: `/forum/resource/${clusterId}/${resourceId}`,
+    data: {
+      name: name,
+      link: link,
+      description: description,
+    },
+  });
+  return data;
+}
+
+export async function deleteClusterResource(
+  clusterId: string,
+  resourceId: string
+) {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/resource/${clusterId}/${resourceId}`,
+  });
 }
 
 /** ------------------------ FRONTEND COMMENT FORMATTING ------------------------ **/
