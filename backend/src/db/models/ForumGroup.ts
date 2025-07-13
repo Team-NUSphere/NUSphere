@@ -15,9 +15,11 @@ import {
 
 import Module from "./Module.js";
 import Post, { PostType } from "./Post.js";
+import Tags from "./Tags.js";
 import User from "./User.js";
 
 interface ForumGroup extends HasManyMixin<Post, string, "Post", "Posts"> {}
+interface ForumGroup extends HasManyMixin<Tags, string, "Tag", "Tags"> {}
 interface ForumGroup extends BelongsToMixin<User, string, "User"> {}
 interface ForumGroup extends BelongsToMixin<Module, string, "Module"> {}
 
@@ -26,7 +28,7 @@ class ForumGroup extends Model<
   InferCreationAttributes<ForumGroup>
 > {
   declare description: CreationOptional<string>;
-  declare groupId?: CreationOptional<string>;
+  declare groupId: CreationOptional<string>;
   declare groupName: string;
   declare postCount?: CreationOptional<number>;
 
@@ -36,6 +38,7 @@ class ForumGroup extends Model<
   declare Owner?: NonAttribute<Module | User>;
   declare UserOwner?: NonAttribute<User>;
   declare ModuleOwner?: NonAttribute<Module>;
+  declare Tags?: NonAttribute<Tags[]>;
 
   getOwner(options?: BelongsToGetAssociationMixinOptions) {
     const mixinMethodName = this.ownerType === "User" ? "getUser" : "getModule";
@@ -43,6 +46,23 @@ class ForumGroup extends Model<
   }
 
   declare Posts?: NonAttribute<Post[]>;
+
+  async updateGroup(description: string, groupName: string, tags: string[]) {
+    const updated = await this.update({
+      description: description,
+      groupName: groupName,
+    });
+    const oriTags = await this.getTags();
+    const originalSet = new Set(oriTags.map((tag) => tag.name));
+    const newSet = new Set(tags);
+    const removed = oriTags.filter((tag) => !newSet.has(tag.name));
+    const added = tags.filter((tag) => !originalSet.has(tag));
+    await Promise.all(removed.map((tag) => tag.destroy()));
+    await Promise.all(
+      added.map((tag) => this.createTag({ groupId: this.groupId, name: tag })),
+    );
+    return updated;
+  }
 
   static associate() {
     ForumGroup.hasMany(Post, {
@@ -60,6 +80,12 @@ class ForumGroup extends Model<
       as: "ModuleOwner",
       foreignKey: "ownerId",
       scope: { ownerType: "Module" },
+    });
+    ForumGroup.hasMany(Tags, {
+      as: "Tags",
+      foreignKey: "groupId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
   }
 

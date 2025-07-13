@@ -10,6 +10,8 @@ import ForumGroup from "./models/ForumGroup.js";
 import Module from "./models/Module.js";
 import Post from "./models/Post.js";
 import PostLikes from "./models/PostLikes.js";
+import PostTag from "./models/PostTag.js";
+import Tags from "./models/Tags.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
@@ -46,6 +48,8 @@ ForumGroup.initModel(sequelize);
 Comment.initModel(sequelize);
 PostLikes.initModel(sequelize);
 CommentLikes.initModel(sequelize);
+Tags.initModel(sequelize);
+PostTag.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
@@ -56,6 +60,8 @@ const db: DB = {
   Module: Module,
   Post: Post,
   PostLikes: PostLikes,
+  PostTag: PostTag,
+  Tags: Tags,
   User: User,
   UserEvent: UserEvent,
   UserTimetable: UserTimetable,

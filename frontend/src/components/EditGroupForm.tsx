@@ -1,9 +1,12 @@
-"use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaUsers } from "react-icons/fa";
-import { createGroup, updateGroup } from "../functions/forumApi";
+import {
+  createGroup,
+  getGroupTagList,
+  updateGroup,
+} from "../functions/forumApi";
 import type { Group } from "../types";
+import GroupTagInput from "./GroupTagInput";
 
 interface EditGroupFormProps {
   onCancel: () => void;
@@ -16,11 +19,25 @@ export default function EditGroupForm({ onCancel, group }: EditGroupFormProps) {
   const [groupDescription, setGroupDescription] = useState(
     group.description || ""
   );
+  const [tags, setTags] = useState<string[]>(group.tags ?? []);
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const existingTags = await getGroupTagList(group.groupId);
+        setTags(existingTags);
+      } catch (error) {
+        console.error("Failed to fetch group tags:", error);
+      }
+    };
+
+    if (!group.tags) fetchTags();
+  }, [group.tags, group.groupId]);
 
   const handleEditGroup = async () => {
     await updateGroup(group.groupId, {
       groupName: groupName,
       description: groupDescription,
+      tags: tags,
     });
     onCancel();
   };
@@ -61,6 +78,14 @@ export default function EditGroupForm({ onCancel, group }: EditGroupFormProps) {
           rows={6}
           className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-colors"
         />
+      </div>
+
+      {/* Group tags */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Group Tags <span className="text-red-500">*</span>
+        </label>
+        <GroupTagInput value={tags} onChange={setTags} />
       </div>
 
       {/* Group creation info */}
