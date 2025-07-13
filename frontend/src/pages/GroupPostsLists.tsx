@@ -86,16 +86,26 @@ export default function GroupPostsLists() {
 
   return (
     <div>
-      <Link
-        to="/forum/group"
-        draggable={false}
-        className="mb-4 text-blue-600 hover:underline text-sm"
-      >
-        ← Back to Groups
-      </Link>
-      <h3 className="text-lg font-semibold mb-2">
-        {groupName || "Group"} Posts
-      </h3>
+      <div className="flex justify-between items-center">
+        <div>
+          <button
+            onClick={() => window.history.back()}
+            draggable={false}
+            className="mb-4 text-blue-600 hover:underline text-sm"
+          >
+            ← Back to Groups
+          </button>
+          <h3 className="text-lg font-semibold mb-2">
+            {groupName || "Group"} Posts
+          </h3>
+        </div>
+        <Link
+          to={`/forum/group/${groupId}/resources`}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Resources
+        </Link>
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-4 outline-none resize-none transition-colors">
         {availableTags.map((tag) => {

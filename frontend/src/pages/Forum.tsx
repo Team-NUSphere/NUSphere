@@ -20,6 +20,7 @@ export default function Forum() {
   const [selectedGroup, setSelectedGroup] = useState<{
     groupId: string;
     groupName: string;
+    groupTags?: string[];
   } | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);

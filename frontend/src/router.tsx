@@ -15,6 +15,7 @@ import GroupPostsLists from "./pages/GroupPostsLists";
 import MyPostsGroups from "./pages/MyPostsGroups";
 import PostPage from "./pages/PostPage";
 import MainPostList from "./pages/MainPostList";
+import ForumResourcePage from "./pages/ForumResourcePage";
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "/forum",
+        element: <Navigate to="/forum/post" replace />,
+      },
+      {
+        path: "/forum",
         element: <Forum />,
         children: [
           {
@@ -67,7 +72,16 @@ export const router = createBrowserRouter([
           },
           {
             path: "/forum/group/:groupId",
-            element: <GroupPostsLists />,
+            children: [
+              {
+                index: true,
+                element: <GroupPostsLists />,
+              },
+              {
+                path: "/forum/group/:groupId/resources",
+                element: <ForumResourcePage />,
+              },
+            ],
           },
           {
             path: "/forum/mine",
@@ -82,6 +96,10 @@ export const router = createBrowserRouter([
       {
         path: "/room/:roomId",
         element: <Room />,
+      },
+      {
+        path: "/resources",
+        element: <ForumResourcePage />,
       },
     ],
   },

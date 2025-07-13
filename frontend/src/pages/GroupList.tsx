@@ -9,7 +9,11 @@ interface GroupListProps {
   currentUser: User;
   handleEditGroup?: (group: Group) => void;
   searchQuery: string;
-  setSelectedGroup: (group: { groupId: string; groupName: string }) => void;
+  setSelectedGroup: (group: {
+    groupId: string;
+    groupName: string;
+    groupTags?: string[];
+  }) => void;
 }
 
 export default function GroupList({
@@ -30,10 +34,12 @@ export default function GroupList({
             key={group.groupId}
             className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
             to={`/forum/group/${group.groupId}`}
+            draggable="false"
             onClick={() => {
               setSelectedGroup({
                 groupId: group.groupId,
                 groupName: group.groupName,
+                groupTags: group.tags,
               });
             }}
           >
@@ -124,6 +130,7 @@ export default function GroupList({
           key={group.groupId}
           className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
           to={`/forum/group/${group.groupId}`}
+          draggable="false"
           onClick={() => {
             setSelectedGroup({
               groupId: group.groupId,

@@ -7,6 +7,8 @@ import Comment from "./models/Comment.js";
 import CommentLikes from "./models/CommentLikes.js";
 import Enrollment from "./models/Enrollment.js";
 import ForumGroup from "./models/ForumGroup.js";
+import ForumResource from "./models/ForumResource.js";
+import ForumResourceCluster from "./models/ForumResourceCluster.js";
 import Module from "./models/Module.js";
 import Post from "./models/Post.js";
 import PostLikes from "./models/PostLikes.js";
@@ -50,6 +52,8 @@ PostLikes.initModel(sequelize);
 CommentLikes.initModel(sequelize);
 Tags.initModel(sequelize);
 PostTag.initModel(sequelize);
+ForumResource.initModel(sequelize);
+ForumResourceCluster.initModel(sequelize);
 
 const db: DB = {
   Class: Class,
@@ -57,6 +61,8 @@ const db: DB = {
   CommentLikes: CommentLikes,
   Enrollment: Enrollment,
   ForumGroup: ForumGroup,
+  ForumResource: ForumResource,
+  ForumResourceCluster: ForumResourceCluster,
   Module: Module,
   Post: Post,
   PostLikes: PostLikes,
