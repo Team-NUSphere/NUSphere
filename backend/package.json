@@ -25,6 +25,7 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "@datastax/langflow-client": "^0.4.0",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",

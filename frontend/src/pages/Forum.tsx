@@ -7,6 +7,7 @@ import { getAuth } from "../contexts/authContext";
 import CreateGroupForm from "../components/CreateGroupForm";
 import EditGroupForm from "../components/EditGroupForm";
 import EditPostForm from "../components/EditPostForm";
+import { useSummaryGeneration } from "../functions/forumApi";
 
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -32,6 +33,25 @@ export default function Forum() {
   // This is for the Post and Group tabs
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  // // This is for the Summary
+  const { summary, loading: summaryLoading, error: summaryError, generateSummary } = useSummaryGeneration();
+
+  const testSummary = async () => {
+    try {
+      const testInput = "This is a test forum post about computer science. It discusses algorithms, data structures, and programming concepts. The post contains multiple paragraphs with detailed explanations about various topics in computer science education.";
+
+      console.log("Testing summary with input:", testInput);
+      const result = await generateSummary(testInput);
+      console.log("Summary result:", result);
+
+      // You can also show the result in the UI
+      alert(`Summary generated successfully!\n\nInput: ${testInput}\n\nSummary: ${result}`);
+    } catch (error) {
+      console.error("Summary test failed:", error);
+      alert("Summary test failed. Check console for details.");
+    }
+  };
 
   // Handler functions with TODO comments
   const handleEditPost = (post: Post) => {
@@ -84,13 +104,18 @@ export default function Forum() {
             onCreateClick={handleCreateClick}
           />
 
+          <button
+            onClick={testSummary}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          > Test Summary Generation</button>
+
           <hr className="border-t border-gray-300" />
         </div>
 
         {showCreatePost ? (
           <CreatePostForm
             onCancel={() => setShowCreatePost(false)}
-            onSubmit={() => {}}
+            onSubmit={() => { }}
             selectedGroup={selectedGroup ?? { groupId: "", groupName: "" }}
           />
         ) : showCreateGroup ? (
@@ -124,10 +149,9 @@ export default function Forum() {
                     setSearchQuery("");
                   }}
                   className={({ isActive }) =>
-                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
-                      isActive
-                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500 hover:text-gray-700"
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${isActive
+                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
                     }`
                   }
                 >
@@ -141,10 +165,9 @@ export default function Forum() {
                     setSearchQuery("");
                   }}
                   className={({ isActive }) =>
-                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
-                      isActive
-                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500 hover:text-gray-700"
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${isActive
+                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
                     }`
                   }
                 >
@@ -158,10 +181,9 @@ export default function Forum() {
                     setSearchQuery("");
                   }}
                   className={({ isActive }) =>
-                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${
-                      isActive
-                        ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500 hover:text-gray-700"
+                    `flex-1 py-2 px-4 text-center font-medium text-sm rounded-t-lg select-none ${isActive
+                      ? "bg-blue-50 text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
                     }`
                   }
                 >

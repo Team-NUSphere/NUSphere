@@ -595,3 +595,47 @@ export function updateNestedComments(
     }
   });
 }
+
+/** ------------------------ SUMMARY ------------------------ **/
+
+export async function runSummaryFlow(input: string): Promise<string> {
+  try {
+    const res = await axiosApi({
+      method: "POST",
+      url: '/summary/runSummary',
+      data: {
+        input: input,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error generating summary:", error);
+    throw new Error("Failed to generate summary");
+  }
+}
+
+// Hook for summary generation with loading state
+export function useSummaryGeneration() {
+  const [summary, setSummary] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateSummary = async (input: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log("Generating summary with input:", input);
+      const result = await runSummaryFlow(input);
+      setSummary(result);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate summary";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { summary, loading, error, generateSummary };
+}

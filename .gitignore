@@ -25,3 +25,5 @@ frontend/.env
 #IDE Specific
 .vscode/
 .vercel
+
+.DS_Store
