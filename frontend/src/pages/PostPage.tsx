@@ -58,12 +58,10 @@ export default function PostPage() {
 
   const [summaryGenerated, setSummaryGenerated] = useState(false);
 
-  // Auto-generate summary when comments are loaded
   useEffect(() => {
     const generatePostSummary = async () => {
       if (commentList.length >= 0 && !summaryGenerated && !summaryLoading) {
         try {
-          // Combine post title, details, and all comments into one input
           const commentsText = commentList
             .map((comment) => comment.comment)
             .join(" ");
@@ -77,8 +75,7 @@ export default function PostPage() {
         }
       }
     };
-
-    // Only generate summary once comments are loaded
+    
     if (commentList.length >= 0) {
       generatePostSummary();
     }
