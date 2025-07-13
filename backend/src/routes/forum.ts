@@ -22,11 +22,15 @@ import {
   handleUpdateReply,
 } from "#controllers/forumController.js";
 import {
-  handleAddTagToPost,
-  handleChangeTagName,
-  handleCreateNewTag,
-  handleDeleteTag,
-  handleDeleteTagFromPost,
+  handleCreateCluster,
+  handleCreateResource,
+  handleDeleteCluster,
+  handleDeleteResource,
+  handleEditCluster,
+  handleEditResource,
+  handleGetGroupResources,
+} from "#controllers/forumResourceController.js";
+import {
   handleGetGroupTagList,
   handleGetPostTagList,
 } from "#controllers/tagController.js";
@@ -73,18 +77,27 @@ router.get("/myGroups", handleGetMyGroupList);
 
 // Tags
 // Manage group tags
-router
-  .route("/tag/:groupId")
-  .get(handleGetGroupTagList)
-  .post(handleCreateNewTag)
-  .put(handleChangeTagName)
-  .delete(handleDeleteTag);
+router.get("/tag/:groupId", handleGetGroupTagList);
 
 // Manage post tags
+router.get("/postTags/:postId", handleGetPostTagList);
+
+// Resources
 router
-  .route("/postTags/:postId")
-  .get(handleGetPostTagList)
-  .post(handleAddTagToPost)
-  .delete(handleDeleteTagFromPost);
+  .route("/resources/:groupId")
+  .get(handleGetGroupResources)
+  .post(handleCreateCluster);
+
+router
+  .route("/resources/:groupId/:clusterId")
+  .put(handleEditCluster)
+  .delete(handleDeleteCluster);
+
+router.route("/resource/:clusterId").post(handleCreateResource);
+
+router
+  .route("/resource/:clusterId/:resourceId")
+  .put(handleEditResource)
+  .delete(handleDeleteResource);
 
 export default router;

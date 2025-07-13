@@ -88,3 +88,18 @@ export interface UserTimetable {
   timetableId: string;
   uid: string;
 }
+
+export interface Resource {
+  resourceId: string;
+  name: string;
+  description: string;
+  link: string;
+}
+
+export interface ResourceClusterType {
+  clusterId: string;
+  name: string;
+  description: string;
+  Resources: Resource[];
+  groupId: string;
+}
