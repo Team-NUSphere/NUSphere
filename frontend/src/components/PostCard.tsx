@@ -50,6 +50,7 @@ export default function PostCard({
     <Link
       to={`/forum/post/${post.postId}`}
       state={{ post: post }}
+      draggable={false}
       className="no-underline"
     >
       <div className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">

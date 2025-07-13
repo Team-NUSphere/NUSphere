@@ -1,8 +1,8 @@
 import axios from "axios";
 import type { Post, Group, Reply } from "../types";
-import { backend } from "../constants";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
+import qs from "qs";
 
 /** ------------------------ POSTS ------------------------ **/
 
@@ -60,7 +60,8 @@ export function fetchAllPosts(query: string = "", pageNumber: number = 1) {
 export function fetchPostsByGroupId(
   groupId: string,
   query: string = "",
-  pageNumber: number = 1
+  pageNumber: number = 1,
+  selectedTags: string[] = []
 ) {
   const [postList, setPostList] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -70,7 +71,7 @@ export function fetchPostsByGroupId(
 
   useEffect(() => {
     setPostList([]);
-  }, [query]);
+  }, [query, selectedTags]);
 
   useEffect(() => {
     setLoading(true);
@@ -85,10 +86,14 @@ export function fetchPostsByGroupId(
       params: {
         page: pageNumber,
         q: query,
+        tags: selectedTags,
       },
+      paramsSerializer: (params) =>
+        qs.stringify(params, { arrayFormat: "repeat" }),
       signal: signal,
     })
       .then((res) => {
+        if (!res.data) return;
         const postList = res.data.posts?.map(
           (post: {
             postId: string;
@@ -120,7 +125,7 @@ export function fetchPostsByGroupId(
         setLoading(false);
       });
     return () => controller.abort();
-  }, [pageNumber, query]);
+  }, [pageNumber, query, selectedTags]);
 
   function deletePostFromList(postId: string) {
     setPostList((prev) => prev.filter((post) => post.postId !== postId));
@@ -132,7 +137,8 @@ export function fetchPostsByGroupId(
 export async function createPost(
   title: string,
   details: string,
-  groupId: string
+  groupId: string,
+  tags: string[]
 ): Promise<number> {
   const res = await axiosApi({
     method: "POST",
@@ -140,6 +146,7 @@ export async function createPost(
     data: {
       title: title,
       details: details,
+      tags: tags,
     },
   });
   return res.status;
@@ -147,7 +154,7 @@ export async function createPost(
 
 export async function updatePost(
   postId: string,
-  updates: Partial<Pick<Post, "title" | "details">>
+  updates: Partial<Pick<Post, "title" | "details" | "tags">>
 ): Promise<Post> {
   const res = await axiosApi({
     method: "PUT",
@@ -155,6 +162,7 @@ export async function updatePost(
     data: {
       title: updates.title,
       details: updates.details,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -235,7 +243,8 @@ export function fetchAllGroups(query: string = "", pageNumber: number = 1) {
 
 export async function createGroup(
   groupName: string,
-  description: string
+  description: string,
+  tags: string[]
 ): Promise<Group> {
   const res = await axiosApi({
     method: "POST",
@@ -243,6 +252,7 @@ export async function createGroup(
     data: {
       name: groupName,
       description: description,
+      tags: tags,
     },
   });
   return res.data;
@@ -250,7 +260,7 @@ export async function createGroup(
 
 export async function updateGroup(
   groupId: string,
-  updates: Partial<Pick<Group, "groupName" | "description">>
+  updates: Partial<Pick<Group, "groupName" | "description" | "tags">>
 ): Promise<Group> {
   const res = await axiosApi({
     method: "PUT",
@@ -258,6 +268,7 @@ export async function updateGroup(
     data: {
       name: updates.groupName,
       description: updates.description,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -503,6 +514,26 @@ export function fetchMyGroups(query: string = "", pageNumber: number = 1) {
     hasMore,
     deleteGroupFromList,
   };
+}
+
+/** ------------------------ TAGS ------------------------ **/
+
+export async function getGroupTagList(groupId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/tag/${groupId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
+}
+
+export async function getPostTagList(postId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/postTags/${postId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
 }
 
 /** ------------------------ FRONTEND COMMENT FORMATTING ------------------------ **/
