@@ -93,7 +93,7 @@ export function fetchPostsByGroupId(
       signal: signal,
     })
       .then((res) => {
-        if (!res.data) return;
+        if (!res || !res.data) return;
         const postList = res.data.posts?.map(
           (post: {
             postId: string;
@@ -737,7 +737,7 @@ export async function runSummaryFlow(input: string): Promise<string> {
   try {
     const res = await axiosApi({
       method: "POST",
-      url: '/summary/runSummary',
+      url: "/summary/runSummary",
       data: {
         input: input,
       },
@@ -764,7 +764,8 @@ export function useSummaryGeneration() {
       setSummary(result);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to generate summary";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate summary";
       setError(errorMessage);
       throw err;
     } finally {

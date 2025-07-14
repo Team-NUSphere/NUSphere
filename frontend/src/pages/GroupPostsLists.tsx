@@ -46,7 +46,7 @@ export default function GroupPostsLists() {
   const debouncedQuery = useDebounce<string>(searchQuery, 500);
   const debouncedTags = useDebounce<string[]>(selectedTags, 250);
   const { postList, loading, error, hasMore, groupName, deletePostFromList } =
-    fetchPostsByGroupId(groupId, debouncedQuery, pageNumber);
+    fetchPostsByGroupId(groupId, debouncedQuery, pageNumber, debouncedTags);
 
   const {
     summary,
