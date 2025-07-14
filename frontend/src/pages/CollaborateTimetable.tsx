@@ -99,6 +99,9 @@ export default function CollaborateTimetable() {
     if (syncedData) {
       Object.entries(syncedData).forEach(([userId, userData], index) => {
         if (selectedCollaborators.includes(userId) && userData.classes) {
+          console.log("Collaborate Timetable Error");
+          console.log(`Adding classes for collaborator ${userId}`);
+          console.log("User classes:", userData.classes);
           userData.classes.forEach((cls) => {
             classes.push({
               ...cls,
@@ -157,7 +160,7 @@ export default function CollaborateTimetable() {
             selectedClass.lessonType
           );
           console.log("Fetched module classes:", result);
-        
+
           const userOnlyClasses = allClasses.filter(
             (cls) => cls.collaboratorId === "You"
           );
@@ -197,7 +200,7 @@ export default function CollaborateTimetable() {
   const handleAlternativeClassClick = async (
     alternativeClass: UserClassType
   ) => {
-    if (isChangingClass) return; 
+    if (isChangingClass) return;
 
     console.log(`Switching to alternative class`, alternativeClass);
 
