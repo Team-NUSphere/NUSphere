@@ -151,8 +151,14 @@ export default function GroupPostsLists() {
           <h3 className="text-lg font-semibold mb-2">
             {groupName || "Group"} Posts
           </h3>
+          <Link
+            to={`/forum/group/${groupId}/resources`}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Resources
+          </Link>
           {/* Overall Group Summary Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mb-8">
+          <div className=" my-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mb-8">
             <h2 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
@@ -229,12 +235,6 @@ export default function GroupPostsLists() {
             )}
           </div>
         </div>
-        <Link
-          to={`/forum/group/${groupId}/resources`}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          Resources
-        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 outline-none resize-none transition-colors">
