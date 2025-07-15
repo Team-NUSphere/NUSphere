@@ -25,7 +25,6 @@
   "type": "module",
   "description": "",
   "dependencies": {
-    "@datastax/langflow-client": "^0.4.0",
     "@google/genai": "^1.9.0",
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.10.0",
