@@ -24,6 +24,7 @@ import {
 } from "sequelize";
 
 import Module from "./Module.js";
+import SwapRequests from "./SwapRequests.js";
 import UserTimetable from "./UserTimetable.js";
 
 interface Class extends BelongsToMixin<Module, string, "Module"> {}
@@ -55,9 +56,13 @@ class Class extends Model<
   declare moduleId: CreationOptional<string>;
 
   declare Module?: NonAttribute<Module>;
+  declare SwapFrom?: NonAttribute<SwapRequests>;
+  declare SwapTo?: NonAttribute<SwapRequests>;
 
   static associate() {
     Class.belongsTo(Module, { as: "Module", foreignKey: "moduleId" });
+    Class.hasMany(SwapRequests, { as: "SwapFrom", foreignKey: "fromClassId" });
+    Class.hasMany(SwapRequests, { as: "SwapTo", foreignKey: "toClassId" });
   }
 
   static initModel(sequelize: Sequelize) {

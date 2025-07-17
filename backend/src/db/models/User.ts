@@ -22,6 +22,7 @@ import ForumGroup from "./ForumGroup.js";
 import Module from "./Module.js";
 import Post from "./Post.js";
 import PostLikes from "./PostLikes.js";
+import SwapRequests from "./SwapRequests.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
 
@@ -163,6 +164,10 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       foreignKey: "uid",
       otherKey: "commentId",
       through: CommentLikes,
+    });
+    User.hasMany(SwapRequests, {
+      as: "SwapRequests",
+      foreignKey: "uid",
     });
   }
 
