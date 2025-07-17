@@ -18,6 +18,9 @@ DB_PORT=5433  # ⚠️ Make sure this matches your PostgreSQL port
 # Firebase
 FIREBASE_SERVICE_ACCOUNT_KEY= # Paste your service account key here
 
+# LangFlow
+LANGFLOW_API_KEY= # Paste your service account key here
+
 
 ## Step 2: Install Docker
 

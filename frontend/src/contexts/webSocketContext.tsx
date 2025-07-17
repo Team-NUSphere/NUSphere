@@ -163,10 +163,10 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
                 ...prevData[userId]?.modules,
                 ...modules,
               },
-              classes: {
+              classes: [
                 ...(prevData[userId]?.classes || []),
                 ...(classes ?? []),
-              },
+              ],
             },
           };
         });
@@ -255,12 +255,16 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         setSyncedData((prevData) => {
           if (!prevData || !prevData[userId]) return prevData;
           const updatedModules = { ...prevData[userId].modules };
+          const updatedClasses = prevData[userId].classes?.filter(
+            (cls) => cls.moduleId !== moduleId
+          );
           delete updatedModules[moduleId];
           return {
             ...prevData,
             [userId]: {
               ...prevData[userId],
               modules: updatedModules,
+              classes: updatedClasses || [],
             },
           };
         });

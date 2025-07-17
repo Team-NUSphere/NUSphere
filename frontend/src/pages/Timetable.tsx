@@ -101,7 +101,7 @@ export default function Timetable({
         {/* Time column */}
         <div
           className="flex flex-col justify-between mt-10"
-          style={{ height: `${numOfHours * 70}px` }}
+          style={{ height: `${numOfHours * 80}px` }}
         >
           {hours.map((hour) => (
             <div key={hour} className="text-right -translate-y-1/2 p-2">

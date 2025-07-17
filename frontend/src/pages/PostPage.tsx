@@ -24,6 +24,7 @@ import {
   replyToPost,
   unlikePost,
   unlikeReply,
+  useSummaryGeneration,
 } from "../functions/forumApi";
 
 interface PostPageProps {
@@ -33,6 +34,13 @@ interface PostPageProps {
 export default function PostPage() {
   const postId = useParams().postId;
   const postProp = useLocation().state.post as Post | undefined;
+
+  const {
+    summary,
+    loading: summaryLoading,
+    error: summaryError,
+    generateSummary,
+  } = useSummaryGeneration();
 
   if (!postId || !postProp) {
     return <div className="text-center text-red-500">Post not found</div>;
@@ -53,7 +61,7 @@ export default function PostPage() {
     if (tags.length === 0) {
       fetchTags();
     }
-  }, [postId, tags]);
+  }, [postId]);
 
   const [pageNumber, setPageNumber] = useState(1);
   const {
@@ -65,6 +73,37 @@ export default function PostPage() {
     setCommentList,
   } = fetchCommentByPostId(postId, pageNumber);
 
+  const [summaryGenerated, setSummaryGenerated] = useState(false);
+
+  useEffect(() => {
+    const generatePostSummary = async () => {
+      if (commentList.length >= 0 && !summaryGenerated && !summaryLoading) {
+        try {
+          const commentsText = commentList
+            .map((comment) => comment.comment)
+            .join(" ");
+          const fullInput = `Title: ${post.title}\n\nDetails: ${post.details}\n\nComments: ${commentsText}`;
+
+          console.log("Auto-generating summary with input:", fullInput);
+          await generateSummary(fullInput);
+          setSummaryGenerated(true);
+        } catch (error) {
+          console.error("Auto summary generation failed:", error);
+        }
+      }
+    };
+    
+    if (commentList.length >= 0) {
+      generatePostSummary();
+    }
+  }, [
+    commentList,
+    post.title,
+    post.details,
+    summaryGenerated,
+    summaryLoading,
+    generateSummary,
+  ]);
   const observerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const observerTarget = observerRef.current;
@@ -177,6 +216,34 @@ export default function PostPage() {
           className="bg-white rounded-lg shadow-sm p-6 flex flex-col gap-6"
           style={{ maxHeight: "70vh", overflowY: "auto" }}
         >
+          {/* Auto-Generated Summary Section */}
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-3 text-blue-800">
+              Post Summary
+            </h2>
+            {summaryLoading && (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-gray-600">Generating summary...</span>
+              </div>
+            )}
+            {summaryError && (
+              <div className="text-red-600 bg-red-50 p-3 rounded-md">
+                <strong>Error:</strong> {summaryError}
+              </div>
+            )}
+            {summary && !summaryLoading && (
+              <div className="prose max-w-none">
+                <p className="text-gray-700 leading-relaxed">{summary}</p>
+              </div>
+            )}
+            {!summary && !summaryLoading && !summaryError && (
+              <div className="text-gray-500 italic">
+                Summary will appear here once generated...
+              </div>
+            )}
+          </div>
+
           {/* Post Content */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
