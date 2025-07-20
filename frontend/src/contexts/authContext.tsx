@@ -134,7 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-export async function authenticateWithBackend(request: string) {
+export async function authenticateWithBackend(request: string, username?: string) {
   let idToken = null;
   try {
     const currentUser = auth.currentUser;
@@ -150,12 +150,19 @@ export async function authenticateWithBackend(request: string) {
   try {
     console.log("authenticating with backend");
     console.log(backend);
+
+    const body: any = {};
+    if (username) {
+      body.username = username;
+    }
+
     const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
       },
+      body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
     });
     if (response.ok) {
       console.log("Backend authenticated");
