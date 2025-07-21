@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable perfectionist/sort-classes */
-import { BelongsToMixin } from "#db/types/associationtypes.js";
+import { BelongsToMixin, HasOneMixin } from "#db/types/associationtypes.js";
 import {
   CreationOptional,
   DataTypes,
@@ -12,12 +12,11 @@ import {
   Sequelize,
 } from "sequelize";
 
-import Class from "./Class.js";
+import MatchedRequest from "./MatchedRequest.js";
 import User from "./User.js";
 
-interface SwapRequests extends BelongsToMixin<Class, number, "FromClass"> {}
-interface SwapRequests extends BelongsToMixin<Class, number, "ToClass"> {}
 interface SwapRequests extends BelongsToMixin<User, string, "User"> {}
+interface SwapRequests extends HasOneMixin<MatchedRequest, string, "Match"> {}
 
 class SwapRequests extends Model<
   InferAttributes<SwapRequests>,
@@ -25,32 +24,26 @@ class SwapRequests extends Model<
 > {
   declare id: CreationOptional<string>;
   declare status: "cancelled" | "fulfilled" | "pending";
-  declare priority: number;
 
-  declare fromClassId: number;
-  declare toClassId: number;
+  declare moduleCode: string;
+  declare lessonType: string;
+  declare fromClassNo: string;
+  declare toClassNos: string[];
+
   declare uid: string;
-
-  declare FromClass?: NonAttribute<Class>;
-  declare ToClass?: NonAttribute<Class>;
   declare User?: NonAttribute<User>;
+  declare Match?: NonAttribute<MatchedRequest>;
 
   static associate() {
-    SwapRequests.belongsTo(Class, {
-      as: "FromClass",
-      foreignKey: "fromClassId",
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
-    SwapRequests.belongsTo(Class, {
-      as: "ToClass",
-      foreignKey: "toClassId",
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
     SwapRequests.belongsTo(User, {
       as: "User",
       foreignKey: "uid",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+    SwapRequests.hasOne(MatchedRequest, {
+      as: "Match",
+      foreignKey: "requestId",
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
@@ -59,9 +52,9 @@ class SwapRequests extends Model<
   static initModel(sequelize: Sequelize) {
     SwapRequests.init(
       {
-        fromClassId: {
+        fromClassNo: {
           allowNull: false,
-          type: DataTypes.INTEGER,
+          type: DataTypes.STRING,
         },
         id: {
           allowNull: false,
@@ -70,17 +63,21 @@ class SwapRequests extends Model<
           type: DataTypes.UUID,
           unique: true,
         },
-        priority: {
-          defaultValue: 1,
-          type: DataTypes.INTEGER,
+        lessonType: {
+          allowNull: false,
+          type: DataTypes.STRING,
+        },
+        moduleCode: {
+          allowNull: false,
+          type: DataTypes.STRING,
         },
         status: {
           defaultValue: "pending",
           type: DataTypes.ENUM("pending", "fulfilled", "cancelled"),
         },
-        toClassId: {
+        toClassNos: {
           allowNull: false,
-          type: DataTypes.INTEGER,
+          type: DataTypes.ARRAY(DataTypes.STRING),
         },
         uid: {
           allowNull: false,

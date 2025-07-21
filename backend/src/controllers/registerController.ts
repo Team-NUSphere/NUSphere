@@ -28,7 +28,6 @@ const handleSignUp = async (
   if (duplicate) res.sendStatus(401);
   try {
     const result = await User.create({ uid: uid });
-    res.sendStatus(200);
     console.log(result.toJSON());
   } catch (err) {
     next(err);

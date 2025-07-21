@@ -10,10 +10,12 @@ import {
   type User,
   type Unsubscribe,
   onIdTokenChanged,
+  updateCurrentUser,
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { backend } from "../constants";
 import axiosApi from "../functions/axiosApi";
+import type { TelegramUser } from "../components/TelegramLoginButton";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -149,7 +151,6 @@ export async function authenticateWithBackend(request: string) {
   }
   try {
     console.log("authenticating with backend");
-    console.log(backend);
     const response = await fetch(backend + `/${request}`, {
       method: "POST",
       headers: {
@@ -166,3 +167,22 @@ export async function authenticateWithBackend(request: string) {
     console.error("Network failure: " + networkError);
   }
 }
+
+export async function authenticateTelegram(user: TelegramUser) {
+  const res = await axiosApi({
+    method: "POST",
+    url: "/telegram/register",
+    data: {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      photo_url: user.photo_url,
+      auth_date: user.auth_date,
+      hash: user.hash,
+    },
+  });
+  return res.status === 200;
+}
+
+export async function getTelegramUser() {}

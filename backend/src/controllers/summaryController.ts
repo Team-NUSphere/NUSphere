@@ -1,8 +1,18 @@
-import { NextFunction, Request, Response } from "express";
 import { GoogleGenAI } from "@google/genai";
+import { NextFunction, Request, Response } from "express";
+import "dotenv/config";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = getEnvVar();
+
 const genAI = new GoogleGenAI({ apiKey: apiKey });
+
+function getEnvVar(): string {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing API_KEY in environment");
+  }
+  return apiKey;
+}
 
 export const handleRunSummary = async (
   req: Request,
@@ -11,11 +21,10 @@ export const handleRunSummary = async (
 ): Promise<void> => {
   console.log("handleRunSummary called");
   try {
-    const { input } = req.body;
+    const { input } = req.body as { input: string };
     console.log("Running summary with input:", input);
 
     const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
       contents: `If it is academic module related, then imagine you are an expert on NUS modules. Below are multiple student forum posts about a specific module. Analyze them carefully and write a concise and structured summary of the overall student sentiment in 4–5 sentences, strictly focused on the most relevant and recurring insights.
  If there is insufficient information, state clearly: “Not enough information to summarise.”
 Use the following format and avoid repetition or vague statements:
@@ -32,6 +41,7 @@ Use the following format and avoid repetition or vague statements:
 
 Focus only on the most useful and commonly agreed-upon points. If not academic module related, just give a brief summary in 4-5 sentences.
 :\n\n${input}`,
+      model: "gemini-2.5-flash",
     });
 
     const text = response.text;

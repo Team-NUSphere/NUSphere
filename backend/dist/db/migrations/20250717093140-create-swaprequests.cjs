@@ -9,26 +9,23 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.literal("uuid_generate_v4()"),
+        unique: true,
       },
-      fromClassId: {
+      moduleCode: {
+        type: Sequelize.STRING,
         allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Classes",
-          key: "classId",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
       },
-      toClassId: {
+      lessonType: {
+        type: Sequelize.STRING,
         allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Classes",
-          key: "classId",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+      },
+      fromClassNo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      toClassNo: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       uid: {
         allowNull: false,
@@ -45,11 +42,6 @@ module.exports = {
         allowNull: false,
         defaultValue: "pending",
       },
-      priority: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1,
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -64,9 +56,9 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable("SwapRequests");
     await queryInterface.sequelize.query(
       `DROP TYPE IF EXISTS "enum_SwapRequests_status";`,
     );
-    await queryInterface.dropTable("SwapRequests");
   },
 };

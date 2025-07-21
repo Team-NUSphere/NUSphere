@@ -16,6 +16,7 @@ import MyPostsGroups from "./pages/MyPostsGroups";
 import PostPage from "./pages/PostPage";
 import MainPostList from "./pages/MainPostList";
 import ForumResourcePage from "./pages/ForumResourcePage";
+import ClassSwap from "./pages/ClassSwap";
 
 export const router = createBrowserRouter([
   {
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([
       {
         path: "/resources",
         element: <ForumResourcePage />,
+      },
+      {
+        path: "/swap",
+        element: <ClassSwap />,
       },
     ],
   },

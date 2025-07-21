@@ -7,6 +7,7 @@ import {
   HasOneMixin,
 } from "#db/types/associationtypes.js";
 import {
+  CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
@@ -52,6 +53,8 @@ interface User
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
+  declare telegramId: CreationOptional<number>;
+  declare telegramUsername: CreationOptional<string>;
 
   declare Timetable?: NonAttribute<UserTimetable>;
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
@@ -174,6 +177,14 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   static initModel(sequelize: Sequelize) {
     User.init(
       {
+        telegramId: {
+          allowNull: true,
+          type: DataTypes.BIGINT,
+        },
+        telegramUsername: {
+          allowNull: true,
+          type: DataTypes.STRING,
+        },
         uid: {
           allowNull: false,
           primaryKey: true,
