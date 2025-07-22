@@ -1,6 +1,10 @@
 name: Super-Linter
 
-on: push
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
 
 jobs:
   super-lint:
