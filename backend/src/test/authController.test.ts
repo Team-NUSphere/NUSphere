@@ -46,7 +46,7 @@ describe('handleAuthentication', () => {
     expect(next).not.toHaveBeenCalled();
     expect(mockVerifyIdToken).not.toHaveBeenCalled();
   });
-//
+
   it('should return 401 if authorization header does not start with Bearer', async () => {
     const req = createMockReq('Basic invalidtoken');
     const res = createMockRes();
