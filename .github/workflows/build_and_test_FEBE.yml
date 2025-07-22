@@ -1,0 +1,51 @@
+name: Build and Test Frontend Backend
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Install and test backend
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
+
+      #- name: Lint backend
+        #working-directory: ./backend
+        #run: npm run lint 
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: npx vitest run
+
+      # Install and test frontend
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      #- name: Lint frontend
+        #working-directory: ./frontend
+        #run: npm run lint 
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npx vitest run
