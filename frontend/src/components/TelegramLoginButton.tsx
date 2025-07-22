@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { authenticateTelegram } from "../contexts/authContext";
+import { authenticateTelegram, getAuth } from "../contexts/authContext";
 
 declare global {
   interface Window {
@@ -18,6 +18,7 @@ export interface TelegramUser {
 }
 
 const TelegramLoginButton = () => {
+  const { telegramId, setTelegramId } = getAuth();
   useEffect(() => {
     window.onTelegramAuth = async (user: TelegramUser) => {
       console.log("Telegram user authenticated:", user);
@@ -25,6 +26,8 @@ const TelegramLoginButton = () => {
       const success = await authenticateTelegram(user);
       if (success) {
         const container = document.getElementById("telegram-login-container");
+        setTelegramId(user.id);
+        console.log("Telegram authentication successful");
         if (container) {
           container.innerHTML = "";
         }
@@ -47,7 +50,7 @@ const TelegramLoginButton = () => {
     };
   }, []);
 
-  return <div id="telegram-login-container" />;
+  return <div>{!telegramId && <div id="telegram-login-container" />}</div>;
 };
 
 export default TelegramLoginButton;

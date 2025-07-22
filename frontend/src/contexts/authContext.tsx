@@ -10,12 +10,12 @@ import {
   type User,
   type Unsubscribe,
   onIdTokenChanged,
-  updateCurrentUser,
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { backend } from "../constants";
 import axiosApi from "../functions/axiosApi";
 import type { TelegramUser } from "../components/TelegramLoginButton";
+import { getTelegramId } from "../functions/classSwapApi";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -32,6 +32,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoadingAuth: boolean;
   userIdToken: string | undefined;
+  telegramId: number | undefined;
+  setTelegramId: (id: number | undefined) => void; // Function to update Telegram ID
 }
 
 const AuthContext = createContext<AuthContextType | undefined>({
@@ -39,6 +41,8 @@ const AuthContext = createContext<AuthContextType | undefined>({
   isAuthenticated: false,
   isLoadingAuth: true,
   userIdToken: undefined,
+  telegramId: undefined,
+  setTelegramId: () => {}, // Default function that does nothing
 });
 
 // AuthProvider definition
@@ -50,6 +54,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
   const [userIdToken, setUserIdToken] = useState<string | undefined>(undefined);
+  const [telegramId, setTelegramId] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchTelegramId = async () => {
+      try {
+        const response = await getTelegramId();
+        if (response && response.telegramId) {
+          setTelegramId(response.telegramId);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Telegram ID:", error);
+      }
+    };
+    if (currentUser) {
+      fetchTelegramId();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     setIsLoadingAuth(true);
@@ -129,6 +150,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: !!currentUser,
         isLoadingAuth,
         userIdToken,
+        telegramId,
+        setTelegramId: setTelegramId, // Expose setTelegramId for updates
       }}
     >
       {children}
@@ -184,5 +207,3 @@ export async function authenticateTelegram(user: TelegramUser) {
   });
   return res.status === 200;
 }
-
-export async function getTelegramUser() {}

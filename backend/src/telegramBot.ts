@@ -2,8 +2,8 @@ import MatchedRequest from "#db/models/MatchedRequest.js";
 import SwapCycle from "#db/models/SwapCycle.js";
 import SwapRequests from "#db/models/SwapRequests.js";
 import User from "#db/models/User.js";
-import crypto from "crypto";
 import "dotenv/config";
+import crypto from "crypto";
 import { NextFunction, Request, Response } from "express";
 import TelegramBot from "node-telegram-bot-api";
 
@@ -48,12 +48,6 @@ export const handleTelegramAuthentication = async (
   }
 
   try {
-    if (req.user.telegramId) {
-      res.status(200).send("Telegram already linked");
-      req.user.telegramUsername = telegramUser.username as string;
-      await req.user.save();
-      return;
-    }
     const id = telegramUser.id as number;
     req.user.telegramId = id;
     req.user.telegramUsername = telegramUser.username as string;
@@ -64,6 +58,14 @@ export const handleTelegramAuthentication = async (
   }
 };
 
+export const handleGetTelegramId = (req: Request, res: Response) => {
+  if (!req.user) {
+    res.status(401).send("User not authenticated");
+    return;
+  }
+  res.json({ telegramId: req.user.telegramId });
+};
+
 const bot = new TelegramBot(botToken, { polling: false });
 
 async function sendSwapCycleMessage(
@@ -71,6 +73,7 @@ async function sendSwapCycleMessage(
   moduleCode: string,
   lessonType: string,
 ): Promise<void> {
+  console.log(botToken);
   // Ensure MatchedRequests are loaded with SwapRequests and User
   const cycle = await SwapCycle.findByPk(swapCycle.id, {
     include: [
@@ -131,12 +134,23 @@ async function sendSwapCycleMessage(
       try {
         // Add delay to avoid rate limits (20 messages per minute)
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        await bot.sendMessage(telegramId, message, { parse_mode: "Markdown" });
-      } catch (error) {
+        await bot.sendMessage(telegramId, message, {
+          parse_mode: "Markdown",
+        });
+      } catch (err) {
         console.error(
           `Failed to send message to ${telegramId.toString()}:`,
-          error,
+          err,
         );
+
+        if (err instanceof AggregateError) {
+          for (const individualErr of err.errors) {
+            if (individualErr instanceof Error)
+              console.error("Individual error:", individualErr.message);
+          }
+        } else if (err instanceof Error) {
+          console.error("Error message:", err.message);
+        }
       }
     }),
   );

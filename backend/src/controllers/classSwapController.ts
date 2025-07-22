@@ -24,7 +24,7 @@ export const handleCreateSwapRequest = async (
   };
 
   try {
-    const { request, stat } = await swapManager.submitSwapRequest(
+    const result = await swapManager.submitSwapRequest(
       data.moduleCode,
       data.lessonType,
       data.fromClassNo,
@@ -32,7 +32,15 @@ export const handleCreateSwapRequest = async (
       uid,
     );
 
-    res.json({ id: request.id, status: stat ? "matched" : request.status });
+    if (!result) {
+      res.status(409).send("duplicate request found");
+      return;
+    }
+
+    res.json({
+      id: result.request.id,
+      status: result.cycleCreated ? "matched" : result.request.status,
+    });
   } catch (error) {
     next(error);
   }

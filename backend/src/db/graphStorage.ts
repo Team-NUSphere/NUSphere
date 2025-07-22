@@ -1,5 +1,5 @@
 import { sendSwapCycleMessage } from "#telegramBot.js";
-import { Sequelize, Transaction } from "sequelize";
+import { Sequelize } from "sequelize";
 import { Op } from "sequelize";
 
 import { sequelize } from "./index.js";
@@ -120,6 +120,7 @@ export class SwapGraphManager {
       await Promise.all(
         matchedRequests.map((match) => match.destroy({ transaction })),
       );
+      await req.Match?.destroy();
       await cycle.destroy({ transaction });
 
       // Attempt to find new cycles for remaining requests
@@ -131,11 +132,7 @@ export class SwapGraphManager {
             this.removeEdgeFromGraph(r);
           }
           // Create a new swap cycle
-          const cycle = await createSwapCycleFromPath(
-            sequelize,
-            path,
-            transaction,
-          );
+          const cycle = await createSwapCycleFromPath(sequelize, path);
           await sendSwapCycleMessage(
             cycle,
             otherRequest.moduleCode,
@@ -284,16 +281,13 @@ export class SwapGraphManager {
           as: "Match",
           model: MatchedRequest,
           required: false,
-          where: {
-            id: null,
-          },
         },
       ],
       where: {
+        "$Match.id$": null,
         status: "pending",
       },
     });
-
     for (const request of requests) {
       this.addEdgeWithoutChecking(request);
     }
@@ -334,35 +328,95 @@ export class SwapGraphManager {
     fromClassNo: string,
     toClassNos: string[],
     uid: string,
-  ) {
-    const request = await SwapRequests.create({
-      fromClassNo,
-      lessonType,
-      moduleCode,
-      status: "pending",
-      toClassNos,
-      uid,
-    });
+  ): Promise<null | { cycleCreated: boolean; request: SwapRequests }> {
+    // Validate inputs
+    if (
+      !moduleCode ||
+      !lessonType ||
+      !fromClassNo ||
+      !toClassNos.length ||
+      !uid
+    ) {
+      throw new Error(
+        "Invalid input: moduleCode, lessonType, fromClassNo, toClassNos, and uid are required",
+      );
+    }
+    console.log(this.graph);
+    const transaction = await sequelize.transaction();
 
-    const path = this.addEdge(request);
-    if (!path) {
-      return { request, stat: false };
+    try {
+      // Prevent duplicate requests
+      const [request, created] = await SwapRequests.findOrCreate({
+        attributes: [
+          "id",
+          "moduleCode",
+          "lessonType",
+          "fromClassNo",
+          "toClassNos",
+          "uid",
+          "status",
+        ], // Optimize fields
+        defaults: {
+          fromClassNo,
+          lessonType,
+          moduleCode,
+          status: "pending",
+          toClassNos,
+          uid,
+        },
+        transaction,
+        where: {
+          lessonType,
+          moduleCode,
+          status: "pending",
+          uid,
+        },
+      });
+      // Duplicate request found
+      if (!created) {
+        await transaction.commit();
+        return null;
+      }
+
+      // Add the request to the graph and check for a cycle
+      let path: null | SwapRequests[];
+      try {
+        path = this.addEdge(request);
+      } catch (error) {
+        console.warn(`Failed to add request ${request.id} to graph:`, error);
+        await transaction.commit();
+        return { cycleCreated: false, request };
+      }
+
+      if (!path) {
+        await transaction.commit();
+        return { cycleCreated: false, request };
+      }
+
+      // Remove the cycle’s requests from the graph so each request only get a match at a time
+      for (const req of path) {
+        this.removeEdgeFromGraph(req);
+      }
+      await transaction.commit();
+
+      const cycle = await createSwapCycleFromPath(sequelize, path);
+      await sendSwapCycleMessage(cycle, moduleCode, lessonType);
+
+      return { cycleCreated: true, request };
+    } catch (error) {
+      await transaction.rollback();
+      if (error instanceof Error)
+        throw new Error(`Failed to submit swap request: ${error.message}`);
+      else throw new Error("Encountered error inserting swap request");
     }
-    for (const req of path) {
-      this.removeEdgeFromGraph(req);
-    }
-    const cycle = await createSwapCycleFromPath(sequelize, path);
-    await sendSwapCycleMessage(cycle, moduleCode, lessonType);
-    return { request, stat: true };
   }
 }
 
 async function createSwapCycleFromPath(
   sequelize: Sequelize,
   path: SwapRequests[],
-  trans?: Transaction,
 ): Promise<SwapCycle> {
-  const transaction = trans ?? (await sequelize.transaction());
+  const transaction = await sequelize.transaction();
 
   try {
     // Validate the cycle
@@ -415,7 +469,9 @@ async function createSwapCycleFromPath(
     return createdCycle;
   } catch (error) {
     // Roll back the transaction on error
+
     await transaction.rollback();
+
     throw error;
   }
 }

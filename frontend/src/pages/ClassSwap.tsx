@@ -10,9 +10,11 @@ import {
   readMySwaps,
 } from "../functions/classSwapApi";
 import { v4 as uuidv4 } from "uuid";
+import { getAuth } from "../contexts/authContext";
 
 export default function ClassSwap() {
   const [requests, setRequests] = useState<SwapRequestType[]>([]);
+  const { telegramId } = getAuth();
 
   const handleCreateSwapRequest = (data: {
     moduleCode: string;
@@ -100,14 +102,20 @@ export default function ClassSwap() {
         <h1 className="text-2xl font-semibold">Class Swap</h1>
         <TelegramLoginButton />
       </div>
-      <div className="grid grid-cols-2 gap-6 items-start">
-        <NewSwap onCreate={handleCreateSwapRequest} />
-        <SwapRequests
-          requests={requests}
-          onCancel={handleCancelSwapRequest}
-          onFulfill={handleFulfillSwapRequest}
-        />
-      </div>
+      {telegramId ? (
+        <div className="grid grid-cols-2 gap-6 items-start">
+          <NewSwap onCreate={handleCreateSwapRequest} />
+          <SwapRequests
+            requests={requests}
+            onCancel={handleCancelSwapRequest}
+            onFulfill={handleFulfillSwapRequest}
+          />
+        </div>
+      ) : (
+        <div className="text-red-500 text-center mt-4">
+          Please login to telegram to proceed
+        </div>
+      )}
     </div>
   );
 }

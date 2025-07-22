@@ -62,3 +62,11 @@ export async function fulfillSwap(swapId: string) {
   }
   return res.status === 200;
 }
+
+export async function getTelegramId() {
+  const res = await axiosApi({
+    method: "GET",
+    url: "/swap/telegram",
+  });
+  return res.data;
+}
