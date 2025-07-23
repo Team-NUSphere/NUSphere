@@ -2,9 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextFunction, Request, Response } from "express";
 import "dotenv/config";
 
-const apiKey = getEnvVar();
-
-const genAI = new GoogleGenAI({ apiKey: apiKey });
+let genAI: GoogleGenAI | null = null;
 
 function getEnvVar(): string {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -12,6 +10,17 @@ function getEnvVar(): string {
     throw new Error("Missing API_KEY in environment");
   }
   return apiKey;
+}
+
+function getGenAI(): GoogleGenAI {
+  if (!genAI) {
+    const apiKey = getEnvVar();
+    if (!apiKey) {
+      throw new Error("Missing API_KEY in environment");
+    }
+    genAI = new GoogleGenAI({ apiKey });
+  }
+  return genAI;
 }
 
 export const handleRunSummary = async (
@@ -24,7 +33,7 @@ export const handleRunSummary = async (
     const { input } = req.body as { input: string };
     console.log("Running summary with input:", input);
 
-    const response = await genAI.models.generateContent({
+    const response = await getGenAI().models.generateContent({
       contents: `If it is academic module related, then imagine you are an expert on NUS modules. Below are multiple student forum posts about a specific module. Analyze them carefully and write a concise and structured summary of the overall student sentiment in 4–5 sentences, strictly focused on the most relevant and recurring insights.
  If there is insufficient information, state clearly: “Not enough information to summarise.”
 Use the following format and avoid repetition or vague statements:
