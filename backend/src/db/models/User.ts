@@ -15,6 +15,7 @@ import {
   NonAttribute,
   Sequelize,
 } from "sequelize";
+import { Op } from "sequelize";
 
 import Comment from "./Comment.js";
 import CommentLikes from "./CommentLikes.js";
@@ -26,7 +27,6 @@ import PostLikes from "./PostLikes.js";
 import SwapRequests from "./SwapRequests.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
-import { Op } from "sequelize";
 
 interface User extends HasOneMixin<UserTimetable, string, "Timetable"> {}
 interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
@@ -142,7 +142,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   async updateUsername(newUsername: string) {
     const existingUser = await User.findOne({
-      where: { username: newUsername, uid: { [Op.ne]: this.uid } },
+      where: { uid: { [Op.ne]: this.uid }, username: newUsername },
     });
 
     if (existingUser) {
