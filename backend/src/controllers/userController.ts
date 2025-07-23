@@ -83,34 +83,19 @@ export const updatePassword = async (
   }
 };
 
-export const getUserProfile = async (
+export const getUserProfile = (
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> => {
-  const authHeader: string | undefined = req.headers.authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    res.sendStatus(401);
+): void => {
+  if (!req.user) {
+    res.status(404).json({ error: "User not found" });
     return;
   }
 
   try {
-    const token: string = authHeader.split(" ")[1];
-    const firebaseUser: DecodedIdToken =
-      await firebaseAuth.verifyIdToken(token);
-    const uid: string = firebaseUser.uid;
-
-    const user = await User.findByPk(uid);
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-
-    res.status(200).json({
-      uid: user.uid,
-      username: user.username,
-    });
+    res.status(200).json(req.user);
+    return;
   } catch (err) {
     next(err);
   }

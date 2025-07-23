@@ -30,8 +30,9 @@ interface ModuleInfo {
   moduleCredit: number;
 }
 
-interface CollaboratorData {
+export interface CollaboratorData {
   userId: string;
+  username: string;
   moduleCount: number;
   color: string;
   modules: ModuleInfo[];
@@ -58,6 +59,7 @@ export default function CollaborateTimetable() {
 
     const allModules: ModuleInfo[] = Object.values(userModules);
     collabs.push({
+      username: "You",
       userId: "You",
       moduleCount: allModules.length,
       color: COLLABORATOR_COLORS[0],
@@ -70,6 +72,7 @@ export default function CollaborateTimetable() {
           ? Object.values(userData.modules)
           : [];
         collabs.push({
+          username: userData.username,
           userId,
           moduleCount: collaboratorModules.length,
           color: COLLABORATOR_COLORS[(index + 1) % COLLABORATOR_COLORS.length],

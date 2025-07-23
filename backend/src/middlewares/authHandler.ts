@@ -8,6 +8,7 @@ const authenticatedRoutes = [
   "/forum",
   "/swap",
   "/telegram",
+  "/user",
 ];
 
 authenticatedRoutes.forEach((route) => {

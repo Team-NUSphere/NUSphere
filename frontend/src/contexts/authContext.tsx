@@ -34,6 +34,8 @@ interface AuthContextType {
   userIdToken: string | undefined;
   telegramId: number | undefined;
   setTelegramId: (id: number | undefined) => void; // Function to update Telegram ID
+  userName: string | undefined;
+  setUsername: (name: string | undefined) => void; // Function to update Username
 }
 
 const AuthContext = createContext<AuthContextType | undefined>({
@@ -43,6 +45,8 @@ const AuthContext = createContext<AuthContextType | undefined>({
   userIdToken: undefined,
   telegramId: undefined,
   setTelegramId: () => {}, // Default function that does nothing
+  userName: undefined,
+  setUsername: () => {}, // Default function that does nothing
 });
 
 // AuthProvider definition
@@ -55,20 +59,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
   const [userIdToken, setUserIdToken] = useState<string | undefined>(undefined);
   const [telegramId, setTelegramId] = useState<number | undefined>(undefined);
+  const [userName, setUsername] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const fetchTelegramId = async () => {
+    const fetchTelegramIdAndUsername = async () => {
       try {
-        const response = await getTelegramId();
+        const response = (await axiosApi.get("/user/profile")).data;
         if (response && response.telegramId) {
           setTelegramId(response.telegramId);
         }
+        if (response && response.username) {
+          setUsername(response.username);
+        }
       } catch (error) {
-        console.error("Failed to fetch Telegram ID:", error);
+        console.error("Failed to fetch Telegram ID and Username:", error);
       }
     };
     if (currentUser) {
-      fetchTelegramId();
+      fetchTelegramIdAndUsername();
     }
   }, [currentUser]);
 
@@ -151,7 +159,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoadingAuth,
         userIdToken,
         telegramId,
-        setTelegramId: setTelegramId, // Expose setTelegramId for updates
+        setTelegramId, // Expose setTelegramId for updates
+        userName,
+        setUsername,
       }}
     >
       {children}
