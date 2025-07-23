@@ -34,6 +34,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded());
 
+// Any path that would require the user object should add its parent path to middlewares/authHandler.ts:
 app.use("/", authMiddleware);
 
 //routes
