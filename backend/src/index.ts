@@ -10,6 +10,7 @@ import registerRouter from "#routes/register.js";
 import roomRouter from "#routes/room.js";
 import userTimetableRouter from "#routes/userTimetable.js";
 import summaryRouter from "#routes/summary.js";
+import userRouter from "#routes/user.js";
 import { setupWebSocket } from "#ws-handler.js";
 import cors from "cors";
 import express from "express";
@@ -42,6 +43,7 @@ app.use("/userTimetable", userTimetableRouter);
 app.use("/room", roomRouter);
 app.use("/forum", forumRouter);
 app.use("/summary", summaryRouter);
+app.use("/user", userRouter)
 
 // 404 catch all
 app.all("*name", (req, res, next) => {
