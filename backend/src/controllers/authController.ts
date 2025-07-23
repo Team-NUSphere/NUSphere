@@ -41,7 +41,7 @@ const handleAuthentication = async (
     // Check for user existence in case we failed to store it during registration
     const found = await User.findOne({ where: { uid: uid } });
     if (!found) {
-      res.status(401).send("User Not Authenticated");
+      res.sendStatus(401);
       return;
     }
     req.user = found;
