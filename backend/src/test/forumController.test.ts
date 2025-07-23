@@ -1,148 +1,155 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockForumGroupFindAndCountAll,
-  mockForumGroupFindByPk,
+  mockCommentCreate,
+  mockCommentCreateReply,
+  mockCommentDecrement,
+  mockCommentDestroy,
+  mockCommentFindByPk,
+  mockCommentGetReplies,
+  mockCommentIncrement,
+  mockCommentLikesFindAll,
+  mockCommentUpdate,
   mockForumGroupCreate,
   mockForumGroupDestroy,
+  mockForumGroupFindAndCountAll,
+  mockForumGroupFindByPk,
+  mockGroupCreatePost,
+  mockGroupCreateTag,
+  mockGroupDecrement,
+  mockGroupGetTags,
+  mockGroupIncrement,
+  mockPostAddNewTag,
+  mockPostCreate,
+  mockPostCreateReply,
+  mockPostDecrement,
+  mockPostDestroy,
   mockPostFindAndCountAll,
   mockPostFindByPk,
-  mockPostCreate,
-  mockPostDestroy,
-  mockCommentFindByPk,
-  mockCommentCreate,
-  mockCommentDestroy,
-  mockCommentUpdate,
+  mockPostGetForumGroup,
+  mockPostGetReplies,
+  mockPostGetTags,
+  mockPostIncrement,
   mockPostLikesFindAll,
-  mockCommentLikesFindAll,
+  mockPostRemoveTags,
+  mockPostTagAddNewTag,
+  mockTagsFindOne,
   mockUserCreateOwnedGroup,
+  mockUserGetComments,
   mockUserGetOwnedGroups,
   mockUserGetPosts,
-  mockUserGetComments,
-  mockUserLikeNewPost,
-  mockUserUnlikePost,
   mockUserLikeNewComment,
+  mockUserLikeNewPost,
   mockUserUnlikeComment,
-  mockTagsFindOne,
-  mockPostTagAddNewTag,
-  mockGroupGetTags,
-  mockGroupCreateTag,
-  mockGroupCreatePost,
-  mockGroupIncrement,
-  mockGroupDecrement,
-  mockPostGetForumGroup,
-  mockPostAddNewTag,
-  mockPostGetTags,
-  mockPostRemoveTags,
-  mockPostIncrement,
-  mockPostDecrement,
-  mockCommentGetReplies,
-  mockCommentCreateReply,
-  mockCommentIncrement,
-  mockCommentDecrement,
-  mockPostGetReplies,
-  mockPostCreateReply
+  mockUserUnlikePost,
 } = vi.hoisted(() => ({
-  mockForumGroupFindAndCountAll: vi.fn(),
-  mockForumGroupFindByPk: vi.fn(),
+  mockCommentCreate: vi.fn(),
+  mockCommentCreateReply: vi.fn(),
+  mockCommentDecrement: vi.fn(),
+  mockCommentDestroy: vi.fn(),
+  mockCommentFindByPk: vi.fn(),
+  mockCommentGetReplies: vi.fn(),
+  mockCommentIncrement: vi.fn(),
+  mockCommentLikesFindAll: vi.fn(),
+  mockCommentUpdate: vi.fn(),
   mockForumGroupCreate: vi.fn(),
   mockForumGroupDestroy: vi.fn(),
+  mockForumGroupFindAndCountAll: vi.fn(),
+  mockForumGroupFindByPk: vi.fn(),
+  mockGroupCreatePost: vi.fn(),
+  mockGroupCreateTag: vi.fn(),
+  mockGroupDecrement: vi.fn(),
+  mockGroupGetTags: vi.fn(),
+  mockGroupIncrement: vi.fn(),
+  mockPostAddNewTag: vi.fn(),
+  mockPostCreate: vi.fn(),
+  mockPostCreateReply: vi.fn(),
+  mockPostDecrement: vi.fn(),
+  mockPostDestroy: vi.fn(),
   mockPostFindAndCountAll: vi.fn(),
   mockPostFindByPk: vi.fn(),
-  mockPostCreate: vi.fn(),
-  mockPostDestroy: vi.fn(),
-  mockCommentFindByPk: vi.fn(),
-  mockCommentCreate: vi.fn(),
-  mockCommentDestroy: vi.fn(),
-  mockCommentUpdate: vi.fn(),
+  mockPostGetForumGroup: vi.fn(),
+  mockPostGetReplies: vi.fn(),
+  mockPostGetTags: vi.fn(),
+  mockPostIncrement: vi.fn(),
   mockPostLikesFindAll: vi.fn(),
-  mockCommentLikesFindAll: vi.fn(),
+  mockPostRemoveTags: vi.fn(),
+  mockPostTagAddNewTag: vi.fn(),
+  mockTagsFindOne: vi.fn(),
   mockUserCreateOwnedGroup: vi.fn(),
+  mockUserGetComments: vi.fn(),
   mockUserGetOwnedGroups: vi.fn(),
   mockUserGetPosts: vi.fn(),
-  mockUserGetComments: vi.fn(),
-  mockUserLikeNewPost: vi.fn(),
-  mockUserUnlikePost: vi.fn(),
   mockUserLikeNewComment: vi.fn(),
+  mockUserLikeNewPost: vi.fn(),
   mockUserUnlikeComment: vi.fn(),
-  mockTagsFindOne: vi.fn(),
-  mockPostTagAddNewTag: vi.fn(),
-  mockGroupGetTags: vi.fn(),
-  mockGroupCreateTag: vi.fn(),
-  mockGroupCreatePost: vi.fn(),
-  mockGroupIncrement: vi.fn(),
-  mockGroupDecrement: vi.fn(),
-  mockPostGetForumGroup: vi.fn(),
-  mockPostAddNewTag: vi.fn(),
-  mockPostGetTags: vi.fn(),
-  mockPostRemoveTags: vi.fn(),
-  mockPostIncrement: vi.fn(),
-  mockPostDecrement: vi.fn(),
-  mockCommentGetReplies: vi.fn(),
-  mockCommentCreateReply: vi.fn(),
-  mockCommentIncrement: vi.fn(),
-  mockCommentDecrement: vi.fn(),
-  mockPostGetReplies: vi.fn(),
-  mockPostCreateReply: vi.fn()
+  mockUserUnlikePost: vi.fn(),
 }));
 
-vi.mock('#db/models/ForumGroup.js', () => ({
+vi.mock("#db/models/ForumGroup.js", () => ({
   default: {
+    create: mockForumGroupCreate,
     findAndCountAll: mockForumGroupFindAndCountAll,
     findByPk: mockForumGroupFindByPk,
-    create: mockForumGroupCreate
-  }
+  },
 }));
 
-vi.mock('#db/models/Post.js', () => ({
+vi.mock("#db/models/Post.js", () => ({
   default: {
+    create: mockPostCreate,
     findAndCountAll: mockPostFindAndCountAll,
     findByPk: mockPostFindByPk,
-    create: mockPostCreate
-  }
+  },
 }));
 
-vi.mock('#db/models/Comment.js', () => ({
+vi.mock("#db/models/Comment.js", () => ({
   default: {
-    findByPk: mockCommentFindByPk,
     create: mockCommentCreate,
     destroy: mockCommentDestroy,
-    update: mockCommentUpdate
-  }
+    findByPk: mockCommentFindByPk,
+    update: mockCommentUpdate,
+  },
 }));
 
-vi.mock('#db/models/PostLikes.js', () => ({
+vi.mock("#db/models/PostLikes.js", () => ({
   default: {
-    findAll: mockPostLikesFindAll
-  }
+    findAll: mockPostLikesFindAll,
+  },
 }));
 
-vi.mock('#db/models/CommentLikes.js', () => ({
+vi.mock("#db/models/CommentLikes.js", () => ({
   default: {
-    findAll: mockCommentLikesFindAll
-  }
+    findAll: mockCommentLikesFindAll,
+  },
 }));
 
-vi.mock('#db/models/Tags.js', () => ({
+vi.mock("#db/models/Tags.js", () => ({
   default: {
-    findOne: mockTagsFindOne
-  }
+    findOne: mockTagsFindOne,
+  },
 }));
 
-vi.mock('#db/models/PostTag.js', () => ({
+vi.mock("#db/models/PostTag.js", () => ({
   default: {
-    addNewTag: mockPostTagAddNewTag
-  }
+    addNewTag: mockPostTagAddNewTag,
+  },
 }));
 
-import * as forumController from '../controllers/forumController.js';
+import * as forumController from "../controllers/forumController.js";
 
-const createMockReq = (query?: any, params?: any, body?: any, user?: any) => ({
-  query: query || {},
-  params: params || {},
-  body: body || {},
-  user: user
-} as any);
+const createMockReq = (query?: any, params?: any, body?: any, user?: any) =>
+  ({
+    body: body ?? {},
+    params: params ?? {},
+    query: query ?? {},
+    user: user,
+  }) as any;
 
 const createMockRes = () => {
   const res: any = {};
@@ -156,91 +163,93 @@ const createMockRes = () => {
 const next = vi.fn();
 
 const mockUser = {
-  uid: 'user123',
-  username: 'testuser',
   createOwnedGroup: mockUserCreateOwnedGroup,
+  getComments: mockUserGetComments,
   getOwnedGroups: mockUserGetOwnedGroups,
   getPosts: mockUserGetPosts,
-  getComments: mockUserGetComments,
-  likeNewPost: mockUserLikeNewPost,
-  unlikePost: mockUserUnlikePost,
   likeNewComment: mockUserLikeNewComment,
-  unlikeComment: mockUserUnlikeComment
+  likeNewPost: mockUserLikeNewPost,
+  uid: "user123",
+  unlikeComment: mockUserUnlikeComment,
+  unlikePost: mockUserUnlikePost,
+  username: "testuser",
 };
 
 const mockGroup = {
-  groupId: 'group123',
-  groupName: 'Test Group',
-  description: 'Test Description',
-  postCount: 5,
-  ownerId: 'user123',
-  getTags: mockGroupGetTags,
-  createTag: mockGroupCreateTag,
   createPost: mockGroupCreatePost,
-  increment: mockGroupIncrement,
+  createTag: mockGroupCreateTag,
   decrement: mockGroupDecrement,
+  description: "Test Description",
   destroy: mockForumGroupDestroy,
-  updateGroup: vi.fn()
+  getTags: mockGroupGetTags,
+  groupId: "group123",
+  groupName: "Test Group",
+  increment: mockGroupIncrement,
+  ownerId: "user123",
+  postCount: 5,
+  updateGroup: vi.fn(),
 };
 
 const mockGetGroupName = vi.fn();
 
 const mockPost = {
-  postId: 'post123',
-  title: 'Test Post',
-  details: 'Test Details',
-  groupId: 'group123',
-  uid: 'user123',
-  likes: 10,
-  replies: 3,
-  views: 100,
-  createdAt: new Date(),
-  isLiked: false,
-  groupName: 'Test Group',
-  getForumGroup: mockPostGetForumGroup,
-  getGroupName: mockGetGroupName,
   addNewTag: mockPostAddNewTag,
-  getTags: mockPostGetTags,
-  removeTags: mockPostRemoveTags,
-  increment: mockPostIncrement,
+  createdAt: new Date(),
+  createReply: mockPostCreateReply,
   decrement: mockPostDecrement,
   destroy: mockPostDestroy,
-  updatePost: vi.fn(),
+  details: "Test Details",
+  getForumGroup: mockPostGetForumGroup,
+  getGroupName: mockGetGroupName,
   getReplies: mockPostGetReplies,
-  createReply: mockPostCreateReply
+  getTags: mockPostGetTags,
+  groupId: "group123",
+  groupName: "Test Group",
+  increment: mockPostIncrement,
+  isLiked: false,
+  likes: 10,
+  postId: "post123",
+  removeTags: mockPostRemoveTags,
+  replies: 3,
+  title: "Test Post",
+  uid: "user123",
+  updatePost: vi.fn(),
+  views: 100,
 };
 
 mockGetGroupName.mockResolvedValue(mockPost);
 
 const mockComment = {
-  commentId: 'comment123',
-  comment: 'Test Comment',
-  uid: 'user123',
-  parentId: 'post123',
-  parentType: 'ParentPost',
-  likes: 5,
-  replies: 2,
-  isLiked: false,
+  comment: "Test Comment",
+  commentId: "comment123",
   createdAt: new Date(),
-  toJSON: vi.fn().mockReturnValue({ commentId: 'comment123', comment: 'Test Comment' }),
-  getReplies: mockCommentGetReplies,
   createReply: mockCommentCreateReply,
-  increment: mockCommentIncrement,
   decrement: mockCommentDecrement,
   destroy: mockCommentDestroy,
-  update: mockCommentUpdate
+  getReplies: mockCommentGetReplies,
+  increment: mockCommentIncrement,
+  isLiked: false,
+  likes: 5,
+  parentId: "post123",
+  parentType: "ParentPost",
+  replies: 2,
+  toJSON: vi
+    .fn()
+    .mockReturnValue({ comment: "Test Comment", commentId: "comment123" }),
+  uid: "user123",
+  update: mockCommentUpdate,
 };
 
-describe('Forum Controller', () => {
+describe("Forum Controller", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('handleGetGroupList', () => {
-    it('should handle database errors', async () => {
-      const req = createMockReq({ page: '1' });
+  describe("handleGetGroupList", () => {
+    it("should handle database errors", async () => {
+      const req = createMockReq({ page: "1" });
       const res = createMockRes();
-      const error = new Error('Database error');
+      const error = new Error("Database error");
 
       mockForumGroupFindAndCountAll.mockRejectedValue(error);
 
@@ -251,22 +260,22 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleGetGroup', () => {
-    it('should return group when found', async () => {
-      const req = createMockReq({}, { groupId: 'group123' });
+  describe("handleGetGroup", () => {
+    it("should return group when found", async () => {
+      const req = createMockReq({}, { groupId: "group123" });
       const res = createMockRes();
 
       mockForumGroupFindByPk.mockResolvedValue(mockGroup);
 
       await forumController.handleGetGroup(req, res, next);
 
-      expect(mockForumGroupFindByPk).toHaveBeenCalledWith('group123');
+      expect(mockForumGroupFindByPk).toHaveBeenCalledWith("group123");
       expect(res.json).toHaveBeenCalledWith(mockGroup);
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should handle group not found', async () => {
-      const req = createMockReq({}, { groupId: 'nonexistent' });
+    it("should handle group not found", async () => {
+      const req = createMockReq({}, { groupId: "nonexistent" });
       const res = createMockRes();
 
       mockForumGroupFindByPk.mockResolvedValue(null);
@@ -277,10 +286,10 @@ describe('Forum Controller', () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors', async () => {
-      const req = createMockReq({}, { groupId: 'group123' });
+    it("should handle database errors", async () => {
+      const req = createMockReq({}, { groupId: "group123" });
       const res = createMockRes();
-      const error = new Error('Database error');
+      const error = new Error("Database error");
 
       mockForumGroupFindByPk.mockRejectedValue(error);
 
@@ -290,39 +299,49 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleCreateGroup', () => {
-    it('should create group with valid data', async () => {
-      const req = createMockReq({}, {}, {
-        name: 'New Group',
-        description: 'New Description',
-        tags: ['tag1', 'tag2']
-      }, mockUser);
+  describe("handleCreateGroup", () => {
+    it("should create group with valid data", async () => {
+      const req = createMockReq(
+        {},
+        {},
+        {
+          description: "New Description",
+          name: "New Group",
+          tags: ["tag1", "tag2"],
+        },
+        mockUser,
+      );
       const res = createMockRes();
 
-      const createdGroup = { ...mockGroup, groupId: 'newgroup123' };
+      const createdGroup = { ...mockGroup, groupId: "newgroup123" };
       mockUserCreateOwnedGroup.mockResolvedValue(createdGroup);
       createdGroup.createTag = mockGroupCreateTag;
 
       await forumController.handleCreateGroup(req, res, next);
 
       expect(mockUserCreateOwnedGroup).toHaveBeenCalledWith({
-        description: 'New Description',
-        groupName: 'New Group',
-        ownerId: 'user123',
-        ownerType: 'User'
+        description: "New Description",
+        groupName: "New Group",
+        ownerId: "user123",
+        ownerType: "User",
       });
       expect(mockGroupCreateTag).toHaveBeenCalledTimes(2);
       expect(res.json).toHaveBeenCalledWith(createdGroup);
     });
 
-    it('should handle creation errors', async () => {
-      const req = createMockReq({}, {}, {
-        name: 'New Group',
-        description: 'New Description',
-        tags: []
-      }, mockUser);
+    it("should handle creation errors", async () => {
+      const req = createMockReq(
+        {},
+        {},
+        {
+          description: "New Description",
+          name: "New Group",
+          tags: [],
+        },
+        mockUser,
+      );
       const res = createMockRes();
-      const error = new Error('Creation failed');
+      const error = new Error("Creation failed");
 
       mockUserCreateOwnedGroup.mockRejectedValue(error);
 
@@ -332,48 +351,51 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleGetGroupPostList', () => {
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({ q: 'test', page: '1' }, { groupId: 'group123' });
+  describe("handleGetGroupPostList", () => {
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq(
+        { page: "1", q: "test" },
+        { groupId: "group123" },
+      );
       const res = createMockRes();
 
       await forumController.handleGetGroupPostList(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('User Not Found');
+      expect(res.send).toHaveBeenCalledWith("User Not Found");
     });
 
-    it('should return posts for a group with query', async () => {
+    it("should return posts for a group with query", async () => {
       const req = createMockReq(
-        { q: 'test', page: '1' }, 
-        { groupId: 'group123' }, 
-        {}, 
-        mockUser
+        { page: "1", q: "test" },
+        { groupId: "group123" },
+        {},
+        mockUser,
       );
       const res = createMockRes();
 
       mockForumGroupFindByPk.mockResolvedValue(mockGroup);
       mockPostFindAndCountAll.mockResolvedValue({
         count: 1,
-        rows: [mockPost]
+        rows: [mockPost],
       });
       mockPostLikesFindAll.mockResolvedValue([]);
 
       await forumController.handleGetGroupPostList(req, res, next);
 
-      expect(mockForumGroupFindByPk).toHaveBeenCalledWith('group123');
+      expect(mockForumGroupFindByPk).toHaveBeenCalledWith("group123");
       expect(res.json).toHaveBeenCalledWith({
-        groupName: 'Test Group',
-        posts: [mockPost]
+        groupName: "Test Group",
+        posts: [mockPost],
       });
     });
 
-    it('should return 404 if group not found', async () => {
+    it("should return 404 if group not found", async () => {
       const req = createMockReq(
-        { q: 'test', page: '1' }, 
-        { groupId: 'nonexistent' }, 
-        {}, 
-        mockUser
+        { page: "1", q: "test" },
+        { groupId: "nonexistent" },
+        {},
+        mockUser,
       );
       const res = createMockRes();
 
@@ -382,91 +404,93 @@ describe('Forum Controller', () => {
       await forumController.handleGetGroupPostList(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Group not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: "Group not found" });
     });
   });
 
-  describe('handleGetAllPosts', () => {
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({ q: 'test', page: '1' });
+  describe("handleGetAllPosts", () => {
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq({ page: "1", q: "test" });
       const res = createMockRes();
 
       await forumController.handleGetAllPosts(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('User Not Found');
+      expect(res.send).toHaveBeenCalledWith("User Not Found");
     });
 
-    it('should return all posts with query', async () => {
-      const req = createMockReq({ q: 'test', page: '1' }, {}, {}, mockUser);
+    it("should return all posts with query", async () => {
+      const req = createMockReq({ page: "1", q: "test" }, {}, {}, mockUser);
       const res = createMockRes();
 
       mockPostFindAndCountAll.mockResolvedValue({
         count: 1,
-        rows: [mockPost]
+        rows: [mockPost],
       });
       mockPostLikesFindAll.mockResolvedValue([]);
       mockPost.getGroupName.mockResolvedValue({
         ...mockPost,
-        groupName: 'Test Group'
+        groupName: "Test Group",
       });
 
       await forumController.handleGetAllPosts(req, res, next);
 
       expect(mockPostFindAndCountAll).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([{
-        createdAt: mockPost.createdAt,
-        details: mockPost.details,
-        groupId: mockPost.groupId,
-        groupName: mockPost.groupName,
-        isLiked: mockPost.isLiked,
-        likes: mockPost.likes,
-        postId: mockPost.postId,
-        replies: mockPost.replies,
-        title: mockPost.title,
-        uid: mockPost.uid,
-        views: mockPost.views
-      }]);
+      expect(res.json).toHaveBeenCalledWith([
+        {
+          createdAt: mockPost.createdAt,
+          details: mockPost.details,
+          groupId: mockPost.groupId,
+          groupName: mockPost.groupName,
+          isLiked: mockPost.isLiked,
+          likes: mockPost.likes,
+          postId: mockPost.postId,
+          replies: mockPost.replies,
+          title: mockPost.title,
+          uid: mockPost.uid,
+          views: mockPost.views,
+        },
+      ]);
     });
   });
 
-  describe('handleCreateNewPost', () => {
-    it('should create post with valid data', async () => {
+  describe("handleCreateNewPost", () => {
+    it("should create post with valid data", async () => {
       const req = createMockReq(
-        {}, 
-        { groupId: 'group123' }, 
+        {},
+        { groupId: "group123" },
         {
-          title: 'New Post',
-          details: 'Post content',
-          tags: ['tag1']
+          details: "Post content",
+          tags: ["tag1"],
+          title: "New Post",
         },
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
       mockForumGroupFindByPk.mockResolvedValue(mockGroup);
-      const newPost = { ...mockPost, postId: 'newpost123' };
+      const newPost = { ...mockPost, postId: "newpost123" };
       mockGroupCreatePost.mockResolvedValue(newPost);
       newPost.addNewTag = mockPostAddNewTag;
 
       await forumController.handleCreateNewPost(req, res, next);
 
-      expect(mockForumGroupFindByPk).toHaveBeenCalledWith('group123');
+      expect(mockForumGroupFindByPk).toHaveBeenCalledWith("group123");
       expect(mockGroupCreatePost).toHaveBeenCalledWith({
-        details: 'Post content',
-        title: 'New Post',
-        uid: 'user123'
+        details: "Post content",
+        title: "New Post",
+        uid: "user123",
       });
-      expect(mockGroupIncrement).toHaveBeenCalledWith('postCount');
+      expect(mockGroupIncrement).toHaveBeenCalledWith("postCount");
       expect(res.json).toHaveBeenCalledWith(newPost);
     });
 
-    it('should handle group not found', async () => {
+    it("should handle group not found", async () => {
       const req = createMockReq(
-        {}, 
-        { groupId: 'nonexistent' }, 
-        { title: 'New Post', details: 'Content', tags: [] },
-        mockUser
+        {},
+        { groupId: "nonexistent" },
+        { details: "Content", tags: [], title: "New Post" },
+        mockUser,
       );
       const res = createMockRes();
 
@@ -478,19 +502,24 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleGetPostComments', () => {
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({ page: '1' }, { postId: 'post123' });
+  describe("handleGetPostComments", () => {
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq({ page: "1" }, { postId: "post123" });
       const res = createMockRes();
 
       await forumController.handleGetPostComments(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('No User Found');
+      expect(res.send).toHaveBeenCalledWith("No User Found");
     });
 
-    it('should return comments for a post', async () => {
-      const req = createMockReq({ page: '1' }, { postId: 'post123' }, {}, mockUser);
+    it("should return comments for a post", async () => {
+      const req = createMockReq(
+        { page: "1" },
+        { postId: "post123" },
+        {},
+        mockUser,
+      );
       const res = createMockRes();
 
       mockPostFindByPk.mockResolvedValue(mockPost);
@@ -499,15 +528,22 @@ describe('Forum Controller', () => {
 
       await forumController.handleGetPostComments(req, res, next);
 
-      expect(mockPostFindByPk).toHaveBeenCalledWith('post123');
-      expect(res.json).toHaveBeenCalledWith([{ 
-        ...mockComment.toJSON(),
-        Replies: [] 
-      }]);
+      expect(mockPostFindByPk).toHaveBeenCalledWith("post123");
+      expect(res.json).toHaveBeenCalledWith([
+        {
+          ...mockComment.toJSON(),
+          Replies: [],
+        },
+      ]);
     });
 
-    it('should return 404 if post not found', async () => {
-      const req = createMockReq({ page: '1' }, { postId: 'nonexistent' }, {}, mockUser);
+    it("should return 404 if post not found", async () => {
+      const req = createMockReq(
+        { page: "1" },
+        { postId: "nonexistent" },
+        {},
+        mockUser,
+      );
       const res = createMockRes();
 
       mockPostFindByPk.mockResolvedValue(null);
@@ -515,47 +551,49 @@ describe('Forum Controller', () => {
       await forumController.handleGetPostComments(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith('Post Not Found');
+      expect(res.send).toHaveBeenCalledWith("Post Not Found");
     });
   });
 
-  describe('handleReplyToPost', () => {
-    it('should create reply to post', async () => {
+  describe("handleReplyToPost", () => {
+    it("should create reply to post", async () => {
       const req = createMockReq(
-        {}, 
-        { postId: 'post123' }, 
-        { content: 'Test reply' },
-        mockUser
+        {},
+        { postId: "post123" },
+        { content: "Test reply" },
+        mockUser,
       );
       const res = createMockRes();
 
       mockPostFindByPk.mockResolvedValue(mockPost);
-      const newComment = { ...mockComment, commentId: 'newcomment123' };
+      const newComment = { ...mockComment, commentId: "newcomment123" };
       mockPostCreateReply.mockResolvedValue(newComment);
-      newComment.toJSON = vi.fn().mockReturnValue({ commentId: 'newcomment123' });
+      newComment.toJSON = vi
+        .fn()
+        .mockReturnValue({ commentId: "newcomment123" });
 
       await forumController.handleReplyToPost(req, res, next);
 
-      expect(mockPostFindByPk).toHaveBeenCalledWith('post123');
+      expect(mockPostFindByPk).toHaveBeenCalledWith("post123");
       expect(mockPostCreateReply).toHaveBeenCalledWith({
-        comment: 'Test reply',
-        parentId: 'post123',
-        parentType: 'ParentPost',
-        uid: 'user123'
+        comment: "Test reply",
+        parentId: "post123",
+        parentType: "ParentPost",
+        uid: "user123",
       });
-      expect(mockPostIncrement).toHaveBeenCalledWith('replies');
+      expect(mockPostIncrement).toHaveBeenCalledWith("replies");
       expect(res.json).toHaveBeenCalledWith({
         ...newComment.toJSON(),
-        Replies: []
+        Replies: [],
       });
     });
 
-    it('should return 404 if post not found', async () => {
+    it("should return 404 if post not found", async () => {
       const req = createMockReq(
-        {}, 
-        { postId: 'nonexistent' }, 
-        { content: 'Test reply' },
-        mockUser
+        {},
+        { postId: "nonexistent" },
+        { content: "Test reply" },
+        mockUser,
       );
       const res = createMockRes();
 
@@ -564,11 +602,15 @@ describe('Forum Controller', () => {
       await forumController.handleReplyToPost(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.send).toHaveBeenCalledWith('Post Not Found');
+      expect(res.send).toHaveBeenCalledWith("Post Not Found");
     });
 
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({}, { postId: 'post123' }, { content: 'Test reply' });
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq(
+        {},
+        { postId: "post123" },
+        { content: "Test reply" },
+      );
       const res = createMockRes();
 
       mockPostFindByPk.mockResolvedValue(mockPost);
@@ -576,38 +618,38 @@ describe('Forum Controller', () => {
       await forumController.handleReplyToPost(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('User Not Found');
+      expect(res.send).toHaveBeenCalledWith("User Not Found");
     });
   });
 
-  describe('handleLikePost', () => {
-    it('should like a post successfully', async () => {
-      const req = createMockReq({}, { postId: 'post123' }, {}, mockUser);
+  describe("handleLikePost", () => {
+    it("should like a post successfully", async () => {
+      const req = createMockReq({}, { postId: "post123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserLikeNewPost.mockResolvedValue(mockPost);
 
       await forumController.handleLikePost(req, res, next);
 
-      expect(mockUserLikeNewPost).toHaveBeenCalledWith('post123');
-      expect(mockPostIncrement).toHaveBeenCalledWith('likes');
+      expect(mockUserLikeNewPost).toHaveBeenCalledWith("post123");
+      expect(mockPostIncrement).toHaveBeenCalledWith("likes");
       expect(res.sendStatus).toHaveBeenCalledWith(200);
     });
 
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({}, { postId: 'post123' });
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq({}, { postId: "post123" });
       const res = createMockRes();
 
       await forumController.handleLikePost(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('No User Found');
+      expect(res.send).toHaveBeenCalledWith("No User Found");
     });
 
-    it('should handle database errors', async () => {
-      const req = createMockReq({}, { postId: 'post123' }, {}, mockUser);
+    it("should handle database errors", async () => {
+      const req = createMockReq({}, { postId: "post123" }, {}, mockUser);
       const res = createMockRes();
-      const error = new Error('Database error');
+      const error = new Error("Database error");
 
       mockUserLikeNewPost.mockRejectedValue(error);
 
@@ -617,59 +659,62 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleUnlikePost', () => {
-    it('should unlike a post successfully', async () => {
-      const req = createMockReq({}, { postId: 'post123' }, {}, mockUser);
+  describe("handleUnlikePost", () => {
+    it("should unlike a post successfully", async () => {
+      const req = createMockReq({}, { postId: "post123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserUnlikePost.mockResolvedValue(mockPost);
 
       await forumController.handleUnlikePost(req, res, next);
 
-      expect(mockUserUnlikePost).toHaveBeenCalledWith('post123');
-      expect(mockPostDecrement).toHaveBeenCalledWith('likes');
+      expect(mockUserUnlikePost).toHaveBeenCalledWith("post123");
+      expect(mockPostDecrement).toHaveBeenCalledWith("likes");
       expect(res.sendStatus).toHaveBeenCalledWith(200);
     });
   });
 
-  describe('handleLikeComment', () => {
-    it('should like a comment successfully', async () => {
-      const req = createMockReq({}, { commentId: 'comment123' }, {}, mockUser);
+  describe("handleLikeComment", () => {
+    it("should like a comment successfully", async () => {
+      const req = createMockReq({}, { commentId: "comment123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserLikeNewComment.mockResolvedValue(mockComment);
 
       await forumController.handleLikeComment(req, res, next);
 
-      expect(mockUserLikeNewComment).toHaveBeenCalledWith('comment123');
-      expect(mockCommentIncrement).toHaveBeenCalledWith('likes');
+      expect(mockUserLikeNewComment).toHaveBeenCalledWith("comment123");
+      expect(mockCommentIncrement).toHaveBeenCalledWith("likes");
       expect(res.sendStatus).toHaveBeenCalledWith(200);
     });
   });
 
-  describe('handleUnlikeComment', () => {
-    it('should unlike a comment successfully', async () => {
-      const req = createMockReq({}, { commentId: 'comment123' }, {}, mockUser);
+  describe("handleUnlikeComment", () => {
+    it("should unlike a comment successfully", async () => {
+      const req = createMockReq({}, { commentId: "comment123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserUnlikeComment.mockResolvedValue(mockComment);
 
       await forumController.handleUnlikeComment(req, res, next);
 
-      expect(mockUserUnlikeComment).toHaveBeenCalledWith('comment123');
-      expect(mockCommentDecrement).toHaveBeenCalledWith('likes');
+      expect(mockUserUnlikeComment).toHaveBeenCalledWith("comment123");
+      expect(mockCommentDecrement).toHaveBeenCalledWith("likes");
       expect(res.sendStatus).toHaveBeenCalledWith(200);
     });
   });
 
-
-  describe('handleUpdateGroup', () => {
-    it('should update group if user owns it', async () => {
+  describe("handleUpdateGroup", () => {
+    it("should update group if user owns it", async () => {
       const req = createMockReq(
         {},
-        { groupId: 'group123' },
-        { name: 'Updated Group', description: 'Updated Description', tags: ['newtag'] },
-        mockUser
+        { groupId: "group123" },
+        {
+          description: "Updated Description",
+          name: "Updated Group",
+          tags: ["newtag"],
+        },
+        mockUser,
       );
       const res = createMockRes();
 
@@ -680,22 +725,22 @@ describe('Forum Controller', () => {
       await forumController.handleUpdateGroup(req, res, next);
 
       expect(mockUserGetOwnedGroups).toHaveBeenCalledWith({
-        where: { groupId: 'group123' }
+        where: { groupId: "group123" },
       });
       expect(mockGroup.updateGroup).toHaveBeenCalledWith(
-        'Updated Description',
-        'Updated Group',
-        ['newtag']
+        "Updated Description",
+        "Updated Group",
+        ["newtag"],
       );
       expect(res.json).toHaveBeenCalledWith(updatedGroup);
     });
 
-    it('should fail if user does not own group', async () => {
+    it("should fail if user does not own group", async () => {
       const req = createMockReq(
         {},
-        { groupId: 'group123' },
-        { name: 'Updated Group', description: 'Updated Description', tags: [] },
-        mockUser
+        { groupId: "group123" },
+        { description: "Updated Description", name: "Updated Group", tags: [] },
+        mockUser,
       );
       const res = createMockRes();
 
@@ -707,9 +752,9 @@ describe('Forum Controller', () => {
     });
   });
 
-  describe('handleDeleteGroup', () => {
-    it('should delete group if user owns it', async () => {
-      const req = createMockReq({}, { groupId: 'group123' }, {}, mockUser);
+  describe("handleDeleteGroup", () => {
+    it("should delete group if user owns it", async () => {
+      const req = createMockReq({}, { groupId: "group123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserGetOwnedGroups.mockResolvedValue([mockGroup]);
@@ -720,8 +765,8 @@ describe('Forum Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
-    it('should fail if user does not own group', async () => {
-      const req = createMockReq({}, { groupId: 'group123' }, {}, mockUser);
+    it("should fail if user does not own group", async () => {
+      const req = createMockReq({}, { groupId: "group123" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserGetOwnedGroups.mockResolvedValue([]);
