@@ -26,6 +26,7 @@ import PostLikes from "./PostLikes.js";
 import SwapRequests from "./SwapRequests.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
+import { Op } from "sequelize";
 
 interface User extends HasOneMixin<UserTimetable, string, "Timetable"> {}
 interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
@@ -55,6 +56,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
   declare telegramId: CreationOptional<number>;
   declare telegramUsername: CreationOptional<string>;
+  declare username: string;
 
   declare Timetable?: NonAttribute<UserTimetable>;
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
@@ -138,6 +140,20 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     return comment;
   }
 
+  async updateUsername(newUsername: string) {
+    const existingUser = await User.findOne({
+      where: { username: newUsername, uid: { [Op.ne]: this.uid } },
+    });
+
+    if (existingUser) {
+      throw new Error("Username already taken");
+    }
+
+    this.username = newUsername;
+    await this.save();
+    return this;
+  }
+
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
     User.hasMany(Post, { as: "Posts", foreignKey: "uid" });
@@ -190,6 +206,15 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
           primaryKey: true,
           type: DataTypes.STRING,
           unique: true,
+        },
+        username: {
+          allowNull: false,
+          type: DataTypes.STRING,
+          unique: true,
+          validate: {
+            len: [3, 20],
+            notEmpty: true,
+          },
         },
       },
       {

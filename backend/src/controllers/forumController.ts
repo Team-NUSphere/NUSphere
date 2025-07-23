@@ -910,7 +910,7 @@ export const handleLikePost = async (
     const postId: string = req.params.postId;
     const post = await req.user.likeNewPost(postId);
     await post?.increment("likes");
-    res.status(200);
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }
@@ -929,7 +929,7 @@ export const handleUnlikePost = async (
     const postId: string = req.params.postId;
     const post = await req.user.unlikePost(postId);
     await post?.decrement("likes");
-    res.status(200);
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }
@@ -948,7 +948,7 @@ export const handleLikeComment = async (
     const commentId: string = req.params.commentId;
     const comment = await req.user.likeNewComment(commentId);
     await comment?.increment("likes");
-    res.status(200);
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }
@@ -967,7 +967,7 @@ export const handleUnlikeComment = async (
     const commentId: string = req.params.commentId;
     const comment = await req.user.unlikeComment(commentId);
     await comment?.decrement("likes");
-    res.status(200);
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }

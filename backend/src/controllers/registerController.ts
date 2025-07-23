@@ -9,6 +9,7 @@ const handleSignUp = async (
   next: NextFunction,
 ): Promise<void> => {
   const authHeader: string | undefined = req.headers.authorization;
+  const { username } = req.body as { username: string };
 
   // User idtoken stored in header auth bearer after firebase auth
   if (!authHeader?.startsWith("Bearer ")) {
@@ -25,9 +26,17 @@ const handleSignUp = async (
 
   // Check for duplicate in case firebase is tripping
   const duplicate = await User.findOne({ where: { uid: uid } });
+  const duplicateUsername = await User.findOne({
+    where: { username: username },
+  });
   if (duplicate) res.sendStatus(401);
+  if (duplicateUsername) {
+    res.status(400).json({ error: "Username already taken" });
+    return;
+  }
   try {
-    const result = await User.create({ uid: uid });
+    const result = await User.create({ uid: uid, username: username });
+    res.sendStatus(200);
     console.log(result.toJSON());
   } catch (err) {
     next(err);

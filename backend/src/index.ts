@@ -12,6 +12,7 @@ import roomRouter from "#routes/room.js";
 import summaryRouter from "#routes/summary.js";
 import telegramRouter from "#routes/telegram.js";
 import userTimetableRouter from "#routes/userTimetable.js";
+import userRouter from "#routes/user.js";
 import { setupWebSocket } from "#ws-handler.js";
 import cors from "cors";
 import express from "express";
@@ -46,6 +47,7 @@ app.use("/forum", forumRouter);
 app.use("/summary", summaryRouter);
 app.use("/swap", classSwapRouter);
 app.use("/telegram", telegramRouter);
+app.use("/user", userRouter);
 
 // 404 catch all
 app.all("*name", (req, res, next) => {

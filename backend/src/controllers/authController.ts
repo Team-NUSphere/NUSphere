@@ -28,7 +28,13 @@ const handleAuthentication = async (
   const idToken: string = authHeader.split(" ")[1];
 
   // Firebase
-  const user: DecodedIdToken = await firebaseAuth.verifyIdToken(idToken);
+  let user: DecodedIdToken;
+  try {
+    user = await firebaseAuth.verifyIdToken(idToken);
+  } catch (err) {
+    next(err);
+    return;
+  }
   const uid: string = user.uid;
 
   try {

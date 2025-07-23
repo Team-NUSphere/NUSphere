@@ -40,7 +40,7 @@ export function Navbar() {
         </div>
 
         <div className="flex flex-col justify-start items-center space-y-5 w-full p-2">
-          <NavItem to="/resources" icon={FiSettings} label="Settings"></NavItem>
+          <NavItem to="/settings" icon={FiSettings} label="Settings"></NavItem>
           <button
             onClick={(e) => {
               e.preventDefault();

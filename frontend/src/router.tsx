@@ -16,6 +16,7 @@ import MyPostsGroups from "./pages/MyPostsGroups";
 import PostPage from "./pages/PostPage";
 import MainPostList from "./pages/MainPostList";
 import ForumResourcePage from "./pages/ForumResourcePage";
+import Settings from "./pages/Settings";
 import ClassSwap from "./pages/ClassSwap";
 
 export const router = createBrowserRouter([
@@ -92,7 +93,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/settings",
-        element: <div> Hello, settings page has yet to be implemented </div>,
+        element: <Settings />,
       },
       {
         path: "/room/:roomId",
