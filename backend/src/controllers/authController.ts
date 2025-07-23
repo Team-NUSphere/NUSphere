@@ -32,7 +32,8 @@ const handleAuthentication = async (
   try {
     user = await firebaseAuth.verifyIdToken(idToken);
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
   const uid: string = user.uid;
 
