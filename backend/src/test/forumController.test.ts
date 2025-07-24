@@ -213,6 +213,8 @@ const mockPost = {
   title: "Test Post",
   uid: "user123",
   updatePost: vi.fn(),
+  User: mockUser,
+  username: "testuser",
   views: 100,
 };
 
@@ -447,6 +449,7 @@ describe("Forum Controller", () => {
           replies: mockPost.replies,
           title: mockPost.title,
           uid: mockPost.uid,
+          username: mockPost.username,
           views: mockPost.views,
         },
       ]);
@@ -584,6 +587,7 @@ describe("Forum Controller", () => {
       expect(res.json).toHaveBeenCalledWith({
         ...newComment.toJSON(),
         Replies: [],
+        username: "testuser",
       });
     });
 

@@ -102,10 +102,12 @@ export const handleGetGroupPostList = async (
         tags,
       );
 
-      const formattedPosts = posts.map((post) => ({
-        ...post.toJSON(),
-        username: post.User?.username,
-      }));
+      const formattedPosts = posts.map((post) => {
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        const postFormat = { ...post, username: post.User?.username };
+
+        return postFormat;
+      });
       res.json({
         groupName: group.groupName,
         posts: formattedPosts,
@@ -271,7 +273,7 @@ export const handleGetAllPosts = async (
         createdAt: post.createdAt,
         details: post.details,
         groupId: post.groupId,
-        groupName: post.ForumGroup?.groupName,
+        groupName: post.ForumGroup?.groupName ?? post.groupName,
         isLiked: post.isLiked,
         likes: post.likes,
         postId: post.postId,
@@ -875,7 +877,7 @@ export const handleGetMyPostList = async (
         createdAt: post.createdAt,
         details: post.details,
         groupId: post.groupId,
-        groupName: post.ForumGroup?.groupName,
+        groupName: post.ForumGroup?.groupName ?? post.groupName,
         isLiked: post.isLiked,
         likes: post.likes,
         postId: post.postId,
