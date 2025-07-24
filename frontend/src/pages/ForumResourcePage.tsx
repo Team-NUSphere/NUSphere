@@ -9,6 +9,7 @@ import {
 } from "../functions/forumApi";
 import { getAuth } from "../contexts/authContext";
 import { v4 as uuidv4 } from "uuid";
+import { FaArrowLeft } from "react-icons/fa6";
 
 export default function ForumResourcePage() {
   const { groupId } = useParams();
@@ -96,58 +97,58 @@ export default function ForumResourcePage() {
   };
 
   return (
-    <div className="w-full mx-auto overflow-auto">
-      <button
-        onClick={() => window.history.back()}
-        draggable={false}
-        className="text-blue-600 hover:underline text-sm"
-      >
-        ← Back
-      </button>
-      <div className="w-full mx-auto space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-4 px-4 py-2 mx-auto">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.history.back()}
+            draggable={false}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <FaArrowLeft className="w-5 h-5 text-gray-600" />
+          </button>
           <h1 className="text-2xl font-semibold">
             {group?.groupName} Resource Page
           </h1>
-          {isOwner && (
-            <button
-              onClick={handleCreateCluster}
-              className="px-4 py-2 p-6 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              + Add Cluster
-            </button>
-          )}
         </div>
-
-        {clusters.length === 0 && (
-          <p className="italic text-gray-500">No resource clusters yet.</p>
+        {isOwner && (
+          <button
+            onClick={handleCreateCluster}
+            className="px-4 py-2 p-6 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            + Add Cluster
+          </button>
         )}
-
-        {creatingCluster && (
-          <ResourceCluster
-            create={true}
-            isOwner={isOwner}
-            cluster={{
-              clusterId: "",
-              name: "",
-              description: "",
-              Resources: [],
-              groupId: group?.groupId || "",
-            }}
-            onCancel={() => setCreatingCluster(false)}
-            onCreate={handleNewCluster}
-          />
-        )}
-
-        {clusters.map((cluster) => (
-          <ResourceCluster
-            key={cluster.clusterId}
-            cluster={cluster}
-            isOwner={isOwner}
-            onDelete={handleDeleteCluster}
-          />
-        ))}
       </div>
+
+      {clusters.length === 0 && (
+        <p className="italic text-gray-500">No resource clusters yet.</p>
+      )}
+
+      {creatingCluster && (
+        <ResourceCluster
+          create={true}
+          isOwner={isOwner}
+          cluster={{
+            clusterId: "",
+            name: "",
+            description: "",
+            Resources: [],
+            groupId: group?.groupId || "",
+          }}
+          onCancel={() => setCreatingCluster(false)}
+          onCreate={handleNewCluster}
+        />
+      )}
+
+      {clusters.map((cluster) => (
+        <ResourceCluster
+          key={cluster.clusterId}
+          cluster={cluster}
+          isOwner={isOwner}
+          onDelete={handleDeleteCluster}
+        />
+      ))}
     </div>
   );
 }
