@@ -8,6 +8,7 @@ import {
   getGroupTagList,
   useSummaryGeneration,
 } from "../functions/forumApi";
+import { FaArrowLeft } from "react-icons/fa6";
 
 export default function GroupPostsLists() {
   const { searchQuery } = useOutletContext<{
@@ -109,28 +110,58 @@ export default function GroupPostsLists() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-4 px-4 py-2 max-w-5xl mx-auto">
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => window.history.back()}
             draggable={false}
-            className="mb-4 text-blue-600 hover:underline text-sm"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            ← Back to Groups
+            <FaArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-xl font-semibold text-gray-800">
             {groupName || "Group"} Posts
           </h3>
-          <Link
-            to={`/forum/group/${groupId}/resources`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        </div>
+        <Link
+          to={`/forum/group/${groupId}/resources`}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Resources
+        </Link>
+      </div>
+
+      {/* Summary Box */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+          <svg
+            className="w-5 h-5 mr-2 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            Resources
-          </Link>
-          {/* Overall Group Summary Section */}
-          <div className=" my-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mb-8">
-            <h2 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Group Discussion Summary
+        </h2>
+
+        {summaryLoading && (
+          <div className="flex items-center text-gray-600">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+            <span>Analyzing all posts and discussions...</span>
+          </div>
+        )}
+
+        {summaryError && (
+          <div className="text-red-600 bg-red-50 p-4 rounded-md border border-red-200">
+            <div className="flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
                 fill="none"
@@ -141,100 +172,82 @@ export default function GroupPostsLists() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              Group Discussion Summary
-            </h2>
-
-            {summaryLoading && (
-              <div className="flex items-center text-gray-600">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-                <span>Analyzing all posts and discussions...</span>
-              </div>
-            )}
-
-            {summaryError && (
-              <div className="text-red-600 bg-red-50 p-4 rounded-md border border-red-200">
-                <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <strong>Error:</strong> {summaryError}
-                </div>
-              </div>
-            )}
-
-            {summary && !summaryLoading && (
-              <div className="prose max-w-none">
-                <div className="bg-white p-4 rounded-md border border-blue-100">
-                  <p className="text-gray-700 leading-relaxed text-base">
-                    {summary}
-                  </p>
-                </div>
-                <div className="mt-3 text-sm text-gray-500">
-                  Summary generated from {postList.length} posts and their
-                  discussions
-                </div>
-              </div>
-            )}
-
-            {!summary &&
-              !summaryLoading &&
-              !summaryError &&
-              postList.length > 0 && (
-                <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
-                  Comprehensive summary will appear here once all posts are
-                  analyzed...
-                </div>
-              )}
-
-            {postList.length === 0 && !loading && (
-              <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
-                No posts found in this group to summarize.
-              </div>
-            )}
+              <strong>Error:</strong> {summaryError}
+            </div>
           </div>
+        )}
+
+        {summary && !summaryLoading && (
+          <div className="prose max-w-none bg-white p-4 rounded-md border border-blue-100">
+            <p className="text-gray-700 leading-relaxed text-base">{summary}</p>
+            <div className="mt-3 text-sm text-gray-500">
+              Summary generated from {postList.length} posts and their
+              discussions.
+            </div>
+          </div>
+        )}
+
+        {!summary &&
+          !summaryLoading &&
+          !summaryError &&
+          postList.length > 0 && (
+            <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
+              Summary will appear here once posts are analyzed...
+            </div>
+          )}
+
+        {postList.length === 0 && !loading && (
+          <div className="text-gray-500 italic bg-white p-4 rounded-md border border-blue-100">
+            No posts found in this group to summarize.
+          </div>
+        )}
+      </div>
+
+      {/* Tag Filter Section */}
+      {availableTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {availableTags.map((tag) => {
+            const isSelected = selectedSet.has(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                  isSelected
+                    ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      )}
 
-      <div className="flex flex-wrap gap-2 mb-4 outline-none resize-none transition-colors">
-        {availableTags.map((tag) => {
-          const isSelected = selectedSet.has(tag);
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleTag(tag)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
-                isSelected
-                  ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-              }`}
-            >
-              {tag}
-            </button>
-          );
-        })}
-      </div>
-
+      {/* Posts List */}
       <PostList posts={postList || []} handleDeletePost={handleDeletePost} />
+
+      {/* Infinite Scroll */}
       {hasMore && (
-        <div ref={observerRef} className="col-span-2 text-center mt-4 h-12">
+        <div
+          ref={observerRef}
+          className="col-span-2 text-center mt-4 h-12 text-gray-500"
+        >
           {loading ? <p>Loading more posts...</p> : <p>Scroll to load more</p>}
         </div>
       )}
-      <div>{error && "...Error loading posts..."}</div>
+
+      {/* Error Handling */}
+      {error && (
+        <div className="text-red-600 italic text-center mt-2">
+          ...Error loading posts...
+        </div>
+      )}
     </div>
   );
 }
