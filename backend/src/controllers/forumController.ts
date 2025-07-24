@@ -4,6 +4,7 @@ import ForumGroup from "#db/models/ForumGroup.js";
 import Post from "#db/models/Post.js";
 import PostLikes from "#db/models/PostLikes.js";
 import Tags from "#db/models/Tags.js";
+import User from "#db/models/User.js";
 import { NextFunction, Request, Response } from "express";
 import { Op, Sequelize } from "sequelize";
 
@@ -100,9 +101,14 @@ export const handleGetGroupPostList = async (
         10,
         tags,
       );
+
+      const formattedPosts = posts.map((post) => ({
+        ...post.toJSON(),
+        username: post.User?.username,
+      }));
       res.json({
         groupName: group.groupName,
-        posts: posts,
+        posts: formattedPosts,
       });
     } else {
       throw new Error("No such group id. Make sure group id is a string");
@@ -148,6 +154,14 @@ const searchGroupPosts = async (
         "views",
         "replies",
       ],
+      include: [
+        {
+          as: "User",
+          attributes: ["username"],
+          model: User,
+          required: false,
+        },
+      ],
       limit: pageSize,
       offset: offset,
       order: [["createdAt", "DESC"]],
@@ -189,7 +203,7 @@ const searchGroupPosts = async (
       "views",
       "replies",
     ],
-    group: ["Post.postId"],
+    group: ["Post.postId", "User.uid", "User.username"],
     having: Sequelize.literal(
       `COUNT(DISTINCT "Tags"."tagId") = ${tagNames.length.toString()}`,
     ),
@@ -202,6 +216,12 @@ const searchGroupPosts = async (
         where: {
           name: { [Op.in]: tagNames },
         },
+      },
+      {
+        as: "User",
+        attributes: ["username"],
+        model: User,
+        required: false,
       },
     ],
     limit: pageSize,
@@ -247,24 +267,21 @@ export const handleGetAllPosts = async (
     if (typeof params.q == "string" && typeof params.page === "string") {
       const page = parseInt(params.page);
       const { posts } = await searchAllPosts(req.user.uid, params.q, page, 10);
-      const formattedPosts = await Promise.all(
-        posts.map(async (post) => {
-          await post.getGroupName();
-          return {
-            createdAt: post.createdAt,
-            details: post.details,
-            groupId: post.groupId,
-            groupName: post.groupName,
-            isLiked: post.isLiked,
-            likes: post.likes,
-            postId: post.postId,
-            replies: post.replies,
-            title: post.title,
-            uid: post.uid,
-            views: post.views,
-          };
-        }),
-      );
+      const formattedPosts = posts.map((post) => ({
+        createdAt: post.createdAt,
+        details: post.details,
+        groupId: post.groupId,
+        groupName: post.ForumGroup?.groupName,
+        isLiked: post.isLiked,
+        likes: post.likes,
+        postId: post.postId,
+        replies: post.replies,
+        title: post.title,
+        uid: post.uid,
+        username: post.User?.username,
+        views: post.views,
+      }));
+
       res.json(formattedPosts);
     } else {
       const { posts } = await searchAllPosts(
@@ -312,6 +329,20 @@ const searchAllPosts = async (
       "createdAt",
       "views",
       "replies",
+    ],
+    include: [
+      {
+        as: "User",
+        attributes: ["username"],
+        model: User,
+        required: false,
+      },
+      {
+        as: "ForumGroup",
+        attributes: ["groupName"],
+        model: ForumGroup,
+        required: false,
+      },
     ],
     limit: pageSize,
     offset: offset,
@@ -531,7 +562,11 @@ export const handleGetPostComments = async (
       );
 
       res.json(
-        comments.map((comment) => ({ ...comment.toJSON(), Replies: [] })),
+        comments.map((comment) => ({
+          ...comment.toJSON(),
+          Replies: [],
+          username: comment.Author?.username,
+        })),
       );
     }
   } catch (error) {
@@ -557,6 +592,14 @@ const searchPostComments = async (
       "createdAt",
       "replies",
       "likes",
+    ],
+    include: [
+      {
+        as: "Author",
+        attributes: ["username"],
+        model: User,
+        required: false,
+      },
     ],
     limit: pageSize,
     offset: offset,
@@ -596,7 +639,16 @@ export const handleGetCommentComments = async (
       return;
     }
     const uid = req.user.uid;
-    const comments = await parentComment.getReplies();
+    const comments = await parentComment.getReplies({
+      include: [
+        {
+          as: "Author",
+          attributes: ["username"],
+          model: User,
+          required: false,
+        },
+      ],
+    });
     const commentIds = comments.map((comment) => comment.commentId);
     const likedCommentIds = await CommentLikes.findAll({
       attributes: ["commentId"],
@@ -610,7 +662,13 @@ export const handleGetCommentComments = async (
     for (const comment of comments) {
       comment.isLiked = likedSet.has(comment.commentId);
     }
-    res.json(comments.map((comment) => ({ ...comment.toJSON(), Replies: [] })));
+    res.json(
+      comments.map((comment) => ({
+        ...comment.toJSON(),
+        Replies: [],
+        username: comment.Author?.username,
+      })),
+    );
   } catch (error) {
     next(error);
   }
@@ -641,7 +699,11 @@ export const handleReplyToComment = async (
       uid: req.user.uid,
     });
     await comment.increment("replies");
-    res.json({ ...childComment.toJSON(), Replies: [] });
+    res.json({
+      ...childComment.toJSON(),
+      Replies: [],
+      username: req.user.username,
+    });
   } catch (error) {
     next(error);
   }
@@ -671,7 +733,7 @@ export const handleReplyToPost = async (
       uid: req.user.uid,
     });
     await post.increment("replies");
-    res.json({ ...comment.toJSON(), Replies: [] });
+    res.json({ ...comment.toJSON(), Replies: [], username: req.user.username });
   } catch (error) {
     next(error);
   }
@@ -809,24 +871,21 @@ export const handleGetMyPostList = async (
     if (typeof params.q == "string" && typeof params.page === "string") {
       const page = parseInt(params.page);
       const { posts } = await searchMyPost(req.user.uid, params.q, page, 10);
-      const formattedPosts = await Promise.all(
-        posts.map(async (post) => {
-          await post.getGroupName();
-          return {
-            createdAt: post.createdAt,
-            details: post.details,
-            groupId: post.groupId,
-            groupName: post.groupName,
-            isLiked: post.isLiked,
-            likes: post.likes,
-            postId: post.postId,
-            replies: post.replies,
-            title: post.title,
-            uid: post.uid,
-            views: post.views,
-          };
-        }),
-      );
+      const formattedPosts = posts.map((post) => ({
+        createdAt: post.createdAt,
+        details: post.details,
+        groupId: post.groupId,
+        groupName: post.ForumGroup?.groupName,
+        isLiked: post.isLiked,
+        likes: post.likes,
+        postId: post.postId,
+        replies: post.replies,
+        title: post.title,
+        uid: post.uid,
+        username: req.user.username,
+        views: post.views,
+      }));
+
       res.json(formattedPosts);
     } else {
       const { posts } = await searchMyPost(
@@ -864,6 +923,14 @@ const searchMyPost = async (
       "createdAt",
       "views",
       "replies",
+    ],
+    include: [
+      {
+        as: "ForumGroup",
+        attributes: ["groupName"],
+        model: ForumGroup,
+        required: false,
+      },
     ],
     limit: pageSize,
     offset: offset,

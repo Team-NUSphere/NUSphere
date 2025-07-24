@@ -21,6 +21,7 @@ import {
   unlikeReply,
   useSummaryGeneration,
 } from "../functions/forumApi";
+import { getAuth } from "../contexts/authContext";
 
 interface PostPageProps {
   currentUser: User;
@@ -74,12 +75,6 @@ export default function PostPage() {
     const generatePostSummary = async () => {
       if (!summaryGenerated && !summaryLoading) {
         try {
-          const commentsText = commentList
-            .map((comment) => comment.comment)
-            .join(" ");
-          const fullInput = `Title: ${post.title}\n\nDetails: ${post.details}\n\nComments: ${commentsText}`;
-
-          console.log("Auto-generating summary with input:", fullInput);
           await generateSummary("post", postId);
           setSummaryGenerated(true);
         } catch (error) {
@@ -123,6 +118,7 @@ export default function PostPage() {
     };
   }, [hasMore, loading]);
 
+  const { userName } = getAuth();
   const { currentUser } = useOutletContext<PostPageProps>();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -241,11 +237,11 @@ export default function PostPage() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-600">
-                  {post.uid.charAt(0).toUpperCase()}
+                  {post.username.slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">{post.uid}</p>
+                <p className="font-medium text-gray-900">{post.username}</p>
                 <p className="text-sm text-gray-500">
                   {formatDistanceToNow(post.createdAt, { addSuffix: true })}
                 </p>
@@ -304,7 +300,7 @@ export default function PostPage() {
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-gray-600">
-                  {currentUser.username.charAt(0).toUpperCase()}
+                  {(userName ?? currentUser.username).slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1">

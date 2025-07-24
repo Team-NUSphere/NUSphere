@@ -67,7 +67,7 @@ export default function PostCard({
                 {post.groupName}
               </button>
               <span className="text-sm text-gray-500">
-                {post.uid} •{" "}
+                {post.username} •{" "}
                 {formatDistanceToNow(post.createdAt, {
                   addSuffix: true,
                 })}

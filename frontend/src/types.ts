@@ -14,6 +14,7 @@ export interface Reply {
   Replies: Reply[];
   parentId: string;
   replies: number;
+  username: string;
 }
 
 export interface Post {
@@ -29,6 +30,7 @@ export interface Post {
   isLiked: boolean;
   replies: number;
   tags: string[];
+  username: string;
 }
 
 export interface Group {
