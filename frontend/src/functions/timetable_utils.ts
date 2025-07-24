@@ -74,6 +74,7 @@ export const findAlternativeClasses = (
 
 export type CollaborativeClassType = UserClassType & {
   collaboratorId: string
+  collaboratorName: string
   color: string
   chosen?: boolean
   totalColumns?: number
