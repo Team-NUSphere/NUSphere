@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ResourceCluster from "../components/ResourceCluster";
-import { Link, useParams } from "react-router-dom";
-import type { Group, ResourceClusterType } from "../types";
+import { useParams } from "react-router-dom";
+import type { ResourceClusterType } from "../types";
 import {
   createGroupResourceCluster,
   deleteGroupResourceCluster,
