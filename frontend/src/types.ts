@@ -1,6 +1,7 @@
 export interface User {
   userId: string;
   username: string;
+  telegramId?: string;
 }
 
 export interface Reply {
@@ -102,4 +103,13 @@ export interface ResourceClusterType {
   description: string;
   Resources: Resource[];
   groupId: string;
+}
+
+export interface SwapRequestType {
+  status: "pending" | "fulfilled" | "cancelled" | "matched";
+  id: string;
+  moduleCode: string;
+  lessonType: string;
+  fromClassNo: string;
+  toClassNos: string[];
 }

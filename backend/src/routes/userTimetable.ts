@@ -4,10 +4,10 @@ import {
   handleDeleteModule,
   handleGetAllEvents,
   handleGetAllUserModules,
+  handleGetClasses,
   handleRegisterModule,
   handleUpdateClasses,
   handleUpdateEvent,
-  handleGetClasses,
 } from "#controllers/userTimetableController.js";
 import { Router } from "express";
 

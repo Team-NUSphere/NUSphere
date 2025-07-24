@@ -1,14 +1,13 @@
-import { useState } from "react";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   FiCalendar,
   FiBookOpen,
   FiMessageSquare,
   FiSettings,
+  FiRefreshCcw,
   FiLogOut,
-  FiUsers,
 } from "react-icons/fi";
 import NavItem from "../components/NavItem";
 import RoomItemModal from "../components/roomItemModal";
@@ -35,9 +34,9 @@ export function Navbar() {
             icon={FiCalendar}
             label="Timetable"
           ></NavItem>
-          <NavItem to="/modules/" icon={FiBookOpen} label="Courses"></NavItem>
-          <NavItem to="/forum" icon={FiMessageSquare} label="Forum"></NavItem>
           <RoomItemModal />
+          <NavItem to="/forum" icon={FiMessageSquare} label="Forum"></NavItem>
+          <NavItem to="/swap/" icon={FiRefreshCcw} label="Swap"></NavItem>
         </div>
 
         <div className="flex flex-col justify-start items-center space-y-5 w-full p-2">

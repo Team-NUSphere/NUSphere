@@ -3,14 +3,16 @@ import db from "#db/index.js";
 import firebaseApp from "#firebase-admin.js";
 import authMiddleware from "#middlewares/authHandler.js";
 import errorHandler from "#middlewares/errorHandler.js";
+import classSwapRouter from "#routes/classSwap.js";
 import forumRouter from "#routes/forum.js";
 import loginRouter from "#routes/login.js";
 import moduleRouter from "#routes/module.js";
 import registerRouter from "#routes/register.js";
 import roomRouter from "#routes/room.js";
-import userTimetableRouter from "#routes/userTimetable.js";
 import summaryRouter from "#routes/summary.js";
+import telegramRouter from "#routes/telegram.js";
 import userRouter from "#routes/user.js";
+import userTimetableRouter from "#routes/userTimetable.js";
 import { setupWebSocket } from "#ws-handler.js";
 import cors from "cors";
 import express from "express";
@@ -32,6 +34,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded());
 
+// Any path that would require the user object should add its parent path to middlewares/authHandler.ts:
 app.use("/", authMiddleware);
 
 //routes
@@ -43,7 +46,9 @@ app.use("/userTimetable", userTimetableRouter);
 app.use("/room", roomRouter);
 app.use("/forum", forumRouter);
 app.use("/summary", summaryRouter);
-app.use("/user", userRouter)
+app.use("/swap", classSwapRouter);
+app.use("/telegram", telegramRouter);
+app.use("/user", userRouter);
 
 // 404 catch all
 app.all("*name", (req, res, next) => {

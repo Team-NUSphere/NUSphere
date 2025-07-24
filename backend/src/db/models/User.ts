@@ -7,6 +7,7 @@ import {
   HasOneMixin,
 } from "#db/types/associationtypes.js";
 import {
+  CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
@@ -14,6 +15,7 @@ import {
   NonAttribute,
   Sequelize,
 } from "sequelize";
+import { Op } from "sequelize";
 
 import Comment from "./Comment.js";
 import CommentLikes from "./CommentLikes.js";
@@ -22,9 +24,9 @@ import ForumGroup from "./ForumGroup.js";
 import Module from "./Module.js";
 import Post from "./Post.js";
 import PostLikes from "./PostLikes.js";
+import SwapRequests from "./SwapRequests.js";
 import UserEvent from "./UserEvents.js";
 import UserTimetable from "./UserTimetable.js";
-import { Op } from "sequelize";
 
 interface User extends HasOneMixin<UserTimetable, string, "Timetable"> {}
 interface User extends HasManyMixin<Post, string, "Post", "Posts"> {}
@@ -52,7 +54,9 @@ interface User
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare uid: string;
-  declare username: string
+  declare telegramId: CreationOptional<number>;
+  declare telegramUsername: CreationOptional<string>;
+  declare username: string;
 
   declare Timetable?: NonAttribute<UserTimetable>;
   declare OwnedGroups?: NonAttribute<ForumGroup[]>;
@@ -138,18 +142,17 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   async updateUsername(newUsername: string) {
     const existingUser = await User.findOne({
-      where: { username: newUsername, uid: { [Op.ne]: this.uid } },
+      where: { uid: { [Op.ne]: this.uid }, username: newUsername },
     });
 
     if (existingUser) {
-      throw new Error('Username already taken')
+      throw new Error("Username already taken");
     }
 
     this.username = newUsername;
     await this.save();
     return this;
   }
-  
 
   static associate() {
     User.hasOne(UserTimetable, { as: "Timetable", foreignKey: "uid" });
@@ -181,11 +184,23 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       otherKey: "commentId",
       through: CommentLikes,
     });
+    User.hasMany(SwapRequests, {
+      as: "SwapRequests",
+      foreignKey: "uid",
+    });
   }
 
   static initModel(sequelize: Sequelize) {
     User.init(
       {
+        telegramId: {
+          allowNull: true,
+          type: DataTypes.BIGINT,
+        },
+        telegramUsername: {
+          allowNull: true,
+          type: DataTypes.STRING,
+        },
         uid: {
           allowNull: false,
           primaryKey: true,
@@ -199,7 +214,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
           validate: {
             len: [3, 20],
             notEmpty: true,
-          }
+          },
         },
       },
       {

@@ -34,7 +34,7 @@ const handleSignIn = async (
       found = await User.findOne({ where: { uid: uid } });
       return;
     }
-    res.sendStatus(200);
+    res.json({ telegramId: found.telegramId });
     console.log(found.toJSON());
   } catch (err) {
     next(err);

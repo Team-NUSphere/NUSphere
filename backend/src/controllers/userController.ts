@@ -9,7 +9,7 @@ export const updateUsername = async (
   next: NextFunction,
 ): Promise<void> => {
   const authHeader: string | undefined = req.headers.authorization;
-  const { newUsername } = req.body;
+  const { newUsername } = req.body as { newUsername: string };
 
   if (!authHeader?.startsWith("Bearer ")) {
     res.sendStatus(401);
@@ -17,13 +17,16 @@ export const updateUsername = async (
   }
 
   if (!newUsername || newUsername.length < 3 || newUsername.length > 30) {
-    res.status(400).json({ error: "Username must be between 3 and 30 characters" });
+    res
+      .status(400)
+      .json({ error: "Username must be between 3 and 30 characters" });
     return;
   }
 
   try {
     const token: string = authHeader.split(" ")[1];
-    const firebaseUser: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
+    const firebaseUser: DecodedIdToken =
+      await firebaseAuth.verifyIdToken(token);
     const uid: string = firebaseUser.uid;
 
     const user = await User.findByPk(uid);
@@ -33,9 +36,12 @@ export const updateUsername = async (
     }
 
     await user.updateUsername(newUsername);
-    res.status(200).json({ message: "Username updated successfully", username: newUsername });
+    res.status(200).json({
+      message: "Username updated successfully",
+      username: newUsername,
+    });
   } catch (err) {
-    if (err instanceof Error && err.message === 'Username already taken') {
+    if (err instanceof Error && err.message === "Username already taken") {
       res.status(400).json({ error: err.message });
       return;
     }
@@ -49,7 +55,7 @@ export const updatePassword = async (
   next: NextFunction,
 ): Promise<void> => {
   const authHeader: string | undefined = req.headers.authorization;
-  const { newPassword } = req.body;
+  const { newPassword } = req.body as { newPassword: string };
 
   if (!authHeader?.startsWith("Bearer ")) {
     res.sendStatus(401);
@@ -63,7 +69,8 @@ export const updatePassword = async (
 
   try {
     const token: string = authHeader.split(" ")[1];
-    const firebaseUser: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
+    const firebaseUser: DecodedIdToken =
+      await firebaseAuth.verifyIdToken(token);
     const uid: string = firebaseUser.uid;
 
     await firebaseAuth.updateUser(uid, {
@@ -76,33 +83,19 @@ export const updatePassword = async (
   }
 };
 
-export const getUserProfile = async (
+export const getUserProfile = (
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> => {
-  const authHeader: string | undefined = req.headers.authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    res.sendStatus(401);
+): void => {
+  if (!req.user) {
+    res.status(404).json({ error: "User not found" });
     return;
   }
 
   try {
-    const token: string = authHeader.split(" ")[1];
-    const firebaseUser: DecodedIdToken = await firebaseAuth.verifyIdToken(token);
-    const uid: string = firebaseUser.uid;
-
-    const user = await User.findByPk(uid);
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-
-    res.status(200).json({
-      uid: user.uid,
-      username: user.username,
-    });
+    res.status(200).json(req.user);
+    return;
   } catch (err) {
     next(err);
   }

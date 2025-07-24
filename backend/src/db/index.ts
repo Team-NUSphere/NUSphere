@@ -2,6 +2,7 @@
 import { Options, Sequelize } from "sequelize";
 
 import * as dbConfig from "./config/config.cjs";
+import { SwapGraphManager } from "./graphStorage.js";
 import Class from "./models/Class.js";
 import Comment from "./models/Comment.js";
 import CommentLikes from "./models/CommentLikes.js";
@@ -9,10 +10,13 @@ import Enrollment from "./models/Enrollment.js";
 import ForumGroup from "./models/ForumGroup.js";
 import ForumResource from "./models/ForumResource.js";
 import ForumResourceCluster from "./models/ForumResourceCluster.js";
+import MatchedRequest from "./models/MatchedRequest.js";
 import Module from "./models/Module.js";
 import Post from "./models/Post.js";
 import PostLikes from "./models/PostLikes.js";
 import PostTag from "./models/PostTag.js";
+import SwapCycle from "./models/SwapCycle.js";
+import SwapRequests from "./models/SwapRequests.js";
 import Tags from "./models/Tags.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
@@ -37,50 +41,62 @@ try {
   console.error("Unable to establish database connection", error);
 }
 
-await sequelize.sync();
+// What in the world was I thinking when i wrote this abomination
 
-Class.initModel(sequelize);
-Module.initModel(sequelize);
-User.initModel(sequelize);
-UserEvent.initModel(sequelize);
-UserTimetable.initModel(sequelize);
-Enrollment.initModel(sequelize);
-Post.initModel(sequelize);
-ForumGroup.initModel(sequelize);
-Comment.initModel(sequelize);
-PostLikes.initModel(sequelize);
-CommentLikes.initModel(sequelize);
-Tags.initModel(sequelize);
-PostTag.initModel(sequelize);
-ForumResource.initModel(sequelize);
-ForumResourceCluster.initModel(sequelize);
+// Class.initModel(sequelize);
+// Module.initModel(sequelize);
+// User.initModel(sequelize);
+// UserEvent.initModel(sequelize);
+// UserTimetable.initModel(sequelize);
+// Enrollment.initModel(sequelize);
+// Post.initModel(sequelize);
+// ForumGroup.initModel(sequelize);
+// Comment.initModel(sequelize);
+// PostLikes.initModel(sequelize);
+// CommentLikes.initModel(sequelize);
+// Tags.initModel(sequelize);
+// PostTag.initModel(sequelize);
+// ForumResource.initModel(sequelize);
+// ForumResourceCluster.initModel(sequelize);
 
 const db: DB = {
-  Class: Class,
-  Comment: Comment,
-  CommentLikes: CommentLikes,
-  Enrollment: Enrollment,
-  ForumGroup: ForumGroup,
-  ForumResource: ForumResource,
-  ForumResourceCluster: ForumResourceCluster,
-  Module: Module,
-  Post: Post,
-  PostLikes: PostLikes,
-  PostTag: PostTag,
-  Tags: Tags,
-  User: User,
-  UserEvent: UserEvent,
-  UserTimetable: UserTimetable,
+  Class,
+  Comment,
+  CommentLikes,
+  Enrollment,
+  ForumGroup,
+  ForumResource,
+  ForumResourceCluster,
+  MatchedRequest,
+  Module,
+  Post,
+  PostLikes,
+  PostTag,
+  SwapCycle,
+  SwapRequests,
+  Tags,
+  User,
+  UserEvent,
+  UserTimetable,
 };
 
-await sequelize.sync();
-
-Object.keys(db).forEach((modelName) => {
-  db[modelName].associate();
+Object.values(db).forEach((model) => {
+  model.initModel(sequelize);
 });
 
 await sequelize.sync();
 
+Object.values(db).forEach((model) => {
+  model.associate();
+});
+
+await sequelize.sync();
+
+const swapManager = new SwapGraphManager();
+
+await swapManager.loadGraphFromDb();
+
+export { swapManager };
 export default db;
 
 // export const sequelize = new Sequelize(databaseUrl, {

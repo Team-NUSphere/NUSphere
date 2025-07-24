@@ -24,6 +24,7 @@ export interface socketDataType {
       classes?: UserClassType[];
       events?: UserEventsType;
       modules?: UserModulesType;
+      username: string;
     }
   >;
   userId?: string; // for remove and delete operations
@@ -303,16 +304,17 @@ async function getAllInRoomEventClassModule(
 }
 
 async function getFullEventClassModule(userId: string) {
-  const userTimetable = (
-    await User.findByPk(userId, {
-      include: [
-        {
-          as: "Timetable",
-          model: UserTimetable,
-        },
-      ],
-    })
-  )?.Timetable;
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        as: "Timetable",
+        model: UserTimetable,
+      },
+    ],
+  });
+  if (!user) return;
+
+  const userTimetable = user.Timetable;
   if (!userTimetable) return;
   const allClasses = await userTimetable.getAllClasses();
   const allEvents = await userTimetable.getAllEvents();
@@ -321,6 +323,7 @@ async function getFullEventClassModule(userId: string) {
     classes: classToSocketClass(allClasses),
     events: eventsToSocketEvents(allEvents),
     modules: modulesToSocketModules(allModules),
+    username: user.username,
   };
 }
 

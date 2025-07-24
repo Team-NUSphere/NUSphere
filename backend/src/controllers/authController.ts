@@ -32,7 +32,8 @@ const handleAuthentication = async (
   try {
     user = await firebaseAuth.verifyIdToken(idToken);
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
   const uid: string = user.uid;
 
@@ -40,7 +41,7 @@ const handleAuthentication = async (
     // Check for user existence in case we failed to store it during registration
     const found = await User.findOne({ where: { uid: uid } });
     if (!found) {
-      res.sendStatus(500);
+      res.sendStatus(401);
       return;
     }
     req.user = found;

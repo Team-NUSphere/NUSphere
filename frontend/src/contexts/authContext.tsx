@@ -14,6 +14,8 @@ import {
 import { auth } from "../firebase";
 import { backend } from "../constants";
 import axiosApi from "../functions/axiosApi";
+import type { TelegramUser } from "../components/TelegramLoginButton";
+import { getTelegramId } from "../functions/classSwapApi";
 
 // Hook function
 export function getAuth(): AuthContextType {
@@ -30,6 +32,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoadingAuth: boolean;
   userIdToken: string | undefined;
+  telegramId: number | undefined;
+  setTelegramId: (id: number | undefined) => void; // Function to update Telegram ID
+  userName: string | undefined;
+  setUsername: (name: string | undefined) => void; // Function to update Username
 }
 
 const AuthContext = createContext<AuthContextType | undefined>({
@@ -37,6 +43,10 @@ const AuthContext = createContext<AuthContextType | undefined>({
   isAuthenticated: false,
   isLoadingAuth: true,
   userIdToken: undefined,
+  telegramId: undefined,
+  setTelegramId: () => {}, // Default function that does nothing
+  userName: undefined,
+  setUsername: () => {}, // Default function that does nothing
 });
 
 // AuthProvider definition
@@ -48,6 +58,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
   const [userIdToken, setUserIdToken] = useState<string | undefined>(undefined);
+  const [telegramId, setTelegramId] = useState<number | undefined>(undefined);
+  const [userName, setUsername] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchTelegramIdAndUsername = async () => {
+      try {
+        const response = (await axiosApi.get("/user/profile")).data;
+        if (response && response.telegramId) {
+          setTelegramId(response.telegramId);
+        }
+        if (response && response.username) {
+          setUsername(response.username);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Telegram ID and Username:", error);
+      }
+    };
+    if (currentUser) {
+      fetchTelegramIdAndUsername();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     setIsLoadingAuth(true);
@@ -127,6 +158,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated: !!currentUser,
         isLoadingAuth,
         userIdToken,
+        telegramId,
+        setTelegramId, // Expose setTelegramId for updates
+        userName,
+        setUsername,
       }}
     >
       {children}
@@ -134,7 +169,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-export async function authenticateWithBackend(request: string, username?: string) {
+export async function authenticateWithBackend(
+  request: string,
+  username?: string
+) {
   let idToken = null;
   try {
     const currentUser = auth.currentUser;
@@ -172,4 +210,21 @@ export async function authenticateWithBackend(request: string, username?: string
   } catch (networkError) {
     console.error("Network failure: " + networkError);
   }
+}
+
+export async function authenticateTelegram(user: TelegramUser) {
+  const res = await axiosApi({
+    method: "POST",
+    url: "/telegram/register",
+    data: {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      photo_url: user.photo_url,
+      auth_date: user.auth_date,
+      hash: user.hash,
+    },
+  });
+  return res.status === 200;
 }

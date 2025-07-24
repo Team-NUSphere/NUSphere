@@ -22,6 +22,7 @@ function handleBroadcastToRoom({
   modules,
   type,
   userId,
+  username,
 }: {
   classes?: Class[];
   dataType: "classes" | "events" | "modules";
@@ -31,6 +32,7 @@ function handleBroadcastToRoom({
   modules?: Module;
   type: "create" | "delete" | "update";
   userId: string;
+  username: string;
 }) {
   const room = getRoomForUser(userId);
   if (!room) return;
@@ -49,6 +51,7 @@ function handleBroadcastToRoom({
         classes: socketClasses,
         events: socketEvent,
         modules: socketModules,
+        username: username,
       },
     },
     userId: userId,
@@ -97,6 +100,7 @@ export const handleCreateNewEvent = async (
       events: userEvent,
       type: "create",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -125,6 +129,7 @@ export const handleUpdateEvent = async (
       events: userEvent,
       type: "update",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -152,6 +157,7 @@ export const handleDeleteEvent = async (
         eventId: params.eventId,
         type: "delete",
         userId: req.user.uid,
+        username: req.user.username,
       });
 
       res.sendStatus(200);
@@ -188,6 +194,7 @@ export const handleRegisterModule = async (
       modules: userModule,
       type: "create",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -226,6 +233,7 @@ export const handleUpdateClasses = async (
         dataType: "classes",
         type: "update",
         userId: req.user.uid,
+        username: req.user.username,
       });
       return;
     }
@@ -256,6 +264,7 @@ export const handleDeleteModule = async (
       moduleId: moduleCode,
       type: "delete",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);

@@ -1,59 +1,65 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockUserGetUserTimetable,
-  mockTimetableGetAllEvents,
-  mockTimetableMakeNewEvent,
-  mockTimetableEditOrMakeEvent,
-  mockTimetableDeleteEvent,
-  mockTimetableRegisterNewModule,
-  mockTimetableEditClasses,
-  mockTimetableUnregisterModule,
-  mockTimetableGetAllModules,
-  mockTimetableGetAllClasses,
+  mockBroadcastToRoom,
+  mockGetRoomForUser,
   mockModuleFindByPk,
   mockModuleGetClasses,
-  mockBroadcastToRoom,
-  mockGetRoomForUser
+  mockTimetableDeleteEvent,
+  mockTimetableEditClasses,
+  mockTimetableEditOrMakeEvent,
+  mockTimetableGetAllClasses,
+  mockTimetableGetAllEvents,
+  mockTimetableGetAllModules,
+  mockTimetableMakeNewEvent,
+  mockTimetableRegisterNewModule,
+  mockTimetableUnregisterModule,
+  mockUserGetUserTimetable,
 } = vi.hoisted(() => ({
-  mockUserGetUserTimetable: vi.fn(),
-  mockTimetableGetAllEvents: vi.fn(),
-  mockTimetableMakeNewEvent: vi.fn(),
-  mockTimetableEditOrMakeEvent: vi.fn(),
-  mockTimetableDeleteEvent: vi.fn(),
-  mockTimetableRegisterNewModule: vi.fn(),
-  mockTimetableEditClasses: vi.fn(),
-  mockTimetableUnregisterModule: vi.fn(),
-  mockTimetableGetAllModules: vi.fn(),
-  mockTimetableGetAllClasses: vi.fn(),
+  mockBroadcastToRoom: vi.fn(),
+  mockGetRoomForUser: vi.fn(),
   mockModuleFindByPk: vi.fn(),
   mockModuleGetClasses: vi.fn(),
-  mockBroadcastToRoom: vi.fn(),
-  mockGetRoomForUser: vi.fn()
+  mockTimetableDeleteEvent: vi.fn(),
+  mockTimetableEditClasses: vi.fn(),
+  mockTimetableEditOrMakeEvent: vi.fn(),
+  mockTimetableGetAllClasses: vi.fn(),
+  mockTimetableGetAllEvents: vi.fn(),
+  mockTimetableGetAllModules: vi.fn(),
+  mockTimetableMakeNewEvent: vi.fn(),
+  mockTimetableRegisterNewModule: vi.fn(),
+  mockTimetableUnregisterModule: vi.fn(),
+  mockUserGetUserTimetable: vi.fn(),
 }));
 
-vi.mock('#db/models/Module.js', () => ({
+vi.mock("#db/models/Module.js", () => ({
   default: {
-    findByPk: mockModuleFindByPk
-  }
+    findByPk: mockModuleFindByPk,
+  },
 }));
 
-vi.mock('#ws-handler.js', () => ({
+vi.mock("#ws-handler.js", () => ({
   broadcastToRoom: mockBroadcastToRoom,
-  getRoomForUser: mockGetRoomForUser,
   eventsToSocketEvents: vi.fn(),
   formatClassToSocketClass: vi.fn(),
-  modulesToSocketModules: vi.fn()
+  getRoomForUser: mockGetRoomForUser,
+  modulesToSocketModules: vi.fn(),
 }));
 
-import * as userTimetableController from '../controllers/userTimetableController.js';
+import * as userTimetableController from "../controllers/userTimetableController.js";
 
-const createMockReq = (query?: any, params?: any, body?: any, user?: any) => ({
-  query: query || {},
-  params: params || {},
-  body: body || {},
-  user: user
-} as any);
+const createMockReq = (query?: any, params?: any, body?: any, user?: any) =>
+  ({
+    body: body ?? {},
+    params: params ?? {},
+    query: query ?? {},
+    user: user,
+  }) as any;
 
 const createMockRes = () => {
   const res: any = {};
@@ -67,61 +73,61 @@ const createMockRes = () => {
 const next = vi.fn();
 
 const mockTimetable = {
-  timetableId: 'timetable123',
-  uid: 'user123',
-  getAllEvents: mockTimetableGetAllEvents,
-  makeNewEvent: mockTimetableMakeNewEvent,
-  editOrMakeEvent: mockTimetableEditOrMakeEvent,
   deleteEvent: mockTimetableDeleteEvent,
-  registerNewModule: mockTimetableRegisterNewModule,
   editClasses: mockTimetableEditClasses,
-  unregisterModule: mockTimetableUnregisterModule,
+  editOrMakeEvent: mockTimetableEditOrMakeEvent,
+  getAllClasses: mockTimetableGetAllClasses,
+  getAllEvents: mockTimetableGetAllEvents,
   getAllModules: mockTimetableGetAllModules,
-  getAllClasses: mockTimetableGetAllClasses
+  makeNewEvent: mockTimetableMakeNewEvent,
+  registerNewModule: mockTimetableRegisterNewModule,
+  timetableId: "timetable123",
+  uid: "user123",
+  unregisterModule: mockTimetableUnregisterModule,
 };
 
 const mockUser = {
-  uid: 'user123',
-  username: 'testuser',
-  getUserTimetable: mockUserGetUserTimetable
+  getUserTimetable: mockUserGetUserTimetable,
+  uid: "user123",
+  username: "testuser",
 };
 
 const mockEvent = {
-  eventId: 'event123',
-  title: 'Test Event',
-  startTime: '09:00',
-  endTime: '10:00',
-  date: '2024-01-15',
-  description: 'Test Description'
+  date: "2024-01-15",
+  description: "Test Description",
+  endTime: "10:00",
+  eventId: "event123",
+  startTime: "09:00",
+  title: "Test Event",
 };
 
 const mockModule = {
-  moduleId: 'CS1010',
-  title: 'Programming Methodology',
-  faculty: 'Computing',
+  faculty: "Computing",
+  getClasses: mockModuleGetClasses,
   moduleCredit: 4,
-  getClasses: mockModuleGetClasses
+  moduleId: "CS1010",
+  title: "Programming Methodology",
 };
 
 const mockClass = {
-  classId: 'class123',
-  classNo: '01',
-  day: 'Monday',
-  startTime: '09:00',
-  endTime: '10:00',
-  lessonType: 'Lecture',
-  venue: 'LT1',
-  moduleId: 'CS1010'
+  classId: "class123",
+  classNo: "01",
+  day: "Monday",
+  endTime: "10:00",
+  lessonType: "Lecture",
+  moduleId: "CS1010",
+  startTime: "09:00",
+  venue: "LT1",
 };
 
-describe('User Timetable Controller', () => {
+describe("User Timetable Controller", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRoomForUser.mockReturnValue('room123');
+    mockGetRoomForUser.mockReturnValue("room123");
   });
 
-  describe('handleGetAllEvents', () => {
-    it('should return all events for authenticated user', async () => {
+  describe("handleGetAllEvents", () => {
+    it("should return all events for authenticated user", async () => {
       const req = createMockReq({}, {}, {}, mockUser);
       const res = createMockRes();
 
@@ -137,7 +143,7 @@ describe('User Timetable Controller', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should return 500 if user not authenticated', async () => {
+    it("should return 500 if user not authenticated", async () => {
       const req = createMockReq();
       const res = createMockRes();
 
@@ -147,10 +153,10 @@ describe('User Timetable Controller', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors', async () => {
+    it("should handle database errors", async () => {
       const req = createMockReq({}, {}, {}, mockUser);
       const res = createMockRes();
-      const error = new Error('Database error');
+      const error = new Error("Database error");
 
       mockUserGetUserTimetable.mockRejectedValue(error);
 
@@ -160,12 +166,12 @@ describe('User Timetable Controller', () => {
     });
   });
 
-  describe('handleCreateNewEvent', () => {
-    it('should create new event successfully', async () => {
+  describe("handleCreateNewEvent", () => {
+    it("should create new event successfully", async () => {
       const req = createMockReq({}, {}, mockEvent, mockUser);
       const res = createMockRes();
 
-      const createdEvent = { ...mockEvent, eventId: 'newevent123' };
+      const createdEvent = { ...mockEvent, eventId: "newevent123" };
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableMakeNewEvent.mockResolvedValue(createdEvent);
 
@@ -175,17 +181,17 @@ describe('User Timetable Controller', () => {
       expect(mockTimetableMakeNewEvent).toHaveBeenCalledWith(mockEvent);
       expect(res.sendStatus).toHaveBeenCalledWith(200);
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'events',
-          type: 'create',
-          userId: 'user123'
+          dataType: "events",
+          type: "create",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 500 if user not authenticated', async () => {
+    it("should return 500 if user not authenticated", async () => {
       const req = createMockReq({}, {}, mockEvent);
       const res = createMockRes();
 
@@ -194,10 +200,10 @@ describe('User Timetable Controller', () => {
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
 
-    it('should handle timetable creation errors', async () => {
+    it("should handle timetable creation errors", async () => {
       const req = createMockReq({}, {}, mockEvent, mockUser);
       const res = createMockRes();
-      const error = new Error('Creation failed');
+      const error = new Error("Creation failed");
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableMakeNewEvent.mockRejectedValue(error);
@@ -208,12 +214,12 @@ describe('User Timetable Controller', () => {
     });
   });
 
-  describe('handleUpdateEvent', () => {
-    it('should update event successfully', async () => {
+  describe("handleUpdateEvent", () => {
+    it("should update event successfully", async () => {
       const req = createMockReq({}, {}, mockEvent, mockUser);
       const res = createMockRes();
 
-      const updatedEvent = { ...mockEvent, title: 'Updated Event' };
+      const updatedEvent = { ...mockEvent, title: "Updated Event" };
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableEditOrMakeEvent.mockResolvedValue(updatedEvent);
 
@@ -223,17 +229,17 @@ describe('User Timetable Controller', () => {
       expect(mockTimetableEditOrMakeEvent).toHaveBeenCalledWith(mockEvent);
       expect(res.sendStatus).toHaveBeenCalledWith(200);
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'events',
-          type: 'update',
-          userId: 'user123'
+          dataType: "events",
+          type: "update",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 500 if user not authenticated', async () => {
+    it("should return 500 if user not authenticated", async () => {
       const req = createMockReq({}, {}, mockEvent);
       const res = createMockRes();
 
@@ -241,12 +247,11 @@ describe('User Timetable Controller', () => {
 
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
-
   });
 
-  describe('handleDeleteEvent', () => {
-    it('should delete event successfully', async () => {
-      const req = createMockReq({ eventId: 'event123' }, {}, {}, mockUser);
+  describe("handleDeleteEvent", () => {
+    it("should delete event successfully", async () => {
+      const req = createMockReq({ eventId: "event123" }, {}, {}, mockUser);
       const res = createMockRes();
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
@@ -254,21 +259,21 @@ describe('User Timetable Controller', () => {
       await userTimetableController.handleDeleteEvent(req, res, next);
 
       expect(mockUserGetUserTimetable).toHaveBeenCalled();
-      expect(mockTimetableDeleteEvent).toHaveBeenCalledWith('event123');
+      expect(mockTimetableDeleteEvent).toHaveBeenCalledWith("event123");
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'events',
-          eventId: 'event123',
-          type: 'delete',
-          userId: 'user123'
+          dataType: "events",
+          eventId: "event123",
+          type: "delete",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 500 if user not authenticated', async () => {
-      const req = createMockReq({ eventId: 'event123' });
+    it("should return 500 if user not authenticated", async () => {
+      const req = createMockReq({ eventId: "event123" });
       const res = createMockRes();
 
       await userTimetableController.handleDeleteEvent(req, res, next);
@@ -276,7 +281,7 @@ describe('User Timetable Controller', () => {
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
 
-    it('should handle inappropriate parameters', async () => {
+    it("should handle inappropriate parameters", async () => {
       const req = createMockReq({}, {}, {}, mockUser);
       const res = createMockRes();
 
@@ -286,12 +291,12 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Inappropriate parameters in delete event request'
-        })
+          message: "Inappropriate parameters in delete event request",
+        }),
       );
     });
 
-    it('should handle invalid eventId type', async () => {
+    it("should handle invalid eventId type", async () => {
       const req = createMockReq({ eventId: 123 }, {}, {}, mockUser);
       const res = createMockRes();
 
@@ -301,15 +306,15 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Inappropriate parameters in delete event request'
-        })
+          message: "Inappropriate parameters in delete event request",
+        }),
       );
     });
   });
 
-  describe('handleRegisterModule', () => {
-    it('should register module successfully', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' }, {}, mockUser);
+  describe("handleRegisterModule", () => {
+    it("should register module successfully", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" }, {}, mockUser);
       const res = createMockRes();
 
       const mockClasses = [mockClass];
@@ -320,22 +325,22 @@ describe('User Timetable Controller', () => {
       await userTimetableController.handleRegisterModule(req, res, next);
 
       expect(mockUserGetUserTimetable).toHaveBeenCalled();
-      expect(mockModuleFindByPk).toHaveBeenCalledWith('CS1010');
-      expect(mockTimetableRegisterNewModule).toHaveBeenCalledWith('CS1010');
+      expect(mockModuleFindByPk).toHaveBeenCalledWith("CS1010");
+      expect(mockTimetableRegisterNewModule).toHaveBeenCalledWith("CS1010");
       expect(res.json).toHaveBeenCalledWith(mockClasses);
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'modules',
-          type: 'create',
-          userId: 'user123'
+          dataType: "modules",
+          type: "create",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 500 if user not authenticated', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' });
+    it("should return 500 if user not authenticated", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" });
       const res = createMockRes();
 
       await userTimetableController.handleRegisterModule(req, res, next);
@@ -343,8 +348,8 @@ describe('User Timetable Controller', () => {
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
 
-    it('should handle module not found', async () => {
-      const req = createMockReq({}, { moduleCode: 'INVALID' }, {}, mockUser);
+    it("should handle module not found", async () => {
+      const req = createMockReq({}, { moduleCode: "INVALID" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
@@ -354,15 +359,15 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'No such module code: INVALID'
-        })
+          message: "No such module code: INVALID",
+        }),
       );
     });
 
-    it('should handle registration errors', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' }, {}, mockUser);
+    it("should handle registration errors", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" }, {}, mockUser);
       const res = createMockRes();
-      const error = new Error('Registration failed');
+      const error = new Error("Registration failed");
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockModuleFindByPk.mockResolvedValue(mockModule);
@@ -374,17 +379,17 @@ describe('User Timetable Controller', () => {
     });
   });
 
-  describe('handleUpdateClasses', () => {
-    it('should update classes successfully', async () => {
+  describe("handleUpdateClasses", () => {
+    it("should update classes successfully", async () => {
       const req = createMockReq(
-        { lessonType: 'Lecture', classNo: '01' },
-        { moduleCode: 'CS1010' },
+        { classNo: "01", lessonType: "Lecture" },
+        { moduleCode: "CS1010" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
-      const updatedClasses = [{ ...mockClass, classNo: '02' }];
+      const updatedClasses = [{ ...mockClass, classNo: "02" }];
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableEditClasses.mockResolvedValue(updatedClasses);
 
@@ -392,26 +397,26 @@ describe('User Timetable Controller', () => {
 
       expect(mockUserGetUserTimetable).toHaveBeenCalled();
       expect(mockTimetableEditClasses).toHaveBeenCalledWith(
-        'CS1010',
-        'Lecture',
-        '01'
+        "CS1010",
+        "Lecture",
+        "01",
       );
       expect(res.json).toHaveBeenCalledWith(updatedClasses);
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'classes',
-          type: 'update',
-          userId: 'user123'
+          dataType: "classes",
+          type: "update",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 500 if user not authenticated', async () => {
+    it("should return 500 if user not authenticated", async () => {
       const req = createMockReq(
-        { lessonType: 'Lecture', classNo: '01' },
-        { moduleCode: 'CS1010' }
+        { classNo: "01", lessonType: "Lecture" },
+        { moduleCode: "CS1010" },
       );
       const res = createMockRes();
 
@@ -420,12 +425,12 @@ describe('User Timetable Controller', () => {
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
 
-    it('should handle wrong format of query parameters', async () => {
+    it("should handle wrong format of query parameters", async () => {
       const req = createMockReq(
-        { lessonType: 'Lecture' },
-        { moduleCode: 'CS1010' },
+        { lessonType: "Lecture" },
+        { moduleCode: "CS1010" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
@@ -435,17 +440,17 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Wrong format of query parameters in handleUpdateClass'
-        })
+          message: "Wrong format of query parameters in handleUpdateClass",
+        }),
       );
     });
 
-    it('should handle invalid parameter types', async () => {
+    it("should handle invalid parameter types", async () => {
       const req = createMockReq(
-        { lessonType: 123, classNo: '01' },
-        { moduleCode: 'CS1010' },
+        { classNo: "01", lessonType: 123 },
+        { moduleCode: "CS1010" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
@@ -455,15 +460,15 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Wrong format of query parameters in handleUpdateClass'
-        })
+          message: "Wrong format of query parameters in handleUpdateClass",
+        }),
       );
     });
   });
 
-  describe('handleDeleteModule', () => {
-    it('should delete module successfully', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' }, {}, mockUser);
+  describe("handleDeleteModule", () => {
+    it("should delete module successfully", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" }, {}, mockUser);
       const res = createMockRes();
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
@@ -471,34 +476,34 @@ describe('User Timetable Controller', () => {
       await userTimetableController.handleDeleteModule(req, res, next);
 
       expect(mockUserGetUserTimetable).toHaveBeenCalled();
-      expect(mockTimetableUnregisterModule).toHaveBeenCalledWith('CS1010');
+      expect(mockTimetableUnregisterModule).toHaveBeenCalledWith("CS1010");
       expect(res.sendStatus).toHaveBeenCalledWith(200);
       expect(mockBroadcastToRoom).toHaveBeenCalledWith(
-        'room123',
+        "room123",
         expect.objectContaining({
-          dataType: 'modules',
-          moduleId: 'CS1010',
-          type: 'delete',
-          userId: 'user123'
+          dataType: "modules",
+          moduleId: "CS1010",
+          type: "delete",
+          userId: "user123",
         }),
-        'user123'
+        "user123",
       );
     });
 
-    it('should return 401 if user not authenticated', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' });
+    it("should return 401 if user not authenticated", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" });
       const res = createMockRes();
 
       await userTimetableController.handleDeleteModule(req, res, next);
 
       expect(res.sendStatus).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith('No User Found');
+      expect(res.send).toHaveBeenCalledWith("No User Found");
     });
 
-    it('should handle unregistration errors', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' }, {}, mockUser);
+    it("should handle unregistration errors", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" }, {}, mockUser);
       const res = createMockRes();
-      const error = new Error('Unregistration failed');
+      const error = new Error("Unregistration failed");
 
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableUnregisterModule.mockRejectedValue(error);
@@ -509,14 +514,14 @@ describe('User Timetable Controller', () => {
     });
   });
 
-  describe('handleGetAllUserModules', () => {
-    it('should return all user modules and classes', async () => {
+  describe("handleGetAllUserModules", () => {
+    it("should return all user modules and classes", async () => {
       const req = createMockReq({}, {}, {}, mockUser);
       const res = createMockRes();
 
       const mockModules = [mockModule];
       const mockClasses = [mockClass];
-      
+
       mockUserGetUserTimetable.mockResolvedValue(mockTimetable);
       mockTimetableGetAllModules.mockResolvedValue(mockModules);
       mockTimetableGetAllClasses.mockResolvedValue(mockClasses);
@@ -530,19 +535,19 @@ describe('User Timetable Controller', () => {
         classes: expect.arrayContaining([
           expect.objectContaining({
             classId: mockClass.classId,
-            moduleId: mockClass.moduleId
-          })
+            moduleId: mockClass.moduleId,
+          }),
         ]),
         modules: expect.arrayContaining([
           expect.objectContaining({
             moduleId: mockModule.moduleId,
-            title: mockModule.title
-          })
-        ])
+            title: mockModule.title,
+          }),
+        ]),
       });
     });
 
-    it('should return 500 if user not authenticated', async () => {
+    it("should return 500 if user not authenticated", async () => {
       const req = createMockReq();
       const res = createMockRes();
 
@@ -552,13 +557,13 @@ describe('User Timetable Controller', () => {
     });
   });
 
-  describe('handleGetClasses', () => {
-    it('should return classes for module and lesson type', async () => {
+  describe("handleGetClasses", () => {
+    it("should return classes for module and lesson type", async () => {
       const req = createMockReq(
         {},
-        { moduleCode: 'CS1010', lessonType: 'Lecture' },
+        { lessonType: "Lecture", moduleCode: "CS1010" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
@@ -568,15 +573,18 @@ describe('User Timetable Controller', () => {
 
       await userTimetableController.handleGetClasses(req, res, next);
 
-      expect(mockModuleFindByPk).toHaveBeenCalledWith('CS1010');
+      expect(mockModuleFindByPk).toHaveBeenCalledWith("CS1010");
       expect(mockModuleGetClasses).toHaveBeenCalledWith({
-        where: { lessonType: 'Lecture' }
+        where: { lessonType: "Lecture" },
       });
       expect(res.json).toHaveBeenCalledWith(mockClasses);
     });
 
-    it('should return 500 if user not authenticated', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010', lessonType: 'Lecture' });
+    it("should return 500 if user not authenticated", async () => {
+      const req = createMockReq(
+        {},
+        { lessonType: "Lecture", moduleCode: "CS1010" },
+      );
       const res = createMockRes();
 
       await userTimetableController.handleGetClasses(req, res, next);
@@ -584,12 +592,12 @@ describe('User Timetable Controller', () => {
       expect(res.sendStatus).toHaveBeenCalledWith(500);
     });
 
-    it('should handle module not found', async () => {
+    it("should handle module not found", async () => {
       const req = createMockReq(
         {},
-        { moduleCode: 'INVALID', lessonType: 'Lecture' },
+        { lessonType: "Lecture", moduleCode: "INVALID" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
 
@@ -599,33 +607,33 @@ describe('User Timetable Controller', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Module with code INVALID not found'
-        })
+          message: "Module with code INVALID not found",
+        }),
       );
     });
 
-    it('should handle missing parameters', async () => {
-      const req = createMockReq({}, { moduleCode: 'CS1010' }, {}, mockUser);
+    it("should handle missing parameters", async () => {
+      const req = createMockReq({}, { moduleCode: "CS1010" }, {}, mockUser);
       const res = createMockRes();
 
       await userTimetableController.handleGetClasses(req, res, next);
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Module code or lesson type is missing'
-        })
+          message: "Module code or lesson type is missing",
+        }),
       );
     });
 
-    it('should handle database errors', async () => {
+    it("should handle database errors", async () => {
       const req = createMockReq(
         {},
-        { moduleCode: 'CS1010', lessonType: 'Lecture' },
+        { lessonType: "Lecture", moduleCode: "CS1010" },
         {},
-        mockUser
+        mockUser,
       );
       const res = createMockRes();
-      const error = new Error('Database error');
+      const error = new Error("Database error");
 
       mockModuleFindByPk.mockRejectedValue(error);
 
