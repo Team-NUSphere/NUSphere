@@ -4,12 +4,7 @@ import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import CommentItem from "../components/CommentItem";
-import {
-  Link,
-  useLocation,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import type { User, Post } from "../types";
 import {
   addCommentReplies,
@@ -26,6 +21,7 @@ import {
   unlikeReply,
   useSummaryGeneration,
 } from "../functions/forumApi";
+import { getAuth } from "../contexts/authContext";
 
 interface PostPageProps {
   currentUser: User;
@@ -77,27 +73,18 @@ export default function PostPage() {
 
   useEffect(() => {
     const generatePostSummary = async () => {
-      if (commentList.length >= 0 && !summaryGenerated && !summaryLoading) {
+      if (!summaryGenerated && !summaryLoading) {
         try {
-          const commentsText = commentList
-            .map((comment) => comment.comment)
-            .join(" ");
-          const fullInput = `Title: ${post.title}\n\nDetails: ${post.details}\n\nComments: ${commentsText}`;
-
-          console.log("Auto-generating summary with input:", fullInput);
-          await generateSummary(fullInput);
+          await generateSummary("post", postId);
           setSummaryGenerated(true);
         } catch (error) {
           console.error("Auto summary generation failed:", error);
         }
       }
     };
-    
-    if (commentList.length >= 0) {
-      generatePostSummary();
-    }
+
+    generatePostSummary();
   }, [
-    commentList,
     post.title,
     post.details,
     summaryGenerated,
@@ -131,6 +118,7 @@ export default function PostPage() {
     };
   }, [hasMore, loading]);
 
+  const { userName } = getAuth();
   const { currentUser } = useOutletContext<PostPageProps>();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -249,11 +237,11 @@ export default function PostPage() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-600">
-                  {post.uid.charAt(0).toUpperCase()}
+                  {post.username.slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">{post.uid}</p>
+                <p className="font-medium text-gray-900">{post.username}</p>
                 <p className="text-sm text-gray-500">
                   {formatDistanceToNow(post.createdAt, { addSuffix: true })}
                 </p>
@@ -312,7 +300,7 @@ export default function PostPage() {
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-gray-600">
-                  {currentUser.username.charAt(0).toUpperCase()}
+                  {(userName ?? currentUser.username).slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1">

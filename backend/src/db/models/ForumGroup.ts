@@ -39,6 +39,8 @@ class ForumGroup extends Model<
   declare groupId: CreationOptional<string>;
   declare groupName: string;
   declare postCount?: CreationOptional<number>;
+  declare aiCache: CreationOptional<string>;
+  declare aiCacheUpdated: CreationOptional<Date>;
 
   declare ownerId: string;
   declare ownerType: "Module" | "User";
@@ -105,6 +107,15 @@ class ForumGroup extends Model<
   static initModel(sequelize: Sequelize) {
     ForumGroup.init(
       {
+        aiCache: {
+          allowNull: true,
+          type: DataTypes.TEXT,
+        },
+        aiCacheUpdated: {
+          allowNull: false,
+          defaultValue: DataTypes.NOW,
+          type: DataTypes.DATE,
+        },
         description: {
           allowNull: true,
           type: DataTypes.TEXT,
@@ -158,6 +169,12 @@ class ForumGroup extends Model<
         // To prevent mistakes:
         delete instance.UserOwner;
         delete instance.ModuleOwner;
+      }
+    });
+
+    ForumGroup.beforeUpdate((group) => {
+      if (group.changed("aiCache")) {
+        group.aiCacheUpdated = new Date();
       }
     });
   }

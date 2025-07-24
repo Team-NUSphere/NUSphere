@@ -1,8 +1,12 @@
-import { handleRunSummary } from "#controllers/summaryController.js";
+import {
+  handleGetGroupSummary,
+  handleGetPostSummary,
+} from "#controllers/summaryController.js";
 import { Router } from "express";
 
 const router = Router();
 
-router.route("/runSummary").post(handleRunSummary);
+router.get("/group/:groupId", handleGetGroupSummary);
+router.get("/post/:postId", handleGetPostSummary);
 
 export default router;

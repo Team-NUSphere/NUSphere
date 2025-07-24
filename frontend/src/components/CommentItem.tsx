@@ -46,11 +46,13 @@ export default function CommentItem({
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-medium text-gray-600">
-              {comment.uid.charAt(0).toUpperCase()}
+              {comment.username.slice(0, 2).toUpperCase()}
             </span>
           </div>
           <div>
-            <p className="font-medium text-gray-900 text-sm">{comment.uid}</p>
+            <p className="font-medium text-gray-900 text-sm">
+              {comment.username}
+            </p>
             <p className="text-xs text-gray-500">
               {formatDistanceToNow(comment.createdAt, { addSuffix: true })}
             </p>
