@@ -103,8 +103,12 @@ export const handleGetGroupPostList = async (
       );
 
       const formattedPosts = posts.map((post) => {
-        // eslint-disable-next-line @typescript-eslint/no-misused-spread
-        const postFormat = { ...post, username: post.User?.username };
+        const postFormat = {
+          ...(typeof post.get === "function"
+            ? post.get({ plain: true })
+            : post),
+          username: post.User?.username,
+        };
 
         return postFormat;
       });
