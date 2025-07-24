@@ -1,6 +1,10 @@
+import Comment from "#db/models/Comment.js";
+import ForumGroup from "#db/models/ForumGroup.js";
+import Post from "#db/models/Post.js";
 import { GoogleGenAI } from "@google/genai";
-import { NextFunction, Request, Response } from "express";
+import { differenceInMinutes } from "date-fns";
 import "dotenv/config";
+import { NextFunction, Request, Response } from "express";
 
 let genAI: GoogleGenAI | null = null;
 
@@ -27,7 +31,7 @@ export const handleRunSummary = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> => {
+): Promise<string> => {
   console.log("handleRunSummary called");
   try {
     const { input } = req.body as { input: string };
@@ -60,8 +64,121 @@ Focus only on the most useful and commonly agreed-upon points. If not academic m
     }
 
     res.json(text);
+    return text;
   } catch (error) {
     console.error("Gemini API error:", error);
+    next(error);
+    return "";
+  }
+};
+
+export const handleGetPostSummary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const postId = req.params.postId;
+  try {
+    const post = await Post.findByPk(postId, {
+      include: [
+        {
+          as: "Replies",
+          limit: 50,
+          model: Comment,
+          order: [
+            ["likes", "DESC"],
+            ["createdAt", "DESC"],
+          ],
+          separate: true,
+        },
+      ],
+    });
+    if (!post) {
+      res.status(404).send(`Post of postId ${postId} cannot be found`);
+      return;
+    }
+    if (
+      post.aiCache &&
+      differenceInMinutes(new Date(), post.aiCacheUpdated) > 60
+    ) {
+      res.json(post.aiCache);
+      return;
+    }
+    const commentList = post.Replies ?? [];
+    const commentsText = commentList
+      .map((comment) => comment.comment)
+      .join(" ");
+    const fullInput = `Title: ${post.title}\n\nDetails: ${post.details}\n\nComments: ${commentsText}`;
+    req.body = { input: fullInput };
+    const cache = await handleRunSummary(req, res, next);
+    await post.update({
+      aiCache: cache,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleGetGroupSummary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const groupId = req.params.groupId;
+  try {
+    const group = await ForumGroup.findByPk(groupId, {
+      include: [
+        {
+          as: "Posts",
+          include: [
+            {
+              as: "Replies",
+              limit: 30,
+              model: Comment,
+              order: [["createdAt", "DESC"]],
+              separate: true,
+            },
+          ],
+          limit: 30,
+          model: Post,
+          order: [
+            ["likes", "DESC"],
+            ["createdAt", "DESC"],
+          ],
+          separate: true,
+        },
+      ],
+    });
+    if (!group) {
+      res.status(404).send(`Group by groupId ${groupId} not found`);
+      return;
+    }
+    if (
+      group.aiCache &&
+      differenceInMinutes(new Date(), group.aiCacheUpdated) > 60
+    ) {
+      res.json(group.aiCache);
+      return;
+    }
+    const posts = group.Posts;
+    if (!posts) {
+      res.json("No posts in this group");
+      return;
+    }
+    const formatted = posts
+      .map((post) => {
+        const commentsText = (post.Replies ?? [])
+          .map((comment) => comment.comment)
+          .join(" ");
+        return `\n\nPost Title: ${post.title}\nPost Details: ${post.details}\nComments: ${commentsText}\n`;
+      })
+      .join("");
+    req.body = { input: formatted };
+    const cache = await handleRunSummary(req, res, next);
+    await group.update({
+      aiCache: cache,
+    });
+  } catch (error) {
     next(error);
   }
 };

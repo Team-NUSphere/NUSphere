@@ -4,12 +4,7 @@ import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import CommentItem from "../components/CommentItem";
-import {
-  Link,
-  useLocation,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import type { User, Post } from "../types";
 import {
   addCommentReplies,
@@ -77,7 +72,7 @@ export default function PostPage() {
 
   useEffect(() => {
     const generatePostSummary = async () => {
-      if (commentList.length >= 0 && !summaryGenerated && !summaryLoading) {
+      if (!summaryGenerated && !summaryLoading) {
         try {
           const commentsText = commentList
             .map((comment) => comment.comment)
@@ -85,19 +80,16 @@ export default function PostPage() {
           const fullInput = `Title: ${post.title}\n\nDetails: ${post.details}\n\nComments: ${commentsText}`;
 
           console.log("Auto-generating summary with input:", fullInput);
-          await generateSummary(fullInput);
+          await generateSummary("post", postId);
           setSummaryGenerated(true);
         } catch (error) {
           console.error("Auto summary generation failed:", error);
         }
       }
     };
-    
-    if (commentList.length >= 0) {
-      generatePostSummary();
-    }
+
+    generatePostSummary();
   }, [
-    commentList,
     post.title,
     post.details,
     summaryGenerated,

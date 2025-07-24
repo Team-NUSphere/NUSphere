@@ -755,12 +755,14 @@ export function useSummaryGeneration() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const generateSummary = async (input: string) => {
+  const generateSummary = async (type: "post" | "group", id: string) => {
     setLoading(true);
     setError(null);
     try {
-      console.log("Generating summary with input:", input);
-      const result = await runSummaryFlow(input);
+      console.log(`Generating summary for ${type} with ${type}Id ${id}`);
+      const result = await (type === "post"
+        ? getPostSummary(id)
+        : getGroupSummary(id));
       setSummary(result);
       return result;
     } catch (err) {
@@ -774,4 +776,20 @@ export function useSummaryGeneration() {
   };
 
   return { summary, loading, error, generateSummary };
+}
+
+export async function getGroupSummary(groupId: string) {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/summary/group/${groupId}`,
+  });
+  return res.data;
+}
+
+export async function getPostSummary(postId: string) {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/summary/post/${postId}`,
+  });
+  return res.data;
 }

@@ -48,6 +48,8 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   declare likes: CreationOptional<number>;
   declare replies: CreationOptional<number>;
   declare views: CreationOptional<number>;
+  declare aiCache: CreationOptional<string>;
+  declare aiCacheUpdated: CreationOptional<Date>;
 
   declare groupId: CreationOptional<string>;
   declare uid: CreationOptional<string>;
@@ -132,6 +134,15 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
   static initModel(sequelize: Sequelize) {
     Post.init(
       {
+        aiCache: {
+          allowNull: true,
+          type: DataTypes.TEXT,
+        },
+        aiCacheUpdated: {
+          allowNull: false,
+          defaultValue: DataTypes.NOW,
+          type: DataTypes.DATE,
+        },
         details: {
           type: DataTypes.TEXT,
         },
@@ -187,6 +198,12 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
           parentType: "ParentPost",
         },
       });
+    });
+
+    Post.beforeUpdate((post) => {
+      if (post.changed("aiCache")) {
+        post.aiCacheUpdated = new Date();
+      }
     });
   }
 }

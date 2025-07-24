@@ -6,7 +6,6 @@ import {
   deletePost,
   fetchPostsByGroupId,
   getGroupTagList,
-  fetchCommentByPostId,
   useSummaryGeneration,
 } from "../functions/forumApi";
 
@@ -62,37 +61,9 @@ export default function GroupPostsLists() {
 
   useEffect(() => {
     const generateOverallSummary = async () => {
-      if (
-        postList.length > 0 &&
-        !summaryGenerated &&
-        !loading &&
-        !summaryLoading
-      ) {
+      if (!summaryGenerated && !loading && !summaryLoading) {
         try {
-          let combinedContent = "";
-
-          for (const post of postList) {
-            try {
-              const comments = await fetchCommentByPostId(post.postId);
-              const commentsText = comments.commentList
-                .map((comment) => comment.comment)
-                .join(" ");
-
-              combinedContent += `\n\nPost Title: ${post.title}\nPost Details: ${post.details}\nComments: ${commentsText}\n`;
-            } catch (error) {
-              console.error(
-                `Failed to fetch comments for post ${post.postId}:`,
-                error
-              );
-              combinedContent += `\n\nPost Title: ${post.title}\nPost Details: ${post.details}\nComments: No comments available\n`;
-            }
-          }
-
-          console.log(
-            "Generating overall summary with combined content:",
-            combinedContent
-          );
-          await generateSummary(combinedContent);
+          await generateSummary("group", groupId);
           setSummaryGenerated(true);
         } catch (error) {
           console.error("Failed to generate overall summary:", error);
@@ -101,7 +72,7 @@ export default function GroupPostsLists() {
     };
 
     generateOverallSummary();
-  }, [postList, summaryGenerated, loading, summaryLoading, generateSummary]);
+  }, [summaryGenerated, loading, summaryLoading, generateSummary]);
 
   const observerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
