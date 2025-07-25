@@ -2,6 +2,9 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { getAuth } from "../contexts/authContext";
 import axiosApi from "../functions/axiosApi";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebase";
+import { cooldownTime } from "./EmailVerificationNotice";
 
 interface UserProfile {
   uid: string;
@@ -11,17 +14,24 @@ interface UserProfile {
 export default function Settings() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [newUsername, setNewUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   const { currentUser } = getAuth();
 
   useEffect(() => {
     fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
 
   const fetchUserProfile = async () => {
     try {
@@ -52,32 +62,24 @@ export default function Settings() {
     }
   };
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
+  const handlePasswordResend = async () => {
+    if (!currentUser || !currentUser.email) return;
+    setResending(true);
     setSuccess("");
+    setError("");
 
     try {
-      await axiosApi.put("/user/password", { newPassword });
-      setSuccess("Password updated successfully!");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to update password");
+      await sendPasswordResetEmail(auth, currentUser.email, {
+        url: "https://shining-rattler-apparently.ngrok-free.app/firebase-handler",
+        handleCodeInApp: true,
+      });
+      setCooldown(cooldownTime);
+      setSuccess(`A verification email has been sent to ${currentUser.email}.`);
+    } catch (error: any) {
+      console.error("Error resending verification:", error);
+      setError("Failed to resend email. Try again later.");
     } finally {
-      setLoading(false);
+      setResending(false);
     }
   };
 
@@ -224,94 +226,62 @@ export default function Settings() {
         </div>
 
         {/* Password Update Card - Full Width */}
-        <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-50 to-violet-50 px-6 py-4 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Change Password
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Update your account password
-            </p>
-          </div>
-          <div className="p-6">
-            <form onSubmit={handlePasswordUpdate} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+        {currentUser?.providerData.some(
+          (profile) => profile.providerId === "password"
+        ) && (
+          <div>
+            <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 px-6 py-4 border-b border-gray-100 flex justify-between">
                 <div>
-                  <label
-                    htmlFor="newPassword"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    New Password
-                  </label>
-                  <input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    minLength={6}
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
-                    placeholder="Enter new password"
-                  />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Change Password
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Update your account password
+                  </p>
                 </div>
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Confirm New Password
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    minLength={6}
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                  onClick={handlePasswordResend}
+                  disabled={cooldown > 0 || resending}
+                  className={`bg-gradient-to-r text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md
+                    ${
+                      cooldown > 0 || resending
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-purple-600 hover:bg-purple-700"
+                    }`}
                 >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Updating...
-                    </div>
-                  ) : (
-                    "Update Password"
-                  )}
+                  {resending
+                    ? "Resending..."
+                    : cooldown > 0
+                    ? `Resend in ${cooldown}s`
+                    : "Resend Verification Email"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Security Notice */}
-        <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center mr-3 mt-0.5">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-            </div>
-            <div>
-              <h3 className="font-medium text-amber-800 mb-1">
-                Security Notice
-              </h3>
-              <p className="text-sm text-amber-700">
-                Keep your account secure by using a strong password and updating
-                it regularly. Your password should be at least 6 characters long
-                and include a mix of letters, numbers, and symbols.
-              </p>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+// {/* Security Notice */}
+// <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+//   <div className="flex items-start">
+//     <div className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center mr-3 mt-0.5">
+//       <div className="w-2 h-2 bg-white rounded-full"></div>
+//     </div>
+//     <div>
+//       <h3 className="font-medium text-amber-800 mb-1">
+//         Security Notice
+//       </h3>
+//       <p className="text-sm text-amber-700">
+//         Keep your account secure by using a strong password and
+//         updating it regularly. Your password should be at least 6
+//         characters long and include a mix of letters, numbers, and
+//         symbols.
+//       </p>
+//     </div>
+//   </div>
+// </div>

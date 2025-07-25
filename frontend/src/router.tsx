@@ -18,15 +18,28 @@ import MainPostList from "./pages/MainPostList";
 import ForumResourcePage from "./pages/ForumResourcePage";
 import Settings from "./pages/Settings";
 import ClassSwap from "./pages/ClassSwap";
+import EmailVerificationNotice from "./pages/EmailVerificationNotice";
+import EmailVerified from "./pages/EmailVerified";
+import FirebaseHandler from "./pages/FirebaseHandler";
+import ChangePassword from "./pages/ChangePassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <HomePage />
-      </ProtectedRoute>
-    ),
+    element: <Navigate to="/timetable" replace />,
+  },
+  {
+    path: "/email-verified",
+    element: <EmailVerified />,
+  },
+  {
+    path: "/firebase-handler",
+    element: <FirebaseHandler />,
+  },
+  {
+    path: "/reset-password",
+    element: <ChangePassword />,
   },
   {
     element: <PublicRoutes />,
@@ -35,10 +48,22 @@ export const router = createBrowserRouter([
         path: "/auth",
         element: <AuthPage />,
       },
+      {
+        path: "/email-verification",
+        element: <EmailVerificationNotice />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
     ],
   },
   {
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/timetable",
