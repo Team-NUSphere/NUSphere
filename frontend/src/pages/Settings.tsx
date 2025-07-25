@@ -1,85 +1,85 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { getAuth } from "../contexts/authContext"
-import axiosApi from "../functions/axiosApi"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { getAuth } from "../contexts/authContext";
+import axiosApi from "../functions/axiosApi";
 
 interface UserProfile {
-  uid: string
-  username: string
+  uid: string;
+  username: string;
 }
 
 export default function Settings() {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [newUsername, setNewUsername] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const { currentUser } = getAuth()
+  const { currentUser } = getAuth();
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [])
+    fetchUserProfile();
+  }, []);
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axiosApi.get("/user/profile")
-      setUserProfile(response.data)
-      setNewUsername(response.data.username)
+      const response = await axiosApi.get("/user/profile");
+      setUserProfile(response.data);
+      setNewUsername(response.data.username);
     } catch (err) {
-      setError("Failed to load user profile")
+      setError("Failed to load user profile");
     }
-  }
+  };
 
   const handleUsernameUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newUsername.trim()) return
+    e.preventDefault();
+    if (!newUsername.trim()) return;
 
-    setLoading(true)
-    setError("")
-    setSuccess("")
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
-      await axiosApi.put("/user/username", { newUsername })
-      setSuccess("Username updated successfully!")
-      await fetchUserProfile()
+      await axiosApi.put("/user/username", { newUsername });
+      setSuccess("Username updated successfully!");
+      await fetchUserProfile();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to update username")
+      setError(err.response?.data?.error || "Failed to update username");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match")
-      return
+      setError("Passwords do not match");
+      return;
     }
 
     if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
+      setError("Password must be at least 6 characters");
+      return;
     }
 
-    setLoading(true)
-    setError("")
-    setSuccess("")
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
-      await axiosApi.put("/user/password", { newPassword })
-      setSuccess("Password updated successfully!")
-      setNewPassword("")
-      setConfirmPassword("")
+      await axiosApi.put("/user/password", { newPassword });
+      setSuccess("Password updated successfully!");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to update password")
+      setError(err.response?.data?.error || "Failed to update password");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (!userProfile) {
     return (
@@ -89,16 +89,20 @@ export default function Settings() {
           <p className="text-gray-600">Loading your settings...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 overflow-auto">
       <div className="px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Settings</h1>
-          <p className="text-gray-600">Manage your account information and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Account Settings
+          </h1>
+          <p className="text-gray-600">
+            Manage your account information and preferences
+          </p>
         </div>
 
         {/* Alert Messages */}
@@ -128,12 +132,16 @@ export default function Settings() {
           {/* Profile Information Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Profile Information
+              </h2>
               <p className="text-sm text-gray-600 mt-1">Your account details</p>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
                 <div className="relative">
                   <input
                     type="email"
@@ -147,7 +155,9 @@ export default function Settings() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  User ID
+                </label>
                 <div className="relative">
                   <input
                     type="text"
@@ -166,13 +176,20 @@ export default function Settings() {
           {/* Username Update Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Update Username</h2>
-              <p className="text-sm text-gray-600 mt-1">Change your display name</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Update Username
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Change your display name
+              </p>
             </div>
             <div className="p-6">
               <form onSubmit={handleUsernameUpdate} className="space-y-4">
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Username
                   </label>
                   <input
@@ -209,14 +226,21 @@ export default function Settings() {
         {/* Password Update Card - Full Width */}
         <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-gradient-to-r from-purple-50 to-violet-50 px-6 py-4 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900">Change Password</h2>
-            <p className="text-sm text-gray-600 mt-1">Update your account password</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Change Password
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Update your account password
+            </p>
           </div>
           <div className="p-6">
             <form onSubmit={handlePasswordUpdate} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="newPassword"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     New Password
                   </label>
                   <input
@@ -231,7 +255,10 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Confirm New Password
                   </label>
                   <input
@@ -273,15 +300,18 @@ export default function Settings() {
               <div className="w-2 h-2 bg-white rounded-full"></div>
             </div>
             <div>
-              <h3 className="font-medium text-amber-800 mb-1">Security Notice</h3>
+              <h3 className="font-medium text-amber-800 mb-1">
+                Security Notice
+              </h3>
               <p className="text-sm text-amber-700">
-                Keep your account secure by using a strong password and updating it regularly. Your password should be
-                at least 6 characters long and include a mix of letters, numbers, and symbols.
+                Keep your account secure by using a strong password and updating
+                it regularly. Your password should be at least 6 characters long
+                and include a mix of letters, numbers, and symbols.
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
