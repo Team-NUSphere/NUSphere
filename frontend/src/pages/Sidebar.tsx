@@ -1,9 +1,9 @@
-import { useState } from "react"
-import ModList from "./ModList"
-import RegisteredModules from "./RegisteredModules"
+import { useState } from "react";
+import ModList from "./ModList";
+import RegisteredModules from "./RegisteredModules";
 
 export default function Sidebar() {
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <div className="relative flex h-full">
@@ -16,18 +16,21 @@ export default function Sidebar() {
       >
         {/* Sidebar Content */}
         <div className="h-full flex flex-col">
-
           {/* Module Search Section */}
           <div className="flex-1 flex flex-col min-h-0">
-            <div className="flex-1 overflow-hidden">{expanded && <ModList />}</div>
+            <div className="flex-1 overflow-hidden">
+              {expanded && <ModList />}
+            </div>
           </div>
 
           {/* Registered Modules Section */}
           <div className="flex-1 flex flex-col min-h-0 border-t border-gray-200">
             <div className="px-4 py-3">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">My Modules</h3>
+              <h3 className="text-sm font-medium text-gray-700">My Modules</h3>
             </div>
-            <div className="flex-1 overflow-hidden">{expanded && <RegisteredModules />}</div>
+            <div className="flex-1 overflow-hidden">
+              {expanded && <RegisteredModules />}
+            </div>
           </div>
         </div>
       </div>
@@ -39,13 +42,25 @@ export default function Sidebar() {
         aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
       >
         <div
-          className={`w-4 h-4 flex items-center justify-center text-gray-600 group-hover:text-gray-800 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          className={`w-4 h-4 flex items-center justify-center text-gray-600 group-hover:text-gray-800 transition-transform duration-200 ${
+            expanded ? "rotate-180" : ""
+          }`}
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </button>
     </div>
-  )
+  );
 }
