@@ -52,7 +52,13 @@ export function AuthForm() {
       setUsername("");
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
+      setError(
+        err instanceof Error
+          ? err.message.includes("auth/email-already-in-use")
+            ? "Email already in use. Please try another one."
+            : err.message
+          : "Authentication failed"
+      );
     } finally {
       setLoading(false);
     }
