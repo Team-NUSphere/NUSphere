@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { SocialLoginButtons } from "./social-login-buttons";
 import { auth } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authenticateWithBackend } from "../contexts/authContext";
 
 export function AuthForm() {
@@ -42,7 +45,14 @@ export function AuthForm() {
       } else {
         // Signup logic
         await createUserWithEmailAndPassword(auth, email, password);
+        if (!auth.currentUser) return;
+        await sendEmailVerification(auth.currentUser, {
+          url: "http://127.0.0.1:5173/email-verified",
+          handleCodeInApp: true,
+        });
         await authenticateWithBackend("register", username);
+        navigate("/email-verification", { replace: true });
+        return;
       }
 
       // Reset form on success
@@ -56,6 +66,8 @@ export function AuthForm() {
         err instanceof Error
           ? err.message.includes("auth/email-already-in-use")
             ? "Email already in use. Please try another one."
+            : err.message.includes("auth/invalid-credential")
+            ? "Invalid email or password."
             : err.message
           : "Authentication failed"
       );
@@ -282,12 +294,13 @@ export function AuthForm() {
                     Remember me
                   </label>
                 </div>
-                <button
+                <Link
+                  to="/forgot-password"
                   type="button"
                   className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
                 >
                   Forgot Password?
-                </button>
+                </Link>
               </div>
             )}
 
