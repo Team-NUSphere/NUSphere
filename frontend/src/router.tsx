@@ -1,8 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-//import Signup from "./pages/Signup";
-//import Login from "./pages/Login";
 import AuthPage from "./pages/AuthPage";
-import HomePage from "./pages/HomePage";
 import PublicRoutes from "./components/PublicRoutes";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
@@ -15,15 +12,31 @@ import GroupPostsLists from "./pages/GroupPostsLists";
 import MyPostsGroups from "./pages/MyPostsGroups";
 import PostPage from "./pages/PostPage";
 import MainPostList from "./pages/MainPostList";
+import ForumResourcePage from "./pages/ForumResourcePage";
+import Settings from "./pages/Settings";
+import ClassSwap from "./pages/ClassSwap";
+import EmailVerificationNotice from "./pages/EmailVerificationNotice";
+import EmailVerified from "./pages/EmailVerified";
+import FirebaseHandler from "./pages/FirebaseHandler";
+import ChangePassword from "./pages/ChangePassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <HomePage />
-      </ProtectedRoute>
-    ),
+    element: <Navigate to="/timetable" replace />,
+  },
+  {
+    path: "/email-verified",
+    element: <EmailVerified />,
+  },
+  {
+    path: "/firebase-handler",
+    element: <FirebaseHandler />,
+  },
+  {
+    path: "/reset-password",
+    element: <ChangePassword />,
   },
   {
     element: <PublicRoutes />,
@@ -32,10 +45,22 @@ export const router = createBrowserRouter([
         path: "/auth",
         element: <AuthPage />,
       },
+      {
+        path: "/email-verification",
+        element: <EmailVerificationNotice />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
     ],
   },
   {
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/timetable",
@@ -48,6 +73,10 @@ export const router = createBrowserRouter([
       {
         path: "/modules",
         element: <Navigate to="/modules/ABM5003" replace />,
+      },
+      {
+        path: "/forum",
+        element: <Navigate to="/forum/post" replace />,
       },
       {
         path: "/forum",
@@ -67,7 +96,16 @@ export const router = createBrowserRouter([
           },
           {
             path: "/forum/group/:groupId",
-            element: <GroupPostsLists />,
+            children: [
+              {
+                index: true,
+                element: <GroupPostsLists />,
+              },
+              {
+                path: "/forum/group/:groupId/resources",
+                element: <ForumResourcePage />,
+              },
+            ],
           },
           {
             path: "/forum/mine",
@@ -77,11 +115,19 @@ export const router = createBrowserRouter([
       },
       {
         path: "/settings",
-        element: <div> Hello, settings page has yet to be implemented </div>,
+        element: <Settings />,
       },
       {
         path: "/room/:roomId",
         element: <Room />,
+      },
+      {
+        path: "/resources",
+        element: <ForumResourcePage />,
+      },
+      {
+        path: "/swap",
+        element: <ClassSwap />,
       },
     ],
   },

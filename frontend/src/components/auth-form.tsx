@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { SocialLoginButtons } from "./social-login-buttons";
 import { auth } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authenticateWithBackend } from "../contexts/authContext";
 
 export function AuthForm() {
@@ -11,6 +14,7 @@ export function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,6 +34,10 @@ export function AuthForm() {
         throw new Error("Passwords do not match");
       }
 
+      if (!isLogin && !username.trim()) {
+        throw new Error("Username is required");
+      }
+
       if (isLogin) {
         // Login logic
         await signInWithEmailAndPassword(auth, email, password);
@@ -37,16 +45,32 @@ export function AuthForm() {
       } else {
         // Signup logic
         await createUserWithEmailAndPassword(auth, email, password);
-        await authenticateWithBackend("register");
+        if (!auth.currentUser) return;
+        await sendEmailVerification(auth.currentUser, {
+          url: "http://127.0.0.1:5173/email-verified",
+          handleCodeInApp: true,
+        });
+        await authenticateWithBackend("register", username);
+        navigate("/email-verification", { replace: true });
+        return;
       }
 
       // Reset form on success
       setEmail("");
       setPassword("");
       setConfirmPassword("");
+      setUsername("");
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
+      setError(
+        err instanceof Error
+          ? err.message.includes("auth/email-already-in-use")
+            ? "Email already in use. Please try another one."
+            : err.message.includes("auth/invalid-credential")
+            ? "Invalid email or password."
+            : err.message
+          : "Authentication failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -235,6 +259,25 @@ export function AuthForm() {
                 </div>
               </div>
             )}
+            {/* Username Field (Signup only) */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <label htmlFor="username" className="text-sm font-medium">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required={!isLogin}
+                  minLength={3}
+                  maxLength={30}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Username"
+                />
+              </div>
+            )}
 
             {/* Remember Me & Forgot Password (Login only) */}
             {isLogin && (
@@ -251,12 +294,13 @@ export function AuthForm() {
                     Remember me
                   </label>
                 </div>
-                <button
+                <Link
+                  to="/forgot-password"
                   type="button"
                   className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
                 >
                   Forgot Password?
-                </button>
+                </Link>
               </div>
             )}
 

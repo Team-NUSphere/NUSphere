@@ -10,8 +10,9 @@ export function SocialLoginButtons() {
     switch (provider) {
       case "google":
         const providerGoogle = new GoogleAuthProvider();
-        await signInWithPopup(auth, providerGoogle);
-        await authenticateWithBackend("login");
+        const result = await signInWithPopup(auth, providerGoogle);
+        const username = result.user.displayName || result.user.email?.split('@')[0] || Math.random().toString(36).substring(2, 9); 
+        await authenticateWithBackend("login", username);
         break;
       default:
         console.error("Unknown provider:", provider);

@@ -1,8 +1,8 @@
 import axios from "axios";
-import type { Post, Group, Reply } from "../types";
-import { backend } from "../constants";
+import type { Post, Group, Reply, ResourceClusterType } from "../types";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
+import qs from "qs";
 
 /** ------------------------ POSTS ------------------------ **/
 
@@ -60,7 +60,8 @@ export function fetchAllPosts(query: string = "", pageNumber: number = 1) {
 export function fetchPostsByGroupId(
   groupId: string,
   query: string = "",
-  pageNumber: number = 1
+  pageNumber: number = 1,
+  selectedTags: string[] = []
 ) {
   const [postList, setPostList] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -70,7 +71,7 @@ export function fetchPostsByGroupId(
 
   useEffect(() => {
     setPostList([]);
-  }, [query]);
+  }, [query, selectedTags]);
 
   useEffect(() => {
     setLoading(true);
@@ -85,10 +86,14 @@ export function fetchPostsByGroupId(
       params: {
         page: pageNumber,
         q: query,
+        tags: selectedTags,
       },
+      paramsSerializer: (params) =>
+        qs.stringify(params, { arrayFormat: "repeat" }),
       signal: signal,
     })
       .then((res) => {
+        if (!res || !res.data) return;
         const postList = res.data.posts?.map(
           (post: {
             postId: string;
@@ -120,7 +125,7 @@ export function fetchPostsByGroupId(
         setLoading(false);
       });
     return () => controller.abort();
-  }, [pageNumber, query]);
+  }, [pageNumber, query, selectedTags]);
 
   function deletePostFromList(postId: string) {
     setPostList((prev) => prev.filter((post) => post.postId !== postId));
@@ -132,7 +137,8 @@ export function fetchPostsByGroupId(
 export async function createPost(
   title: string,
   details: string,
-  groupId: string
+  groupId: string,
+  tags: string[]
 ): Promise<number> {
   const res = await axiosApi({
     method: "POST",
@@ -140,6 +146,7 @@ export async function createPost(
     data: {
       title: title,
       details: details,
+      tags: tags,
     },
   });
   return res.status;
@@ -147,7 +154,7 @@ export async function createPost(
 
 export async function updatePost(
   postId: string,
-  updates: Partial<Pick<Post, "title" | "details">>
+  updates: Partial<Pick<Post, "title" | "details" | "tags">>
 ): Promise<Post> {
   const res = await axiosApi({
     method: "PUT",
@@ -155,6 +162,7 @@ export async function updatePost(
     data: {
       title: updates.title,
       details: updates.details,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -168,7 +176,17 @@ export async function deletePost(postId: string): Promise<void> {
 }
 
 export async function likePost(postId: string): Promise<void> {
-  await axios.post(`${backend}/posts/${postId}/like`);
+  await axiosApi({
+    method: "POST",
+    url: `/forum/likePost/${postId}`,
+  });
+}
+
+export async function unlikePost(postId: string): Promise<void> {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/likePost/${postId}`,
+  });
 }
 
 /** ------------------------ GROUPS ------------------------ **/
@@ -225,7 +243,8 @@ export function fetchAllGroups(query: string = "", pageNumber: number = 1) {
 
 export async function createGroup(
   groupName: string,
-  description: string
+  description: string,
+  tags: string[]
 ): Promise<Group> {
   const res = await axiosApi({
     method: "POST",
@@ -233,6 +252,7 @@ export async function createGroup(
     data: {
       name: groupName,
       description: description,
+      tags: tags,
     },
   });
   return res.data;
@@ -240,7 +260,7 @@ export async function createGroup(
 
 export async function updateGroup(
   groupId: string,
-  updates: Partial<Pick<Group, "groupName" | "description">>
+  updates: Partial<Pick<Group, "groupName" | "description" | "tags">>
 ): Promise<Group> {
   const res = await axiosApi({
     method: "PUT",
@@ -248,6 +268,7 @@ export async function updateGroup(
     data: {
       name: updates.groupName,
       description: updates.description,
+      tags: updates.tags,
     },
   });
   return res.data;
@@ -372,11 +393,18 @@ export async function deleteReply(commentId: string): Promise<void> {
   });
 }
 
-export async function likeReply(
-  postId: string,
-  replyId: string
-): Promise<void> {
-  await axios.post(`${backend}/posts/${postId}/replies/${replyId}/like`);
+export async function likeReply(commentId: string): Promise<void> {
+  await axiosApi({
+    method: "POST",
+    url: `/forum/likeComment/${commentId}`,
+  });
+}
+
+export async function unlikeReply(commentId: string): Promise<void> {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/likeComment/${commentId}`,
+  });
 }
 
 /** ------------------------ MY POSTS / GROUPS ------------------------ **/
@@ -488,6 +516,130 @@ export function fetchMyGroups(query: string = "", pageNumber: number = 1) {
   };
 }
 
+/** ------------------------ TAGS ------------------------ **/
+
+export async function getGroupTagList(groupId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/tag/${groupId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
+}
+
+export async function getPostTagList(postId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/postTags/${postId}`,
+  });
+  const tags = data.data as string[];
+  return tags;
+}
+
+/** ------------------------ RESOURCES ------------------------ **/
+
+export async function getGroupResourceList(groupId: string) {
+  const data = await axiosApi({
+    method: "GET",
+    url: `/forum/resources/${groupId}`,
+  });
+  const groupResources = data.data as {
+    groupId: string;
+    groupName: string;
+    ownerId: string;
+    ResourceClusters: ResourceClusterType[];
+  };
+  return groupResources;
+}
+
+export function createGroupResourceCluster(
+  groupId: string,
+  name: string,
+  description: string = ""
+) {
+  return axiosApi({
+    method: "POST",
+    url: `/forum/resources/${groupId}`,
+    data: {
+      name: name,
+      description: description,
+    },
+  });
+}
+
+export async function editGroupResourceCluster(
+  groupId: string,
+  clusterId: string,
+  name: string,
+  description: string = ""
+) {
+  const data = await axiosApi({
+    method: "PUT",
+    url: `/forum/resources/${groupId}/${clusterId}`,
+    data: {
+      name: name,
+      description: description,
+    },
+  });
+  return data;
+}
+
+export async function deleteGroupResourceCluster(
+  groupId: string,
+  clusterId: string
+) {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/resources/${groupId}/${clusterId}`,
+  });
+}
+
+export function createGroupResource(
+  clusterId: string,
+  title: string,
+  link: string = "",
+  description: string = ""
+) {
+  return axiosApi({
+    method: "POST",
+    url: `/forum/resource/${clusterId}`,
+    data: {
+      title: title,
+      link: link,
+      description: description,
+    },
+  });
+}
+
+export async function editClusterResource(
+  clusterId: string,
+  resourceId: string,
+  name: string,
+  link: string,
+  description: string = ""
+) {
+  const data = await axiosApi({
+    method: "PUT",
+    url: `/forum/resource/${clusterId}/${resourceId}`,
+    data: {
+      name: name,
+      link: link,
+      description: description,
+    },
+  });
+  return data;
+}
+
+export async function deleteClusterResource(
+  clusterId: string,
+  resourceId: string
+) {
+  await axiosApi({
+    method: "DELETE",
+    url: `/forum/resource/${clusterId}/${resourceId}`,
+  });
+}
+
 /** ------------------------ FRONTEND COMMENT FORMATTING ------------------------ **/
 export function addCommentReply(
   comments: Reply[],
@@ -528,6 +680,25 @@ export function editComment(
   });
 }
 
+export function likeAndUnlikeComment(
+  comments: Reply[],
+  targetId: string
+): Reply[] {
+  return updateNestedComments(comments, targetId, (comment) => {
+    return comment.isLiked
+      ? {
+          ...comment,
+          isLiked: false,
+          likes: comment.likes > 0 ? comment.likes - 1 : 0,
+        }
+      : {
+          ...comment,
+          isLiked: true,
+          likes: comment.likes + 1,
+        };
+  });
+}
+
 export function deleteCommentReply(
   comments: Reply[],
   parentId: string,
@@ -558,4 +729,67 @@ export function updateNestedComments(
       return comment;
     }
   });
+}
+
+/** ------------------------ SUMMARY ------------------------ **/
+
+export async function runSummaryFlow(input: string): Promise<string> {
+  try {
+    const res = await axiosApi({
+      method: "POST",
+      url: "/summary/runSummary",
+      data: {
+        input: input,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error generating summary:", error);
+    throw new Error("Failed to generate summary");
+  }
+}
+
+// Hook for summary generation with loading state
+export function useSummaryGeneration() {
+  const [summary, setSummary] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateSummary = async (type: "post" | "group", id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`Generating summary for ${type} with ${type}Id ${id}`);
+      const result = await (type === "post"
+        ? getPostSummary(id)
+        : getGroupSummary(id));
+      setSummary(result);
+      return result;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate summary";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { summary, loading, error, generateSummary };
+}
+
+export async function getGroupSummary(groupId: string) {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/summary/group/${groupId}`,
+  });
+  return res.data;
+}
+
+export async function getPostSummary(postId: string) {
+  const res = await axiosApi({
+    method: "GET",
+    url: `/summary/post/${postId}`,
+  });
+  return res.data;
 }

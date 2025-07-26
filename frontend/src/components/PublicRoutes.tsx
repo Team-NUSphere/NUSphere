@@ -1,6 +1,7 @@
 import type React from "react";
 import { getAuth } from "../contexts/authContext";
 import { Outlet, Navigate } from "react-router-dom";
+import { auth } from "../firebase";
 
 const PublicRoutes: React.FC = () => {
   const { isAuthenticated, isLoadingAuth } = getAuth();
@@ -9,7 +10,7 @@ const PublicRoutes: React.FC = () => {
     return <h2>Loading profile</h2>;
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && auth.currentUser?.emailVerified) {
     return <Navigate to="/timetable" replace />;
   }
 

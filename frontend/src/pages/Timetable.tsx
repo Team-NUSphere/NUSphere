@@ -1,11 +1,8 @@
 import DayColumn from "../components/DayColumn";
-import { format } from "date-fns";
 import type { UserClassType } from "../contexts/timetableContext";
 import { useState, useEffect } from "react";
 import { getTimetableContext } from "../contexts/timetableContext";
-import detectOverlaps, {
-  findAlternativeClasses,
-} from "../functions/timetable_utils";
+import { findAlternativeClasses } from "../functions/timetable_utils";
 
 export default function Timetable({
   startHour = 0,
@@ -95,23 +92,29 @@ export default function Timetable({
     setSelectedClass(null);
   };
 
+  const formatHour = (hour: number) => {
+    const period = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}${period}`;
+  };
+
   return (
-    <div className="overflow-y-auto w-full h-full overflow-x-auto">
+    <div className="overflow-y-auto w-full h-full overflow-x-auto ">
       <div className="flex flex-row w-full h-min">
         {/* Time column */}
         <div
           className="flex flex-col justify-between mt-10"
-          style={{ height: `${numOfHours * 70}px` }}
+          style={{ height: `${numOfHours * 60}px` }}
         >
           {hours.map((hour) => (
             <div key={hour} className="text-right -translate-y-1/2 p-2">
-              {format(new Date(2000, 0, 1, hour, 0), "ha")}
+              {formatHour(hour)}
             </div>
           ))}
           <div></div>
-          {/* Timetable grid */}
         </div>
-        <ol className="border-1 border-gray-300 rounded-lg flex flex-row flex-grow flex-shrink-0 basis-auto divide-x-1 divide-solid divide-gray-300">
+        {/* Timetable grid */}
+        <div className="border border-gray-300 rounded-lg flex flex-row flex-grow flex-shrink-0 basis-auto divide-x divide-gray-300">
           {daysOfWeek.map((day) => (
             <DayColumn
               key={day}
@@ -125,9 +128,9 @@ export default function Timetable({
               selectedClass={selectedClass ?? undefined}
               onClassClick={handleClassClick}
               onAlternativeClassClick={handleAlternativeClassClick}
-            ></DayColumn>
+            />
           ))}
-        </ol>
+        </div>
       </div>
     </div>
   );

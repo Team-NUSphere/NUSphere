@@ -1,24 +1,27 @@
 import { useState, useEffect, useRef } from "react";
-import { add, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { FaRegThumbsUp, FaRegComment, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import CommentItem from "../components/CommentItem";
-import {
-  Link,
-  useLocation,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
-import type { User, Post, Reply } from "../types";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
+import type { User, Post } from "../types";
 import {
   addCommentReplies,
   addCommentReply,
   fetchCommentByCommentId,
   fetchCommentByPostId,
+  getPostTagList,
+  likeAndUnlikeComment,
+  likePost,
+  likeReply,
   replyToComment,
   replyToPost,
+  unlikePost,
+  unlikeReply,
+  useSummaryGeneration,
 } from "../functions/forumApi";
+import { getAuth } from "../contexts/authContext";
 
 interface PostPageProps {
   currentUser: User;
@@ -26,8 +29,35 @@ interface PostPageProps {
 
 export default function PostPage() {
   const postId = useParams().postId;
-  const oriPost = useLocation().state.post as Post | undefined;
-  if (!postId || !oriPost) return null;
+  const postProp = useLocation().state.post as Post | undefined;
+
+  const {
+    summary,
+    loading: summaryLoading,
+    error: summaryError,
+    generateSummary,
+  } = useSummaryGeneration();
+
+  if (!postId || !postProp) {
+    return <div className="text-center text-red-500">Post not found</div>;
+  }
+
+  const [post, setPost] = useState<Post>(postProp);
+  const [tags, setTags] = useState<string[]>(postProp.tags || []);
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await getPostTagList(postId);
+        setTags(fetchedTags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+
+    if (tags.length === 0) {
+      fetchTags();
+    }
+  }, [postId]);
 
   const [pageNumber, setPageNumber] = useState(1);
   const {
@@ -35,11 +65,32 @@ export default function PostPage() {
     loading,
     error,
     hasMore,
-    deleteCommentFromList,
     addCommentToList,
     setCommentList,
   } = fetchCommentByPostId(postId, pageNumber);
 
+  const [summaryGenerated, setSummaryGenerated] = useState(false);
+
+  useEffect(() => {
+    const generatePostSummary = async () => {
+      if (!summaryGenerated && !summaryLoading) {
+        try {
+          await generateSummary("post", postId);
+          setSummaryGenerated(true);
+        } catch (error) {
+          console.error("Auto summary generation failed:", error);
+        }
+      }
+    };
+
+    generatePostSummary();
+  }, [
+    post.title,
+    post.details,
+    summaryGenerated,
+    summaryLoading,
+    generateSummary,
+  ]);
   const observerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const observerTarget = observerRef.current;
@@ -67,26 +118,27 @@ export default function PostPage() {
     };
   }, [hasMore, loading]);
 
+  const { userName } = getAuth();
   const { currentUser } = useOutletContext<PostPageProps>();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [post] = useState<Post>(oriPost);
-
-  const fetchPostData = async () => {
-    // TODO: Fetch post data from backend
-    console.log("Fetching post data for postId:", postId);
-  };
-
-  const fetchComments = async () => {
-    // TODO: Fetch comments from backend
-    console.log("Fetching comments for post:", postId);
-  };
-
-  // Handler functions with TODO comments
-  const handleLikePost = () => {
-    // TODO: Implement like post functionality
-    console.log("Like post:", postId);
+  const handleLikeClick = () => {
+    if (post.isLiked) {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes > 0 ? prev.likes - 1 : 0,
+        isLiked: false,
+      }));
+      unlikePost(post.postId);
+    } else {
+      setPost((prev) => ({
+        ...prev,
+        likes: prev.likes + 1,
+        isLiked: true,
+      }));
+      likePost(post.postId);
+    }
   };
 
   const handleSubmitComment = async () => {
@@ -104,7 +156,14 @@ export default function PostPage() {
     }
   };
 
-  const handleLikeComment = (commentId: string) => {};
+  const handleLikeComment = (commentId: string, like: boolean) => {
+    if (like) {
+      likeReply(commentId);
+    } else {
+      unlikeReply(commentId);
+    }
+    setCommentList((prev) => likeAndUnlikeComment(prev, commentId));
+  };
 
   const handleReplyToComment = async (
     parentCommentId: string,
@@ -126,12 +185,15 @@ export default function PostPage() {
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
-          <Link
+          <button
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            to="/forum/post"
+            onClick={() => {
+              window.history.back();
+            }}
+            draggable={false}
           >
             <FaArrowLeft className="w-4 h-4 text-gray-600" />
-          </Link>
+          </button>
           <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
             {post.groupName}
           </span>
@@ -142,21 +204,61 @@ export default function PostPage() {
           className="bg-white rounded-lg shadow-sm p-6 flex flex-col gap-6"
           style={{ maxHeight: "70vh", overflowY: "auto" }}
         >
+          {/* Auto-Generated Summary Section */}
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-3 text-blue-800">
+              Post Summary
+            </h2>
+            {summaryLoading && (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-gray-600">Generating summary...</span>
+              </div>
+            )}
+            {summaryError && (
+              <div className="text-red-600 bg-red-50 p-3 rounded-md">
+                <strong>Error:</strong> {summaryError}
+              </div>
+            )}
+            {summary && !summaryLoading && (
+              <div className="prose max-w-none">
+                <p className="text-gray-700 leading-relaxed">{summary}</p>
+              </div>
+            )}
+            {!summary && !summaryLoading && !summaryError && (
+              <div className="text-gray-500 italic">
+                Summary will appear here once generated...
+              </div>
+            )}
+          </div>
+
           {/* Post Content */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-600">
-                  {post.uid.charAt(0).toUpperCase()}
+                  {post.username.slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">{post.uid}</p>
+                <p className="font-medium text-gray-900">{post.username}</p>
                 <p className="text-sm text-gray-500">
                   {formatDistanceToNow(post.createdAt, { addSuffix: true })}
                 </p>
               </div>
             </div>
+
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 outline-none resize-none transition-colors">
+                {tags.map((tag) => {
+                  return (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800 hover:bg-gray-200">
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
 
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-3">
@@ -167,7 +269,10 @@ export default function PostPage() {
 
             <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
               <button
-                onClick={handleLikePost}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLikeClick();
+                }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors ${
                   post.isLiked ? "text-blue-600" : "text-gray-500"
                 }`}
@@ -195,7 +300,7 @@ export default function PostPage() {
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-gray-600">
-                  {currentUser.username.charAt(0).toUpperCase()}
+                  {(userName ?? currentUser.username).slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1">

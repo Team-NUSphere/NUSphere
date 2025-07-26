@@ -7,7 +7,7 @@ backend/node_modules/
 frontend/build/
 backend/build/
 frontend/dist/
-backend/dist/
+backend/trash/
 
 #Logs
 logs/
@@ -25,3 +25,5 @@ frontend/.env
 #IDE Specific
 .vscode/
 .vercel
+
+.DS_Store

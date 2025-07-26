@@ -24,6 +24,7 @@ export interface socketDataType {
       classes?: UserClassType[];
       events?: UserEventsType;
       modules?: UserModulesType;
+      username: string;
     }
   >;
   userId?: string; // for remove and delete operations
@@ -158,10 +159,11 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
     void (async () => {
       socket.on("error", onSocketPreError);
 
-      const url = new URL(
-        req.url ?? "",
-        `http://${req.headers.host ?? "localhost:3001"}`,
-      );
+      const protocol =
+        req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+      const host = req.headers.host ?? "localhost:3001";
+      const url = new URL(req.url ?? "", `${protocol}://${host}`);
+
       const userToken = url.searchParams.get("token");
       const room = url.searchParams.get("room");
 
@@ -303,16 +305,17 @@ async function getAllInRoomEventClassModule(
 }
 
 async function getFullEventClassModule(userId: string) {
-  const userTimetable = (
-    await User.findByPk(userId, {
-      include: [
-        {
-          as: "Timetable",
-          model: UserTimetable,
-        },
-      ],
-    })
-  )?.Timetable;
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        as: "Timetable",
+        model: UserTimetable,
+      },
+    ],
+  });
+  if (!user) return;
+
+  const userTimetable = user.Timetable;
   if (!userTimetable) return;
   const allClasses = await userTimetable.getAllClasses();
   const allEvents = await userTimetable.getAllEvents();
@@ -321,6 +324,7 @@ async function getFullEventClassModule(userId: string) {
     classes: classToSocketClass(allClasses),
     events: eventsToSocketEvents(allEvents),
     modules: modulesToSocketModules(allModules),
+    username: user.username,
   };
 }
 

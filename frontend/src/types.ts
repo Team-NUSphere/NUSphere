@@ -1,6 +1,7 @@
 export interface User {
   userId: string;
   username: string;
+  telegramId?: string;
 }
 
 export interface Reply {
@@ -13,6 +14,7 @@ export interface Reply {
   Replies: Reply[];
   parentId: string;
   replies: number;
+  username: string;
 }
 
 export interface Post {
@@ -27,6 +29,8 @@ export interface Post {
   views: number;
   isLiked: boolean;
   replies: number;
+  tags: string[];
+  username: string;
 }
 
 export interface Group {
@@ -37,6 +41,7 @@ export interface Group {
   createdAt: Date;
   ownerId: string;
   posts: Post[]; //not useful for now, it would be better to segregate what we can seperate
+  tags?: string[];
 }
 
 export interface Module {
@@ -85,4 +90,28 @@ export interface UserEvent {
 export interface UserTimetable {
   timetableId: string;
   uid: string;
+}
+
+export interface Resource {
+  resourceId: string;
+  name: string;
+  description: string;
+  link: string;
+}
+
+export interface ResourceClusterType {
+  clusterId: string;
+  name: string;
+  description: string;
+  Resources: Resource[];
+  groupId: string;
+}
+
+export interface SwapRequestType {
+  status: "pending" | "fulfilled" | "cancelled" | "matched";
+  id: string;
+  moduleCode: string;
+  lessonType: string;
+  fromClassNo: string;
+  toClassNos: string[];
 }

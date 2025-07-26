@@ -28,14 +28,20 @@ const handleAuthentication = async (
   const idToken: string = authHeader.split(" ")[1];
 
   // Firebase
-  const user: DecodedIdToken = await firebaseAuth.verifyIdToken(idToken);
+  let user: DecodedIdToken;
+  try {
+    user = await firebaseAuth.verifyIdToken(idToken);
+  } catch (err) {
+    next(err);
+    return;
+  }
   const uid: string = user.uid;
 
   try {
     // Check for user existence in case we failed to store it during registration
     const found = await User.findOne({ where: { uid: uid } });
     if (!found) {
-      res.sendStatus(500);
+      res.sendStatus(401);
       return;
     }
     req.user = found;

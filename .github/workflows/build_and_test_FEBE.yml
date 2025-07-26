@@ -22,16 +22,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
+
+
 
       # Install and test backend
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm install
 
-      #- name: Lint backend
-        #working-directory: ./backend
-        #run: npm run lint 
+      - name: Lint backend
+        working-directory: ./backend
+        run: npm run lint
 
       - name: Run backend tests
         working-directory: ./backend
@@ -43,9 +45,10 @@ jobs:
         run: npm install
 
       #- name: Lint frontend
-        #working-directory: ./frontend
-        #run: npm run lint 
+      #working-directory: ./frontend
+      #run: npm run lint
 
       #- name: Run frontend tests
-        #working-directory: ./frontend
-        #run: npx vitest run
+      #working-directory: ./frontend
+      #run: npx vitest run
+

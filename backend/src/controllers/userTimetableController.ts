@@ -22,6 +22,7 @@ function handleBroadcastToRoom({
   modules,
   type,
   userId,
+  username,
 }: {
   classes?: Class[];
   dataType: "classes" | "events" | "modules";
@@ -31,6 +32,7 @@ function handleBroadcastToRoom({
   modules?: Module;
   type: "create" | "delete" | "update";
   userId: string;
+  username: string;
 }) {
   const room = getRoomForUser(userId);
   if (!room) return;
@@ -49,6 +51,7 @@ function handleBroadcastToRoom({
         classes: socketClasses,
         events: socketEvent,
         modules: socketModules,
+        username: username,
       },
     },
     userId: userId,
@@ -90,13 +93,14 @@ export const handleCreateNewEvent = async (
     const event: null | UserEventType = req.body as null | UserEventType;
     if (!event) throw new Error("No event found in request body");
     const userEvent = await userTimetable.makeNewEvent(event);
-    res.status(200);
+    res.sendStatus(200);
 
     handleBroadcastToRoom({
       dataType: "events",
       events: userEvent,
       type: "create",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -118,13 +122,14 @@ export const handleUpdateEvent = async (
     const event: null | UserEventType = req.body as null | UserEventType;
     if (!event) throw new Error("No event found in request body");
     const userEvent = await userTimetable.editOrMakeEvent(event);
-    res.status(200);
+    res.sendStatus(200);
 
     handleBroadcastToRoom({
       dataType: "events",
       events: userEvent,
       type: "update",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -152,11 +157,16 @@ export const handleDeleteEvent = async (
         eventId: params.eventId,
         type: "delete",
         userId: req.user.uid,
+        username: req.user.username,
       });
+
+      res.sendStatus(200);
     } else {
+      res.sendStatus(400);
       throw new Error("Inappropriate parameters in delete event request");
     }
   } catch (error) {
+    res.sendStatus(400);
     next(error);
   }
 };
@@ -184,6 +194,7 @@ export const handleRegisterModule = async (
       modules: userModule,
       type: "create",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);
@@ -222,6 +233,7 @@ export const handleUpdateClasses = async (
         dataType: "classes",
         type: "update",
         userId: req.user.uid,
+        username: req.user.username,
       });
       return;
     }
@@ -238,20 +250,21 @@ export const handleDeleteModule = async (
   next: NextFunction,
 ): Promise<void> => {
   if (!req.user) {
-    res.sendStatus(500);
+    res.sendStatus(401).send("No User Found");
     return;
   }
   const userTimetable = await req.user.getUserTimetable();
   try {
     const moduleCode = req.params.moduleCode;
     await userTimetable.unregisterModule(moduleCode);
-    res.status(200);
+    res.sendStatus(200);
 
     handleBroadcastToRoom({
       dataType: "modules",
       moduleId: moduleCode,
       type: "delete",
       userId: req.user.uid,
+      username: req.user.username,
     });
   } catch (error) {
     next(error);

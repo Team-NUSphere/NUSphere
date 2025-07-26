@@ -11,10 +11,10 @@
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "getMods": "tsx --watch src/db/scripts/populateModules.ts",
-    "build:migrations": "npx tsc --outDir dist/db/migrations --rootDir src/db/migrations src/db/migrations/*.ts",
-    "db:migrate": "npm run build:migrations && sequelize-cli db:migrate"
+    "migration:create": "node src/db/scripts/createMigration.cjs",
+    "db:migrate": "npx sequelize db:migrate",
+    "test": "vitest"
   },
   "imports": {
     "#*": "./src/*"
@@ -25,12 +25,15 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "@google/genai": "^1.9.0",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
+    "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.16.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
@@ -44,14 +47,18 @@
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.18",
+    "@types/node-telegram-bot-api": "^0.64.9",
     "@types/sequelize": "^4.28.20",
+    "@types/supertest": "^6.0.3",
     "@types/ws": "^8.18.1",
     "eslint": "^9.27.0",
     "eslint-plugin-perfectionist": "^4.13.0",
     "prettier": "^3.5.3",
     "sequelize-cli": "^6.6.3",
+    "supertest": "^7.1.3",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.32.1",
+    "vitest": "^3.2.4"
   }
 }

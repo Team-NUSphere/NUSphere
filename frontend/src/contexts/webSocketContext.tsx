@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import { backendRaw } from "../constants";
+import { backendwss } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
@@ -34,6 +34,7 @@ interface WebSocketContextType {
   createNewRoom: () => void;
   syncedData: {
     [userId: string]: {
+      username: string;
       events?: UserEventsType;
       classes?: UserClassType[];
       modules?: UserModulesType;
@@ -58,6 +59,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
   const { userIdToken } = getAuth();
   const [syncedData, setSyncedData] = useState<{
     [userId: string]: {
+      username: string;
       events?: UserEventsType;
       classes?: UserClassType[];
       modules?: UserModulesType;
@@ -108,6 +110,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     dataType?: "events" | "classes" | "modules";
     userData?: {
       [userId: string]: {
+        username: string;
         events?: UserEventsType;
         classes?: UserClassType[];
         modules?: UserModulesType;
@@ -137,10 +140,10 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         console.error("Create operation missing userId or userDataValue");
         return;
       }
-      const { events, classes, modules } = userDataValue;
+      const { username, events, classes, modules } = userDataValue;
       if (dataType === "events" && events) {
         setSyncedData((prevData) => {
-          if (!prevData) return { [userId]: { events } };
+          if (!prevData) return { [userId]: { username, events } };
           return {
             ...prevData,
             [userId]: {
@@ -154,7 +157,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         });
       } else if (dataType === "modules" && modules) {
         setSyncedData((prevData) => {
-          if (!prevData) return { [userId]: { modules } };
+          if (!prevData) return { [userId]: { username, modules } };
           return {
             ...prevData,
             [userId]: {
@@ -163,10 +166,10 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
                 ...prevData[userId]?.modules,
                 ...modules,
               },
-              classes: {
+              classes: [
                 ...(prevData[userId]?.classes || []),
                 ...(classes ?? []),
-              },
+              ],
             },
           };
         });
@@ -190,11 +193,11 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         console.error("Create operation missing userId or userDataValue");
         return;
       }
-      const { events, classes } = userDataValue;
+      const { username, events, classes } = userDataValue;
 
       if (dataType === "events" && events) {
         setSyncedData((prevData) => {
-          if (!prevData) return { [userId]: { events } };
+          if (!prevData) return { [userId]: { username, events } };
           return {
             ...prevData,
             [userId]: {
@@ -209,7 +212,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
       } else if (dataType === "classes" && classes) {
         const { moduleId, classNo, lessonType } = classes[0];
         setSyncedData((prevData) => {
-          if (!prevData) return { [userId]: { classes } };
+          if (!prevData) return { [userId]: { username, classes } };
           const filteredClasses = prevData[userId]?.classes?.filter(
             (lesson) =>
               lesson.moduleId !== moduleId &&
@@ -255,12 +258,16 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         setSyncedData((prevData) => {
           if (!prevData || !prevData[userId]) return prevData;
           const updatedModules = { ...prevData[userId].modules };
+          const updatedClasses = prevData[userId].classes?.filter(
+            (cls) => cls.moduleId !== moduleId
+          );
           delete updatedModules[moduleId];
           return {
             ...prevData,
             [userId]: {
               ...prevData[userId],
               modules: updatedModules,
+              classes: updatedClasses || [],
             },
           };
         });
@@ -314,7 +321,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     try {
       const ws = new WebSocket(
-        `ws://${backendRaw}/?token=${userIdToken}&room=${room}`
+        `${backendwss}/?token=${userIdToken}&room=${room}`
       );
       ws.onopen = () => {
         setIsConnected(true);
