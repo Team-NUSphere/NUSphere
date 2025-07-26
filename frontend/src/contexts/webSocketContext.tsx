@@ -210,14 +210,12 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
           };
         });
       } else if (dataType === "classes" && classes) {
-        const { moduleId, classNo, lessonType } = classes[0];
+        const { moduleId, lessonType } = classes[0];
         setSyncedData((prevData) => {
           if (!prevData) return { [userId]: { username, classes } };
           const filteredClasses = prevData[userId]?.classes?.filter(
             (lesson) =>
-              !(
-                lesson.moduleId === moduleId && lesson.lessonType === lessonType
-              )
+              lesson.moduleId !== moduleId || lesson.lessonType !== lessonType
           );
           return {
             ...prevData,
