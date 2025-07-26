@@ -159,10 +159,11 @@ export function setupWebSocket(server: Server, wss: WebSocketServer) {
     void (async () => {
       socket.on("error", onSocketPreError);
 
-      const url = new URL(
-        req.url ?? "",
-        `http://${req.headers.host ?? "localhost:3001"}`,
-      );
+      const protocol =
+        req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+      const host = req.headers.host ?? "localhost:3001";
+      const url = new URL(req.url ?? "", `${protocol}://${host}`);
+
       const userToken = url.searchParams.get("token");
       const room = url.searchParams.get("room");
 
