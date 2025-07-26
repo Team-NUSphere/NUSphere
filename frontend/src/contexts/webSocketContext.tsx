@@ -216,9 +216,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
           const filteredClasses = prevData[userId]?.classes?.filter(
             (lesson) =>
               !(
-                lesson.moduleId === moduleId &&
-                lesson.classNo === classNo &&
-                lesson.lessonType === lessonType
+                lesson.moduleId === moduleId && lesson.lessonType === lessonType
               )
           );
           return {
