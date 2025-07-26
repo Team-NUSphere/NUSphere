@@ -3,7 +3,6 @@ import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import {
   FiCalendar,
-  FiBookOpen,
   FiMessageSquare,
   FiSettings,
   FiRefreshCcw,

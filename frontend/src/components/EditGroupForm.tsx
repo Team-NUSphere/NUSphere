@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaUsers } from "react-icons/fa";
-import {
-  createGroup,
-  getGroupTagList,
-  updateGroup,
-} from "../functions/forumApi";
+import { getGroupTagList, updateGroup } from "../functions/forumApi";
 import type { Group } from "../types";
 import GroupTagInput from "./GroupTagInput";
 

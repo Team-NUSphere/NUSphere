@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import type { Group, Post } from "../types";
+import type { Group } from "../types";
 import GroupList from "./GroupList";
 import PostList from "../components/PostList";
 import useDebounce from "../functions/useDebounce";
@@ -19,8 +19,7 @@ interface MyGroupListProps {
 }
 
 export default function MyPostsGroups() {
-  const { handleEditGroup, searchQuery, setSelectedGroup } =
-    useOutletContext<MyGroupListProps>();
+  const { searchQuery } = useOutletContext<MyGroupListProps>();
 
   const [groupPageNumber, setGroupPageNumber] = useState(1);
   const debouncedQuery = useDebounce<string>(searchQuery, 500);

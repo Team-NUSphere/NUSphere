@@ -1,4 +1,4 @@
-import { useOutletContext, useParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import PostList from "../components/PostList";
 import { useEffect, useRef, useState } from "react";
 import useDebounce from "../functions/useDebounce";

@@ -15,7 +15,6 @@ import { auth } from "../firebase";
 import { backend } from "../constants";
 import axiosApi from "../functions/axiosApi";
 import type { TelegramUser } from "../components/TelegramLoginButton";
-import { getTelegramId } from "../functions/classSwapApi";
 
 // Hook function
 export function getAuth(): AuthContextType {

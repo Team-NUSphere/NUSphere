@@ -16,7 +16,6 @@ interface PostCardProps {
 
 export default function PostCard({
   postProp,
-  onLike,
   handleDeletePost,
 }: PostCardProps) {
   const navigate = useNavigate();
