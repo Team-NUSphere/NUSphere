@@ -17,6 +17,7 @@
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "firebase": "^11.8.1",
     "ical-generator": "^9.0.0",
