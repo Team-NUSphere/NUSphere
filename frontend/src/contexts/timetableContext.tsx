@@ -31,7 +31,14 @@ export type UserEventsType = Record<string, UserEventType>;
 
 export type UserClassType = {
   classNo: string;
-  day: string;
+  day:
+    | "Monday"
+    | "Tuesday"
+    | "Wednesday"
+    | "Thursday"
+    | "Friday"
+    | "Saturday"
+    | "Sunday";
   endTime: string;
   classId: number;
   lessonType: string;

@@ -20,11 +20,13 @@ import Tags from "./models/Tags.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
-import { DB } from "./types/dbtypes.js";
+
 import "dotenv/config";
 
+import { DB } from "./types/dbtypes.js";
+
 export const sequelize = new Sequelize(
-  process.env.DATABASE_URL ?? "localhost:3001",
+  process.env.DATABASE_URL ?? "localhost:5432",
   {
     dialect: "postgres",
     dialectOptions: {
@@ -33,6 +35,7 @@ export const sequelize = new Sequelize(
         require: true,
       },
     },
+    logging: false,
   },
 );
 
