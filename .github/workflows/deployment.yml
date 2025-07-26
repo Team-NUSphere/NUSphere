@@ -41,6 +41,13 @@ jobs:
         working-directory: ./backend
         run: jq '.imports["#*"] = "./dist/*"' package.json > temp.temp.json && mv temp.temp.json package.json
 
+      - name: Updating Ubuntu system and Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: sudo apt update && sudo apt install heroku neofetch
+      - name: Checking the info
+        run: neofetch
+
       # Heroku deployment
       - name: Login to Heroku container registry
         working-directory: ./backend
