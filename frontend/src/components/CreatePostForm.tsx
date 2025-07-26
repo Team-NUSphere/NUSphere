@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { FaAngleDown, FaUsers, FaEdit } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaUsers, FaEdit } from "react-icons/fa";
 import {
   createGroup,
   createPost,

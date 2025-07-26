@@ -1,4 +1,12 @@
-export const backendRaw = "5f16c3645401.ngrok-free.app"; // raw
-export const backend = `https://${backendRaw}`; // api
+const backendURL = import.meta.env.VITE_BACKEND_URL;
+
+export const backendRaw =
+  typeof backendURL === "string" ? backendURL : "localhost:3001"; // raw
+export const backend = `${
+  typeof backendURL === "string" ? "https" : "http"
+}://${backendRaw}`; // api
+export const backendwss = `${
+  typeof backendURL === "string" ? "wss" : "ws"
+}://${backendRaw}`; // api
 // wss://backend/...
 // To be delete, mock data for development

@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import { backendRaw } from "../constants";
+import { backendwss } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
@@ -321,7 +321,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     try {
       const ws = new WebSocket(
-        `ws://${backendRaw}/?token=${userIdToken}&room=${room}`
+        `${backendwss}/?token=${userIdToken}&room=${room}`
       );
       ws.onopen = () => {
         setIsConnected(true);

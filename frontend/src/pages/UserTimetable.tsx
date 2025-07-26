@@ -1,6 +1,5 @@
 import { getTimetableContext } from "../contexts/timetableContext";
 import Timetable from "./Timetable";
-import AddEventModal from "../components/AddEventModal";
 
 export default function UserTimetable() {
   const { userClasses } = getTimetableContext();
@@ -12,9 +11,9 @@ export default function UserTimetable() {
         numOfHours={14}
         classes={userClasses}
       ></Timetable>
-      <div className="absolute flex justify-end bottom-0.5 right-0.5">
+      {/* <div className="absolute flex justify-end bottom-0.5 right-0.5">
         <AddEventModal />
-      </div>
+      </div> */}
     </div>
   );
 }
