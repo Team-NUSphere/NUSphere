@@ -11,8 +11,8 @@ module.exports = {
 
     await queryInterface.sequelize.query(`
       UPDATE "Users"
-      SET "username" = "telegramUsername"
-      WHERE "username" IS NULL AND "telegramUsername" IS NOT NULL;
+      SET "username" = 'user_' || substring(md5(random()::text), 1, 12)
+      WHERE "username" IS NULL;
     `);
 
     await queryInterface.changeColumn("Users", "username", {
