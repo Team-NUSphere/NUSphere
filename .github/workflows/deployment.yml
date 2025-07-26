@@ -51,7 +51,7 @@ jobs:
         working-directory: ./backend
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:Login
+        run: heroku container:login
 
       - name: Push to Heroku
         working-directory: ./backend
