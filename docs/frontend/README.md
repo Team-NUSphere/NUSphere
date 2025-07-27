@@ -1,125 +1,80 @@
-🛠 Tech Stack
-React (with TypeScript) — UI framework
-Vite — Fast development/build tool
-Tailwind CSS — Utility-first CSS framework
-Firebase — Authentication
-React Router — Routing/navigation
-Axios — HTTP requests
-React Icons — Icon library
+# NUSphere Frontend
 
-📁 Project Structure
+## 🛠 Tech Stack
+- **React** (with Vite) – Modern SPA framework
+- **TypeScript** – Type safety for React and API calls
+- **React Router** – Client-side routing
+- **Tailwind CSS** – Utility-first styling (if used)
+- **Firebase** – Authentication
+- **Axios** – API requests
+- **WebSocket** – Real-time collaboration
+- **React Icons** – Icon library
+
+## 📁 Project Structure
+
+```
 src/
-├── App.tsx                # Main app component, sets up providers and router
-├── constants.ts           # Shared constants (e.g., backend URL)
-├── firebase.ts            # Firebase config and initialization
-├── contexts/              # React context providers (auth, timetable, etc.)
-├── components/            # Reusable UI components (Navbar, ModItem, etc.)
-├── functions/             # Custom hooks (e.g., useModuleSearch)
-├── pages/                 # Top-level pages (HomePage, Login, Signup, ModList, etc.)
-├── assets/                # Static assets (SVGs, images)
-├── styles/                # Global styles (Tailwind, etc.)
-├── main.tsx               # Entry point, renders <App />
-├── router.tsx             # Route definitions for React Router
+├── components/      # Reusable UI components (forms, modals, lists, etc.)
+├── contexts/        # React context providers for auth, timetable, websocket
+├── functions/       # API utilities, hooks, and helpers
+├── pages/           # Main route pages (Forum, Timetable, Modules, etc.)
+├── assets/          # Static assets (images, SVGs)
+├── App.tsx          # App root, context providers, router
+├── router.tsx       # Route definitions
+├── constants.ts     # App-wide constants (API URLs, etc.)
+├── firebase.ts      # Firebase config and initialization
+├── main.tsx         # Vite entry point
+└── styles/          # Global styles (Tailwind, etc.)
+```
 
-# 🔑 Key Features
+## 🚀 Main Features
+- **Authentication**: Firebase-based login, signup, password reset, and email verification.
+- **Timetable Management**: View, edit, and share your NUS timetable. Add custom events, register modules, and manage classes.
+- **Forum**: Post questions, join groups, comment, like, and tag posts. Nested comments and group forums supported.
+- **Class Swap**: Request and manage class swaps with other students.
+- **Module Search**: Search and browse NUS modules, view details, and register.
+- **Resource Sharing**: Share and access resources in forum groups (files, links, etc.).
+- **Real-Time Collaboration**: Join rooms for collaborative timetable editing and see live updates via WebSocket.
+- **AI Summaries**: Get AI-generated summaries of forum discussions (via backend integration).
+- **Settings**: Manage your profile, change password, and link Telegram.
+- **Responsive UI**: Modern, mobile-friendly design with Tailwind CSS.
 
-### ✅ Authentication  
-- Powered by Firebase  
-- On successful login/signup, user is also registered in the backend database  
+## 🗂️ Key Pages & Navigation
+- `/auth` – Login, signup, and password reset
+- `/timetable` – Main timetable view and editor
+- `/modules` – Module search and details
+- `/forum` – Forum home (posts, groups, my posts, group resources)
+- `/swap` – Class swap requests and management
+- `/settings` – User settings and profile
+- `/room` – Real-time collaboration rooms
+- `/email-verification`, `/email-verified` – Email verification flows
 
-### 📅 Timetable Management  
-- Search for modules  
-- Add/remove modules from personal timetable  
-- Global state managed using React Context (`TimetableProvider`)
+## 🧩 State Management (Contexts)
+- **AuthContext**: Tracks current user, authentication state, ID token, Telegram ID, and username. Handles login/logout and user profile fetch.
+- **TimetableContext**: Manages timetable data, events, modules, and class registration. Provides functions to update, add, or remove events and modules.
+- **WebSocketContext**: Handles WebSocket connection, room management, and real-time data sync for collaborative features.
 
-### 🔍 Module Search  
-- `ModList` uses a custom hook `useModuleSearch` to query the backend  
-- Modules displayed using the `ModItem` component (with add/remove button)
+## 🌐 API & Backend Integration
+- **API Layer**: All backend calls are made via Axios (see `functions/axiosApi.ts`).
+- **Endpoints**: Interacts with backend for authentication, timetable, forum, class swap, and more.
+- **Token Handling**: Automatically attaches Firebase ID token to all API requests.
+- **Hooks**: Custom React hooks for fetching posts, modules, timetable data, etc.
 
-### 🌐 Forum & Community *(Planned)*  
-- Placeholders set up in routes and navigation
+## 🔄 Real-Time Features
+- **WebSocket**: Used for collaborative timetable editing and room-based updates. Handles user join/leave, data sync, and live changes.
+- **Context-driven**: WebSocket state and data are managed via `WebSocketContext` and consumed throughout the app.
 
-### 📱 Responsive UI  
-- Tailwind CSS ensures clean, modern, mobile-friendly design
+## 🧱 How to Extend the Frontend
+- **Add Pages**: Create new route pages in `pages/` and add to `router.tsx`.
+- **Add Components**: Build reusable UI in `components/` and compose in pages.
+- **Add API Calls**: Use or extend `functions/axiosApi.ts` and related hooks.
+- **Add State**: Use or extend context providers in `contexts/` for global state.
+- **Add Real-Time Features**: Extend `WebSocketContext` and backend WebSocket events.
 
----
-
-# 🧩 Main Components
-
-- **App.tsx**  
-  Wraps the app with `AuthProvider` and `TimetableProvider`, handles routing setup
-
-- **Navbar / Sidebar**  
-  Main navigation UI for page transitions
-
-- **ModItem**  
-  Displays individual module info and lets user register/unregister it
-
-- **ModList**  
-  Searchable, paginated module directory  
-
-- **Pages**  
-
-    - **AuthPage.tsx**  
-    Renders the authentication form (`AuthForm` component).  
-    Used for login/signup UI.
-
-    - **HomePage.tsx**  
-    The landing page of the app.  
-    Shows intro, feature highlights, and stats.  
-    Includes a navbar and footer with custom styles.
-
-    - **Login.tsx**  
-    Login form using Firebase authentication.  
-    On success, authenticates with the backend and redirects the user.
-
-    - **Signup.tsx**  
-    Signup form using Firebase authentication.  
-    On success, registers the user in the backend and redirects.
-
-    - **ModList.tsx**  
-    Main module search and registration page.  
-    Uses a search bar and paginated infinite scroll.  
-    Fetches modules from the backend and displays them using `ModItem`.
-
-    - **Modules.tsx**  
-    Displays details for a specific module.  
-    Fetches module data from the backend using the module code from the URL.
-
-    - **RegisteredModules.tsx**  
-    Lists all modules the user has registered for.  
-    Displays each as a `ModItem` with registered status.
-
-    - **UserTimetable.tsx**  
-    Page for the user's personal timetable.  
-    Uses the `Timetable` component to show registered classes.  
-    Includes a button/modal to add custom events.
-
-    - **Navbar.tsx**  
-    Top navigation bar.  
-    Handles navigation links, sign out, and responsive menu.
-
-    - **Sidebar.tsx**  
-    Layout sidebar.  
-    Contains `ModList` and `RegisteredModules` components.
-
-    - **Timetable.tsx**  
-    Timetable grid display.  
-    Accepts props for start hour, total hours, and class data.  
-    Uses `DayColumn` components to render the daily schedule.
+## 📝 Development & Linting
+- Uses ESLint with recommended and type-aware rules for React and TypeScript.
+- See `eslint.config.js` for configuration and plugin suggestions.
 
 ---
 
-# 🧱 How to Extend
-
-- **Add a new page**  
-  → Create a new file in `pages/` and register it in `router.tsx`  
-
-- **Add a reusable component**  
-  → Place it in `components/`  
-
-- **Add a new global state/context**  
-  → Use the `contexts/` directory  
-
-- **Make API calls**  
-  → Use `Axios`, with backend base URL defined in `constants.ts`
+This is a production-grade frontend for the NUSphere platform. For backend details, see the `/docs/backend/README.md` in the main repo.
