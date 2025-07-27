@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getAuth } from "./authContext";
-import { backendRaw } from "../constants";
+import { backendwss } from "../constants";
 import type {
   UserClassType,
   UserEventsType,
@@ -210,14 +210,12 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
           };
         });
       } else if (dataType === "classes" && classes) {
-        const { moduleId, classNo, lessonType } = classes[0];
+        const { moduleId, lessonType } = classes[0];
         setSyncedData((prevData) => {
           if (!prevData) return { [userId]: { username, classes } };
           const filteredClasses = prevData[userId]?.classes?.filter(
             (lesson) =>
-              lesson.moduleId !== moduleId &&
-              lesson.classNo !== classNo &&
-              lesson.lessonType !== lessonType
+              lesson.moduleId !== moduleId || lesson.lessonType !== lessonType
           );
           return {
             ...prevData,
@@ -321,7 +319,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
 
     try {
       const ws = new WebSocket(
-        `ws://${backendRaw}/?token=${userIdToken}&room=${room}`
+        `${backendwss}/?token=${userIdToken}&room=${room}`
       );
       ws.onopen = () => {
         setIsConnected(true);

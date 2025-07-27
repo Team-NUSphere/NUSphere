@@ -1,6 +1,4 @@
-import type {
-  UserClassType,
-} from "../contexts/timetableContext";
+import type { UserClassType } from "../contexts/timetableContext";
 import { differenceInMinutes, parse } from "date-fns";
 
 // Helper function to detect overlapping classes
@@ -73,62 +71,64 @@ export const findAlternativeClasses = (
 };
 
 export type CollaborativeClassType = UserClassType & {
-  collaboratorId: string
-  collaboratorName: string
-  color: string
-  chosen?: boolean
-  totalColumns?: number
-  column?: number
-}
+  collaboratorId: string;
+  collaboratorName: string;
+  color: string;
+  chosen?: boolean;
+  totalColumns?: number;
+  column?: number;
+};
 
 // Helper function to detect overlapping classes in collaboration
 export function detectCollaborativeOverlaps(
   classes: CollaborativeClassType[],
-  startHour: number,
+  _startHour: number
 ): CollaborativeClassType[] {
-  if (classes.length === 0) return []
+  if (classes.length === 0) return [];
 
   // Group classes by day
-  const classesByDay: { [day: string]: CollaborativeClassType[] } = {}
+  const classesByDay: { [day: string]: CollaborativeClassType[] } = {};
 
   classes.forEach((cls) => {
-    const day = cls.day.slice(0, 3).toUpperCase()
+    const day = cls.day.slice(0, 3).toUpperCase();
     if (!classesByDay[day]) {
-      classesByDay[day] = []
+      classesByDay[day] = [];
     }
-    classesByDay[day].push(cls)
-  })
+    classesByDay[day].push(cls);
+  });
 
-  const processedClasses: CollaborativeClassType[] = []
+  const processedClasses: CollaborativeClassType[] = [];
 
   Object.values(classesByDay).forEach((dayClasses) => {
     const sortedClasses = dayClasses.sort((a, b) => {
-      const aStart = timeToMinutes(a.startTime)
-      const bStart = timeToMinutes(b.startTime)
-      return aStart - bStart
-    })
+      const aStart = timeToMinutes(a.startTime);
+      const bStart = timeToMinutes(b.startTime);
+      return aStart - bStart;
+    });
 
-    const overlapGroups: CollaborativeClassType[][] = []
-    let currentGroup: CollaborativeClassType[] = []
+    const overlapGroups: CollaborativeClassType[][] = [];
+    let currentGroup: CollaborativeClassType[] = [];
 
     sortedClasses.forEach((cls, index) => {
       if (currentGroup.length === 0) {
-        currentGroup.push(cls)
+        currentGroup.push(cls);
       } else {
-        const hasOverlap = currentGroup.some((groupClass) => classesOverlap(groupClass, cls))
+        const hasOverlap = currentGroup.some((groupClass) =>
+          classesOverlap(groupClass, cls)
+        );
 
         if (hasOverlap) {
-          currentGroup.push(cls)
+          currentGroup.push(cls);
         } else {
-          overlapGroups.push([...currentGroup])
-          currentGroup = [cls]
+          overlapGroups.push([...currentGroup]);
+          currentGroup = [cls];
         }
       }
 
       if (index === sortedClasses.length - 1) {
-        overlapGroups.push([...currentGroup])
+        overlapGroups.push([...currentGroup]);
       }
-    })
+    });
 
     overlapGroups.forEach((group) => {
       if (group.length === 1) {
@@ -136,100 +136,102 @@ export function detectCollaborativeOverlaps(
           ...group[0],
           totalColumns: 1,
           column: 0,
-        })
+        });
       } else {
-        const columnsAssigned = assignColumnsToOverlappingClasses(group)
-        processedClasses.push(...columnsAssigned)
+        const columnsAssigned = assignColumnsToOverlappingClasses(group);
+        processedClasses.push(...columnsAssigned);
       }
-    })
-  })
+    });
+  });
 
-  return processedClasses
+  return processedClasses;
 }
 
 // Helper function to convert time string to minutes since start of day
 function timeToMinutes(timeStr: string): number {
-  const [hours, minutes] = timeStr.split(":").map(Number)
-  return hours * 60 + minutes
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
 }
 
 // Helper function to check if two classes overlap in time
 function classesOverlap(class1: UserClassType, class2: UserClassType): boolean {
-  const start1 = timeToMinutes(class1.startTime)
-  const end1 = timeToMinutes(class1.endTime)
-  const start2 = timeToMinutes(class2.startTime)
-  const end2 = timeToMinutes(class2.endTime)
+  const start1 = timeToMinutes(class1.startTime);
+  const end1 = timeToMinutes(class1.endTime);
+  const start2 = timeToMinutes(class2.startTime);
+  const end2 = timeToMinutes(class2.endTime);
 
   // Classes overlap if one starts before the other ends
-  return start1 < end2 && start2 < end1
+  return start1 < end2 && start2 < end1;
 }
 
 // Helper function to assign columns to overlapping classes
-function assignColumnsToOverlappingClasses(classes: CollaborativeClassType[]): CollaborativeClassType[] {
+function assignColumnsToOverlappingClasses(
+  classes: CollaborativeClassType[]
+): CollaborativeClassType[] {
   // Sort by start time, then by end time
   const sortedClasses = classes.sort((a, b) => {
-    const aStart = timeToMinutes(a.startTime)
-    const bStart = timeToMinutes(b.startTime)
-    if (aStart !== bStart) return aStart - bStart
+    const aStart = timeToMinutes(a.startTime);
+    const bStart = timeToMinutes(b.startTime);
+    if (aStart !== bStart) return aStart - bStart;
 
-    const aEnd = timeToMinutes(a.endTime)
-    const bEnd = timeToMinutes(b.endTime)
-    return aEnd - bEnd
-  })
+    const aEnd = timeToMinutes(a.endTime);
+    const bEnd = timeToMinutes(b.endTime);
+    return aEnd - bEnd;
+  });
 
-  const columns: { endTime: number; classes: CollaborativeClassType[] }[] = []
-  const result: CollaborativeClassType[] = []
+  const columns: { endTime: number; classes: CollaborativeClassType[] }[] = [];
+  const result: CollaborativeClassType[] = [];
 
   sortedClasses.forEach((cls) => {
-    const startTime = timeToMinutes(cls.startTime)
-    const endTime = timeToMinutes(cls.endTime)
+    const startTime = timeToMinutes(cls.startTime);
+    const endTime = timeToMinutes(cls.endTime);
 
-    let assignedColumn = -1
+    let assignedColumn = -1;
     for (let i = 0; i < columns.length; i++) {
       if (columns[i].endTime <= startTime) {
-        assignedColumn = i
-        break
+        assignedColumn = i;
+        break;
       }
     }
 
     if (assignedColumn === -1) {
-      assignedColumn = columns.length
-      columns.push({ endTime: 0, classes: [] })
+      assignedColumn = columns.length;
+      columns.push({ endTime: 0, classes: [] });
     }
 
-    columns[assignedColumn].endTime = endTime
-    columns[assignedColumn].classes.push(cls)
+    columns[assignedColumn].endTime = endTime;
+    columns[assignedColumn].classes.push(cls);
 
     result.push({
       ...cls,
       totalColumns: Math.max(columns.length, classes.length),
       column: assignedColumn,
-    })
-  })
+    });
+  });
 
-  const totalColumns = columns.length
+  const totalColumns = columns.length;
   return result.map((cls) => ({
     ...cls,
     totalColumns,
-  }))
+  }));
 }
 
 // Alternative classes finder for collaborative timetable
 export function findCollaborativeAlternativeClasses(
   allModuleClasses: UserClassType[],
   currentUserClasses: CollaborativeClassType[],
-  selectedClass: UserClassType,
+  selectedClass: UserClassType
 ): UserClassType[] {
   return allModuleClasses.filter((cls) => {
-    if (cls.classId === selectedClass.classId) return false
+    if (cls.classId === selectedClass.classId) return false;
 
     const hasClass = currentUserClasses.some(
       (userClass) =>
         userClass.moduleId === cls.moduleId &&
         userClass.lessonType === cls.lessonType &&
-        userClass.classId === cls.classId,
-    )
+        userClass.classId === cls.classId
+    );
 
-    return !hasClass
-  })
+    return !hasClass;
+  });
 }

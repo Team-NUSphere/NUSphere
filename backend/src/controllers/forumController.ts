@@ -888,7 +888,7 @@ export const handleGetMyPostList = async (
         replies: post.replies,
         title: post.title,
         uid: post.uid,
-        username: req.user.username,
+        username: req.user?.username ?? "",
         views: post.views,
       }));
 

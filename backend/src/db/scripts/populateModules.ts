@@ -59,7 +59,10 @@ async function populateModuleTable() {
     );
 
     const ModuleGroupFormatted: InferCreationAttributes<ForumGroup> = {
+      aiCache: undefined,
+      aiCacheUpdated: undefined,
       description: description,
+      groupId: undefined,
       groupName: `${moduleCode}: ${title}`,
       ownerId: moduleCode,
       ownerType: "Module",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ModList from "./ModList";
 import RegisteredModules from "./RegisteredModules";
+import DownloadICSButton from "../components/ExportTimetableButton";
 
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
@@ -25,8 +26,9 @@ export default function Sidebar() {
 
           {/* Registered Modules Section */}
           <div className="flex-1 flex flex-col min-h-0 border-t border-gray-200">
-            <div className="px-4 py-3">
+            <div className="px-4 py-3 flex justify-between items-center">
               <h3 className="text-sm font-medium text-gray-700">My Modules</h3>
+              <DownloadICSButton />
             </div>
             <div className="flex-1 overflow-hidden">
               {expanded && <RegisteredModules />}
@@ -34,7 +36,6 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-
       {/* Toggle Button */}
       <button
         className="absolute top-1/2 -right-4 -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-xl transition-all duration-200 group"

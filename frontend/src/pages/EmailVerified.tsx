@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { applyActionCode, checkActionCode, signOut } from "firebase/auth";
+import { applyActionCode, checkActionCode } from "firebase/auth";
 import { auth } from "../firebase";
 
 export default function EmailVerified() {

@@ -1,7 +1,6 @@
 // import { databaseUrl } from "#configs/sequelizeOptions.js";
-import { Options, Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 
-import * as dbConfig from "./config/config.cjs";
 import { SwapGraphManager } from "./graphStorage.js";
 import Class from "./models/Class.js";
 import Comment from "./models/Comment.js";
@@ -21,17 +20,23 @@ import Tags from "./models/Tags.js";
 import User from "./models/User.js";
 import UserEvent from "./models/UserEvents.js";
 import UserTimetable from "./models/UserTimetable.js";
+
+import "dotenv/config";
+
 import { DB } from "./types/dbtypes.js";
 
-type NodeEnv = "development" | "production" | "test";
-const env: NodeEnv = (process.env.NODE_ENV ?? "development") as NodeEnv;
-type DbConfigs = Record<string, Options>;
-const config = (dbConfig.default as DbConfigs)[env];
 export const sequelize = new Sequelize(
-  config.database ?? "default",
-  config.username ?? "user",
-  config.password ?? "password",
-  config,
+  process.env.DATABASE_URL ?? "localhost:5432",
+  {
+    dialect: "postgres",
+    dialectOptions: {
+      ssl: {
+        rejectUnauthorized: false,
+        require: true,
+      },
+    },
+    logging: false,
+  },
 );
 
 try {

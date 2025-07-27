@@ -35,7 +35,5 @@
 //       ],
 //     },
 //   },
-//   ...compat.extends(
-//     "plugin:react/recommended"
-//   )
+//   ...compat.extends("plugin:react/recommended")
 // );

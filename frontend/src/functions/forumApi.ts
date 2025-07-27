@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Post, Group, Reply, ResourceClusterType } from "../types";
 import { useEffect, useState } from "react";
 import axiosApi from "./axiosApi";
-import qs, { stringify } from "qs";
+import qs from "qs";
 
 /** ------------------------ POSTS ------------------------ **/
 
